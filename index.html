@@ -117,7 +117,7 @@
     <div class="header-title">Staff Reaction Checker</div>
     <div class="header-sub">ZOZOTOWNシフト確認ツール — Laboro</div>
   </div>
-  <div class="status-badge" id="staffBadge">0 staff</div>
+  <div class="status-badge" id="staffBadge" onclick="syncFromCloud()" style="cursor:pointer;" title="Tap to sync">0 staff</div>
 </div>
 
 <div class="container">
@@ -432,16 +432,80 @@ const DEFAULT_STAFF = [
   {fb:"Asok Pudl",real:"PUDASAINI PUJAN"}
 ];
 
+const API_URL = 'https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec';
+
 let staffMap = (() => {
   try {
-    const saved = JSON.parse(localStorage.getItem('zozo_staff_v4') || 'null');
+    const saved = JSON.parse(localStorage.getItem('zozo_staff_v5') || 'null');
     return saved && saved.length > 0 ? saved : DEFAULT_STAFF;
   } catch(e) { return DEFAULT_STAFF; }
 })();
 
 let todayRoster = [], results = [], unmatched = [], currentTab = 'missing';
+let isSyncing = false;
 
-function saveStaff() { localStorage.setItem('zozo_staff_v4', JSON.stringify(staffMap)); }
+function saveStaff() { localStorage.setItem('zozo_staff_v5', JSON.stringify(staffMap)); }
+
+async function syncFromCloud() {
+  if (isSyncing) return;
+  isSyncing = true;
+  const badge = document.getElementById('staffBadge');
+  const oldText = badge.textContent;
+  badge.textContent = '⏳ Syncing...';
+  badge.style.background = '#eff6ff';
+  badge.style.color = '#2563eb';
+  badge.style.borderColor = '#bfdbfe';
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      staffMap = data;
+      saveStaff();
+      updateBadge();
+      if (document.getElementById('page-manage').classList.contains('active')) renderManage();
+      showToast('✅ Synced ' + data.length + ' staff from cloud!');
+    } else {
+      badge.textContent = oldText;
+    }
+  } catch(e) {
+    badge.textContent = oldText;
+    showToast('⚠ Sync failed - using offline data', '#d97706');
+  }
+  isSyncing = false;
+}
+
+async function cloudAdd(fb, real) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'add', fb, real })
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+async function cloudDelete(fb, real) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'delete', fb, real })
+    });
+    return true;
+  } catch(e) { return false; }
+}
+
+async function cloudUpdate(oldFb, oldReal, newFb, newReal) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ action: 'update', oldFb, oldReal, newFb, newReal })
+    });
+    return true;
+  } catch(e) { return false; }
+}
 function normalize(s) { return s.toLowerCase().replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()]/g,''); }
 function updateBadge() { document.getElementById('staffBadge').textContent = staffMap.length + ' staff'; }
 
@@ -452,6 +516,7 @@ function showToast(msg, color) {
 }
 
 updateBadge();
+syncFromCloud();
 
 function switchPage(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -584,23 +649,28 @@ function renderManage() {
 
 function escapeHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function addStaff() {
+async function addStaff() {
   const fb = document.getElementById('newFb').value.trim();
   const real = document.getElementById('newReal').value.trim();
   if (!fb||!real) { showToast('Enter both names!','#dc2626'); return; }
   staffMap.push({fb,real}); saveStaff(); updateBadge();
   document.getElementById('newFb').value=''; document.getElementById('newReal').value='';
-  showToast('✅ '+fb+' added!'); renderManage();
+  showToast('✅ '+fb+' added! Syncing...');
+  renderManage();
+  await cloudAdd(fb, real);
+  showToast('☁️ Saved to cloud!');
 }
 
 function removeStaff(idx) {
-  const name = staffMap[idx].fb;
-  document.getElementById('confirmMsg').textContent = 'Remove "' + name + '"? This cannot be undone.';
+  const staff = staffMap[idx];
+  document.getElementById('confirmMsg').textContent = 'Remove "' + staff.fb + '"? This cannot be undone.';
   document.getElementById('confirmOverlay').classList.add('show');
-  document.getElementById('confirmOkBtn').onclick = function() {
+  document.getElementById('confirmOkBtn').onclick = async function() {
     staffMap.splice(idx,1); saveStaff(); updateBadge();
     closeConfirm();
-    showToast('🗑 '+name+' removed','#dc2626'); renderManage();
+    showToast('🗑 '+staff.fb+' removed','#dc2626'); renderManage();
+    await cloudDelete(staff.fb, staff.real);
+    showToast('☁️ Synced to cloud');
   };
 }
 function closeConfirm() {
@@ -621,12 +691,15 @@ function cancelEdit(idx) {
   document.getElementById('mbe-'+idx).style.display='none';
 }
 
-function saveEdit(idx) {
+async function saveEdit(idx) {
   const fb = document.getElementById('ef-'+idx).value.trim();
   const real = document.getElementById('er-'+idx).value.trim();
   if (!fb||!real) { showToast('Both fields required!','#dc2626'); return; }
+  const oldFb = staffMap[idx].fb, oldReal = staffMap[idx].real;
   staffMap[idx]={fb,real}; saveStaff();
   showToast('✅ Updated!'); renderManage();
+  await cloudUpdate(oldFb, oldReal, fb, real);
+  showToast('☁️ Synced to cloud');
 }
 </script>
 
