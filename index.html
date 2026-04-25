@@ -350,6 +350,8 @@ function clearReactors() {
   document.getElementById('results').style.display = 'none';
 }
 
+let extraReactors = [];
+
 function checkReactions() {
   if (!todayRoster.length) { showToast('Load roster first!', '#dc2626'); return; }
   const raw = document.getElementById('reactorInput').value;
@@ -357,24 +359,35 @@ function checkReactions() {
   const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
   document.getElementById('reactorCount').textContent = lines.length + ' detected';
   unmatched = [];
+  extraReactors = [];
   results = todayRoster.map(s => ({...s, reacted:false}));
   lines.forEach(name => {
     const n = normalize(name); if (!n) return;
-    let matched = false;
+    let matchedInRoster = false;
     results.forEach(s => {
       const fn = normalize(s.fb), rn = normalize(s.real);
       if (fn===n || rn===n || fn.includes(n) || n.includes(fn) || rn.includes(n) || n.includes(rn)) {
-        s.reacted = true; matched = true;
+        s.reacted = true; matchedInRoster = true;
       }
     });
-    if (!matched) unmatched.push(name);
+    if (!matchedInRoster) {
+      const inDb = staffMap.find(s => {
+        const fn = normalize(s.fb), rn = normalize(s.real);
+        return fn===n || rn===n || fn.includes(n) || n.includes(fn) || rn.includes(n) || n.includes(rn);
+      });
+      if (inDb) {
+        if (!extraReactors.find(e => e.fb === inDb.fb)) extraReactors.push(inDb);
+      } else {
+        unmatched.push(name);
+      }
+    }
   });
   const reacted = results.filter(s => s.reacted).length;
   document.getElementById('reactedCount').textContent = reacted;
   document.getElementById('missingCount').textContent = results.length - reacted;
   document.getElementById('shiftCount').textContent = results.length;
   document.getElementById('extraCount').textContent = extraReactors.length;
-  document.getElementById('extraCountBadge').textContent = extraReactors.length ? '('+extraReactors.length+')' : '';
+  document.getElementById('extraCountBadge').textContent = extraReactors.length ? ' ('+extraReactors.length+')' : '';
   document.getElementById('results').style.display = 'block';
   currentTab = 'missing';
   document.querySelectorAll('.f-tab').forEach((t,i) => t.classList.toggle('active', i===2));
