@@ -102,7 +102,9 @@
   ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
   @media (max-width: 500px) {
     .add-grid { grid-template-columns: 1fr; }
-    .stat-num { font-size: 24px; }
+    .stat-num { font-size: 20px; }
+    .stats { grid-template-columns: repeat(2,1fr) !important; }
+    .stat-label { font-size: 10px; }
     .header { padding: 10px 12px; }
     .container { padding: 12px; }
     .site-dropdown { max-width: 130px; font-size: 12px; padding: 7px 10px; }
@@ -161,10 +163,11 @@
     </div>
 
     <div id="results" style="display:none;">
-      <div class="stats">
+      <div class="stats" style="grid-template-columns:repeat(4,1fr);">
         <div class="stat"><div class="stat-num s-green" id="reactedCount">0</div><div class="stat-label">✅ Reacted</div></div>
         <div class="stat"><div class="stat-num s-red" id="missingCount">0</div><div class="stat-label">❌ Missing</div></div>
-        <div class="stat"><div class="stat-num s-blue" id="shiftCount">0</div><div class="stat-label">Today's Shift</div></div>
+        <div class="stat"><div class="stat-num s-blue" id="shiftCount">0</div><div class="stat-label">Shift</div></div>
+        <div class="stat"><div class="stat-num" style="color:#d97706;" id="extraCount">0</div><div class="stat-label">⭐ Extra</div></div>
       </div>
       <div class="card" style="padding:16px;">
         <input class="search-input" id="searchBox" placeholder="🔍 Search name..." oninput="renderList()" />
@@ -172,6 +175,7 @@
           <div class="f-tab" onclick="setTab('all',this)">All</div>
           <div class="f-tab" onclick="setTab('reacted',this)">Reacted ✅</div>
           <div class="f-tab active" onclick="setTab('missing',this)">Missing ❌</div>
+          <div class="f-tab" onclick="setTab('extra',this)" id="extraTab">Extra ⭐ <span id="extraCountBadge"></span></div>
         </div>
         <div class="staff-list" id="staffList"></div>
         <div id="unmatchedBox"></div>
@@ -369,6 +373,8 @@ function checkReactions() {
   document.getElementById('reactedCount').textContent = reacted;
   document.getElementById('missingCount').textContent = results.length - reacted;
   document.getElementById('shiftCount').textContent = results.length;
+  document.getElementById('extraCount').textContent = extraReactors.length;
+  document.getElementById('extraCountBadge').textContent = extraReactors.length ? '('+extraReactors.length+')' : '';
   document.getElementById('results').style.display = 'block';
   currentTab = 'missing';
   document.querySelectorAll('.f-tab').forEach((t,i) => t.classList.toggle('active', i===2));
@@ -386,14 +392,24 @@ function renderList() {
   let list = results;
   if (currentTab==='reacted') list = results.filter(s => s.reacted);
   if (currentTab==='missing') list = results.filter(s => !s.reacted);
+  if (currentTab==='extra') {
+    list = extraReactors.map(s => ({...s, reacted: true, isExtra: true}));
+  }
   if (search) list = list.filter(s => s.fb.toLowerCase().includes(search) || s.real.toLowerCase().includes(search));
-  document.getElementById('staffList').innerHTML = list.length ? list.map(s =>
-    '<div class="staff-row '+(s.reacted?'reacted':'missing')+'">'+
-    '<div><div class="staff-name">'+escapeHtml(s.fb)+'</div><div class="staff-real">'+escapeHtml(s.real)+'</div></div>'+
-    '<div class="badge '+(s.reacted?'badge-yes':'badge-no')+'">'+(s.reacted?'✅ Reacted':'❌ Missing')+'</div>'+
-    '</div>').join('') : '<div class="empty">No results</div>';
+  document.getElementById('staffList').innerHTML = list.length ? list.map(s => {
+    if (s.isExtra) {
+      return '<div class="staff-row" style="border-color:#fbbf24;background:#fffbeb;">'+
+        '<div><div class="staff-name">'+escapeHtml(s.fb)+'</div><div class="staff-real">'+escapeHtml(s.real)+'</div></div>'+
+        '<div class="badge" style="background:white;color:#92400e;border:1px solid #fde68a;">⭐ Extra</div>'+
+        '</div>';
+    }
+    return '<div class="staff-row '+(s.reacted?'reacted':'missing')+'">'+
+      '<div><div class="staff-name">'+escapeHtml(s.fb)+'</div><div class="staff-real">'+escapeHtml(s.real)+'</div></div>'+
+      '<div class="badge '+(s.reacted?'badge-yes':'badge-no')+'">'+(s.reacted?'✅ Reacted':'❌ Missing')+'</div>'+
+      '</div>';
+  }).join('') : '<div class="empty">No results</div>';
   document.getElementById('unmatchedBox').innerHTML = unmatched.length ?
-    '<div class="unmatched"><strong>⚠ '+unmatched.length+' not matched:</strong>'+unmatched.map(n => '<span class="tag">'+escapeHtml(n)+'</span>').join(' ')+'</div>' : '';
+    '<div class="unmatched"><strong>⚠ '+unmatched.length+' unknown reactors (not in database):</strong>'+unmatched.map(n => '<span class="tag">'+escapeHtml(n)+'</span>').join(' ')+'</div>' : '';
 }
 
 function renderManage() {
