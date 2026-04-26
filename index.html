@@ -238,7 +238,11 @@ function showToast(msg, color) {
 }
 
 function normalize(s) {
-  return (s || "").toLowerCase().replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()]/g, "");
+  if (!s) return "";
+  // Normalize unicode (NFC) so Devanagari combining chars work right
+  let str = s.toLowerCase().normalize("NFC");
+  // Remove punctuation and whitespace but KEEP letters of all scripts
+  return str.replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, "");
 }
 
 function escapeHtml(s) {
@@ -247,10 +251,33 @@ function escapeHtml(s) {
 
 function nameMatches(name, staff) {
   const n = normalize(name);
-  if (!n) return false;
+  if (!n || n.length < 3) return false;
   const fn = normalize(staff.fb);
   const rn = normalize(staff.real);
-  return fn === n || rn === n || fn.includes(n) || n.includes(fn) || rn.includes(n) || n.includes(rn);
+  if (!fn && !rn) return false;
+  // Exact match
+  if (fn === n || rn === n) return true;
+  // Containment - both directions, but require min 4 char overlap
+  if (n.length >= 4) {
+    if (fn && fn.includes(n)) return true;
+    if (rn && rn.includes(n)) return true;
+  }
+  if (fn && fn.length >= 4 && n.includes(fn)) return true;
+  if (rn && rn.length >= 4 && n.includes(rn)) return true;
+  // Token-based matching: split into words and check if any word matches
+  const nameTokens = n.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || [];
+  const fbTokens = (fn.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || []);
+  const realTokens = (rn.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || []);
+  if (nameTokens.length === 0) return false;
+  // Count matching tokens (length >= 4)
+  let matches = 0;
+  for (const t of nameTokens) {
+    if (t.length < 4) continue;
+    if (fbTokens.some(ft => ft === t || (ft.length >= 4 && (ft.includes(t) || t.includes(ft))))) { matches++; continue; }
+    if (realTokens.some(rt => rt === t || (rt.length >= 4 && (rt.includes(t) || t.includes(rt))))) { matches++; }
+  }
+  // Need at least 1 strong token match
+  return matches >= 1;
 }
 
 async function loadSites() {
@@ -325,13 +352,19 @@ function loadRoster() {
   const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
   todayRoster = [];
   let unmatchedCount = 0;
+  const seenKeys = new Set();
   lines.forEach(name => {
     const found = findStaff(name);
     const entry = found ? {fb: found.fb, real: found.real} : {fb: name, real: "(not in database)"};
     if (!found) unmatchedCount++;
-    if (!todayRoster.find(r => normalize(r.fb) === normalize(entry.fb))) todayRoster.push(entry);
+    // Dedupe using BOTH fb and real name combined
+    const key = normalize(entry.fb) + "|" + normalize(entry.real);
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      todayRoster.push(entry);
+    }
   });
-  document.getElementById("rosterCount").textContent = todayRoster.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
+  document.getElementById("rosterCount").textContent = todayRoster.length + "/" + lines.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
   document.getElementById("results").style.display = "none";
   showToast(todayRoster.length + " staff loaded!");
 }
