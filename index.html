@@ -346,33 +346,57 @@ function findStaff(name) {
   return staffMap.find(s => nameMatches(name, s));
 }
 
+let rosterDuplicates = [];
+let rosterUnknowns = [];
+
 function loadRoster() {
   const raw = document.getElementById("rosterInput").value;
   if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
   const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
   todayRoster = [];
-  let unmatchedCount = 0;
-  let dupCount = 0;
+  rosterDuplicates = [];
+  rosterUnknowns = [];
   const seenOriginal = new Set();
   lines.forEach(name => {
-    // Only dedupe EXACT same input lines (case insensitive)
     const origKey = name.toLowerCase().trim();
     if (seenOriginal.has(origKey)) {
-      dupCount++;
+      rosterDuplicates.push(name);
       return;
     }
     seenOriginal.add(origKey);
     const found = findStaff(name);
     const entry = found ? {fb: found.fb, real: found.real, _input: name} : {fb: name, real: "(not in database)", _input: name};
-    if (!found) unmatchedCount++;
+    if (!found) rosterUnknowns.push(name);
     todayRoster.push(entry);
   });
   let txt = todayRoster.length + "/" + lines.length + " loaded";
-  if (dupCount) txt += " (" + dupCount + " dup)";
-  if (unmatchedCount) txt += " (" + unmatchedCount + " unknown)";
-  document.getElementById("rosterCount").textContent = txt;
+  if (rosterDuplicates.length) txt += " · " + rosterDuplicates.length + " dup";
+  if (rosterUnknowns.length) txt += " · " + rosterUnknowns.length + " unknown";
+  document.getElementById("rosterCount").innerHTML = txt + (rosterDuplicates.length || rosterUnknowns.length ? ' <a href="#" onclick="showSkipped(event)" style="color:#2563eb;text-decoration:underline;font-weight:600;">view</a>' : "");
   document.getElementById("results").style.display = "none";
   showToast(todayRoster.length + " staff loaded!");
+}
+
+function showSkipped(e) {
+  if (e) e.preventDefault();
+  let html = "";
+  if (rosterDuplicates.length) {
+    html += '<div class="card-title" style="margin-top:8px;">🔁 Duplicates (' + rosterDuplicates.length + ')</div>';
+    html += '<div style="background:#fef3c7;border-radius:8px;padding:10px;font-size:12px;line-height:1.8;color:#92400e;">';
+    html += rosterDuplicates.map(n => '<div>• ' + escapeHtml(n) + '</div>').join("");
+    html += '</div>';
+  }
+  if (rosterUnknowns.length) {
+    html += '<div class="card-title" style="margin-top:12px;">❓ Not in database (' + rosterUnknowns.length + ')</div>';
+    html += '<div style="background:#fef2f2;border-radius:8px;padding:10px;font-size:12px;line-height:1.8;color:#991b1b;">';
+    html += rosterUnknowns.map(n => '<div>• ' + escapeHtml(n) + '</div>').join("");
+    html += '</div>';
+    html += '<div class="hint" style="margin-top:8px;">💡 Add unknown names via Manage Staff tab</div>';
+  }
+  document.getElementById("confirmTitle").textContent = "Roster Issues";
+  document.getElementById("confirmMsg").innerHTML = html;
+  document.getElementById("confirmOk").style.display = "none";
+  document.getElementById("confirmModal").classList.add("show");
 }
 
 function clearRoster() {
@@ -538,7 +562,7 @@ function removeStaff(idx) {
   };
 }
 
-function closeConfirm() { document.getElementById("confirmModal").classList.remove("show"); }
+function closeConfirm() { document.getElementById("confirmModal").classList.remove("show"); document.getElementById("confirmOk").style.display = ""; }
 
 function startEdit(idx) {
   document.getElementById("mn-" + idx).style.display = "none";
