@@ -352,19 +352,25 @@ function loadRoster() {
   const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
   todayRoster = [];
   let unmatchedCount = 0;
-  const seenKeys = new Set();
+  let dupCount = 0;
+  const seenOriginal = new Set();
   lines.forEach(name => {
-    const found = findStaff(name);
-    const entry = found ? {fb: found.fb, real: found.real} : {fb: name, real: "(not in database)"};
-    if (!found) unmatchedCount++;
-    // Dedupe using BOTH fb and real name combined
-    const key = normalize(entry.fb) + "|" + normalize(entry.real);
-    if (!seenKeys.has(key)) {
-      seenKeys.add(key);
-      todayRoster.push(entry);
+    // Only dedupe EXACT same input lines (case insensitive)
+    const origKey = name.toLowerCase().trim();
+    if (seenOriginal.has(origKey)) {
+      dupCount++;
+      return;
     }
+    seenOriginal.add(origKey);
+    const found = findStaff(name);
+    const entry = found ? {fb: found.fb, real: found.real, _input: name} : {fb: name, real: "(not in database)", _input: name};
+    if (!found) unmatchedCount++;
+    todayRoster.push(entry);
   });
-  document.getElementById("rosterCount").textContent = todayRoster.length + "/" + lines.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
+  let txt = todayRoster.length + "/" + lines.length + " loaded";
+  if (dupCount) txt += " (" + dupCount + " dup)";
+  if (unmatchedCount) txt += " (" + unmatchedCount + " unknown)";
+  document.getElementById("rosterCount").textContent = txt;
   document.getElementById("results").style.display = "none";
   showToast(todayRoster.length + " staff loaded!");
 }
