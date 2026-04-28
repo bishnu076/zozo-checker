@@ -428,21 +428,35 @@ function checkReactions() {
   lines.forEach(name => {
     if (!normalize(name)) return;
     
-    let foundInRoster = false;
-    for (let i = 0; i < results.length; i++) {
-      if (nameMatches(name, results[i])) {
-        results[i].reacted = true;
-        foundInRoster = true;
-      }
-    }
+    // STEP 1: Find which staff person this reactor name maps to (using DATABASE)
+    const dbMatch = findStaff(name);
     
-    if (!foundInRoster) {
-      const inDb = findStaff(name);
-      if (inDb) {
-        if (!extraReactors.find(e => e.fb === inDb.fb)) {
-          extraReactors.push({fb: inDb.fb, real: inDb.real});
+    // STEP 2: Check if this person is in today's roster
+    let foundInRoster = false;
+    if (dbMatch) {
+      // We know who they are - check roster by their identity (fb OR real)
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
+          r.reacted = true;
+          foundInRoster = true;
         }
-      } else {
+      }
+      if (!foundInRoster) {
+        // In database but not on shift = EXTRA
+        if (!extraReactors.find(e => normalize(e.fb) === normalize(dbMatch.fb))) {
+          extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
+        }
+      }
+    } else {
+      // Not in database - try direct text match against roster as fallback
+      for (let i = 0; i < results.length; i++) {
+        if (nameMatches(name, results[i])) {
+          results[i].reacted = true;
+          foundInRoster = true;
+        }
+      }
+      if (!foundInRoster) {
         unmatched.push(name);
       }
     }
