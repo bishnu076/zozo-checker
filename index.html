@@ -413,6 +413,42 @@ function clearReactors() {
   document.getElementById("results").style.display = "none";
 }
 
+function debugMatch(reactorName) {
+  const found = findStaff(reactorName);
+  let html = '<div style="font-family:monospace;font-size:11px;line-height:1.6;">';
+  html += '<b>Reactor:</b> "' + escapeHtml(reactorName) + '"<br>';
+  html += '<b>Normalized:</b> "' + escapeHtml(normalize(reactorName)) + '"<br>';
+  html += '<b>Found in DB:</b> ' + (found ? 'YES → fb="' + escapeHtml(found.fb) + '" real="' + escapeHtml(found.real) + '"' : 'NO') + '<br>';
+  if (found) {
+    html += '<b>DB normalized:</b> fb="' + escapeHtml(normalize(found.fb)) + '" real="' + escapeHtml(normalize(found.real)) + '"<br>';
+    html += '<br><b>Roster check:</b><br>';
+    let rosterMatch = false;
+    todayRoster.forEach(r => {
+      const fbMatch = normalize(r.fb) === normalize(found.fb);
+      const realMatch = normalize(r.real) === normalize(found.real);
+      if (fbMatch || realMatch) {
+        html += '✅ Roster has fb="' + escapeHtml(r.fb) + '" real="' + escapeHtml(r.real) + '" (fbMatch=' + fbMatch + ', realMatch=' + realMatch + ')<br>';
+        rosterMatch = true;
+      }
+    });
+    if (!rosterMatch) {
+      html += '❌ NOT FOUND in roster<br>';
+      html += '<br><b>Roster has these entries with similar real names:</b><br>';
+      todayRoster.forEach(r => {
+        if (r.real.toLowerCase().includes(found.real.toLowerCase().substring(0, 4))) {
+          html += '· fb="' + escapeHtml(r.fb) + '" real="' + escapeHtml(r.real) + '"<br>';
+          html += '  normalized fb="' + escapeHtml(normalize(r.fb)) + '" real="' + escapeHtml(normalize(r.real)) + '"<br>';
+        }
+      });
+    }
+  }
+  html += '</div>';
+  document.getElementById("confirmTitle").textContent = "🔍 Debug: " + reactorName;
+  document.getElementById("confirmMsg").innerHTML = html;
+  document.getElementById("confirmOk").style.display = "none";
+  document.getElementById("confirmModal").classList.add("show");
+}
+
 function checkReactions() {
   if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
   const raw = document.getElementById("reactorInput").value;
@@ -506,9 +542,9 @@ function renderList() {
   
   document.getElementById("staffList").innerHTML = list.length ? list.map(s => {
     if (isExtra) {
-      return '<div class="staff-row extra">' +
+      return '<div class="staff-row extra" onclick="debugMatch(\'' + escapeHtml(s.fb).replace(/'/g, "&#39;") + '\')" style="cursor:pointer;">' +
         '<div><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
-        '<div class="badge badge-extra">⭐ Extra</div>' +
+        '<div class="badge badge-extra">⭐ Extra (tap to debug)</div>' +
         '</div>';
     }
     return '<div class="staff-row ' + (s.reacted ? "reacted" : "missing") + '">' +
