@@ -15,7 +15,35 @@
     --green: #16a34a; --green-light: #f0fdf4; --green-border: #bbf7d0;
     --red: #dc2626; --red-light: #fef2f2; --red-border: #fecaca;
     --orange: #d97706; --orange-light: #fffbeb; --orange-border: #fde68a;
+    --leader-bg: #dbeafe; --leader-border: #2563eb;
+    --subleader-bg: #d1fae5; --subleader-border: #16a34a;
   }
+  body.dark {
+    --bg: #0f172a; --card: #1e293b; --border: #334155; --border2: #475569;
+    --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+    --accent: #60a5fa; --accent-dark: #3b82f6; --accent-light: #1e3a8a;
+    --green: #4ade80; --green-light: #14532d; --green-border: #16a34a;
+    --red: #f87171; --red-light: #7f1d1d; --red-border: #dc2626;
+    --orange: #fbbf24; --orange-light: #78350f; --orange-border: #d97706;
+    --leader-bg: #1e3a8a; --leader-border: #60a5fa;
+    --subleader-bg: #14532d; --subleader-border: #4ade80;
+  }
+  body.dark .info-box {
+    background: linear-gradient(135deg, #1e293b, #1e3a8a);
+    border-color: #3b82f6;
+    color: #93c5fd;
+  }
+  body.dark textarea, body.dark input[type=text], body.dark .search-input {
+    background: #0f172a; color: #f1f5f9;
+  }
+  body.dark .staff-row { background: #0f172a; }
+  body.dark .staff-row.reacted { background: #14532d; border-color: #16a34a; }
+  body.dark .staff-row.missing { background: #7f1d1d; border-color: #dc2626; }
+  body.dark .staff-row.extra { background: #78350f; border-color: #d97706; }
+  body.dark .manage-row { background: #0f172a; }
+  body.dark .stat { background: #1e293b; }
+  body.dark .badge-yes, body.dark .badge-no, body.dark .badge-extra { background: #1e293b; }
+  body.dark .modal-box { background: #1e293b; color: #f1f5f9; }
   body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
   .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
   .logo { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
@@ -53,6 +81,20 @@
   .staff-row.reacted { border-color: var(--green-border); background: var(--green-light); }
   .staff-row.missing { border-color: var(--red-border); background: var(--red-light); }
   .staff-row.extra { border-color: var(--orange-border); background: var(--orange-light); }
+  .staff-row.leader { border-color: var(--leader-border); background: var(--leader-bg); border-width: 2px; }
+  .staff-row.subleader { border-color: var(--subleader-border); background: var(--subleader-bg); border-width: 2px; }
+  .leader-tag { display:inline-block; background:var(--leader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
+  .subleader-tag { display:inline-block; background:var(--subleader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
+  .skill-chip { display:inline-block; padding:4px 10px; margin:2px; border-radius:14px; font-size:11px; font-weight:600; cursor:pointer; user-select:none; transition:all 0.15s; border:1px solid var(--border2); background:white; color:var(--text2); }
+  body.dark .skill-chip { background:#0f172a; }
+  .skill-chip.active { background:var(--accent); color:white; border-color:var(--accent); }
+  .skill-chip.primary { background:#fbbf24; color:#78350f; border-color:#f59e0b; }
+  .skill-chip.primary::before { content:"⭐ "; }
+  .skill-chip:hover { transform:scale(1.05); }
+  .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
+  .skill-tag.primary { background:#fef3c7; color:#92400e; }
+  .skill-tag.primary::before { content:"⭐ "; }
+  .btn-skill { padding:6px 12px; font-size:11px; border-radius:6px; cursor:pointer; border:1px solid var(--accent); background:var(--accent-light); color:var(--accent); font-weight:600; }
   .staff-name { font-size: 13px; font-weight: 600; }
   .staff-real { font-size: 11px; color: var(--text3); margin-top: 2px; }
   .badge { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; flex-shrink: 0; background: white; }
@@ -112,12 +154,14 @@
     <select class="site-dropdown" id="siteSelector" onchange="onSiteChange()"></select>
     <button class="icon-btn" onclick="openSitesModal()" title="Sites">⚙️</button>
     <button class="icon-btn" onclick="syncCurrent()" title="Sync">🔄</button>
+    <button class="icon-btn" onclick="toggleDark()" title="Dark mode" id="darkBtn">🌙</button>
   </div>
 </div>
 
 <div class="container">
   <div class="page-tabs">
     <div class="page-tab active" onclick="switchPage('checker',this)">✅ Checker</div>
+    <div class="page-tab" onclick="switchPage('assign',this)">🎯 Assign</div>
     <div class="page-tab" onclick="switchPage('manage',this)">👥 Manage</div>
   </div>
 
@@ -172,6 +216,45 @@
     </div>
   </div>
 
+
+  <div class="page" id="page-assign">
+    <div class="info-box">
+      🎯 <strong>Smart Assignment Tool:</strong><br>
+      1️⃣ Paste today's roster<br>
+      2️⃣ Enter how many people you need per department<br>
+      3️⃣ Get auto-assigned based on each person's skills (from past haichi data)
+    </div>
+
+    <div class="card">
+      <div class="step-header"><span class="step-num">1</span> Today's roster</div>
+      <div class="card-sub">Paste staff names available today</div>
+      <textarea id="assignRoster" placeholder="GAUTAM ANIL&#10;KHATTRI SULAV&#10;..."></textarea>
+      <button class="btn" onclick="loadAssignRoster()" style="margin-top:8px;">Load Roster</button>
+      <span class="roster-count" id="assignRosterCount" style="margin-left:10px;"></span>
+    </div>
+
+    <div class="card">
+      <div class="step-header"><span class="step-num">2</span> Department needs</div>
+      <div class="card-sub">How many people needed for each department?</div>
+      <div id="deptNeedsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;"></div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="runAssignment()">🎯 Auto Assign</button>
+        <button class="btn-sm btn-gray" onclick="clearAssignNeeds()">Clear</button>
+        <span class="roster-count" id="assignTotalNeeded"></span>
+      </div>
+    </div>
+
+    <div id="assignResults" style="display:none;">
+      <div class="card" style="padding:16px;">
+        <div class="card-title" style="margin-bottom:10px;">📋 Assignment Results</div>
+        <div id="assignmentSummary" style="margin-bottom:12px;"></div>
+        <button class="btn-sm btn-green" onclick="copyAssignment()" style="margin-bottom:12px;">📋 Copy Assignment</button>
+        <div id="assignmentList"></div>
+        <div id="unassignedBox"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-manage">
     <div class="card">
       <div class="card-title">➕ Add new staff member</div>
@@ -215,9 +298,124 @@
   </div>
 </div>
 
+
+<div class="modal-overlay" id="skillModal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-title" id="skillModalTitle">✏️ Edit Skills</div>
+    <div class="modal-msg" id="skillModalSubtitle" style="font-size:11px;"></div>
+    <div style="margin:12px 0;">
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Primary Skill (best at):</div>
+      <select id="primarySkill" style="width:100%;padding:10px;border:1px solid var(--border2);border-radius:8px;background:white;font-size:13px;">
+        <option value="">-- None --</option>
+      </select>
+    </div>
+    <div style="margin:12px 0;">
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">All departments they can work:</div>
+      <div id="skillCheckboxes" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
+      <button id="skillSaveBtn" style="color:white;background:var(--accent);">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Skills Editor Modal -->
+<div class="modal-overlay" id="skillsModal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-title">🎯 Edit Skills</div>
+    <div class="modal-msg" id="skillsName" style="font-weight:600;color:var(--accent);"></div>
+    
+    <div style="margin-top:12px;">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Tap to toggle departments. Tap ⭐ to set primary skill.</div>
+      <div id="skillsDeptList" style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;"></div>
+    </div>
+    
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeSkillsEditor()">Cancel</button>
+      <button onclick="saveSkillsEdit()" style="color:white;background:var(--accent);">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="skillModal">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-title" id="skillModalTitle">⚙️ Edit Skills</div>
+    <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;">
+      <div style="color:var(--text2);">Staff member:</div>
+      <div style="font-weight:700;font-size:14px;margin-top:2px;" id="skillStaffName"></div>
+    </div>
+    
+    <div class="card-title">Departments they can work:</div>
+    <div class="card-sub">Tap to toggle. Their PRIMARY skill is the first one (reorder by tapping ⭐)</div>
+    
+    <div id="skillDeptList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+    
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+      <button class="btn-sm btn-gray" onclick="closeSkillModal()" style="flex:1;">Cancel</button>
+      <button class="btn" onclick="saveSkills()" style="flex:1;">💾 Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// Leaders (always 管理)
+const LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
+
+// Sub-leaders
+const SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
+
+function _normName(s) { return (s||"").toLowerCase().normalize("NFC").replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, ""); }
+
+function isLeader(name) {
+  const n = _normName(name);
+  return LEADERS.some(l => _normName(l) === n);
+}
+
+function isSubLeader(name) {
+  const n = _normName(name);
+  return SUBLEADERS.some(l => _normName(l) === n);
+}
+
+// Custom skills storage - overrides SKILL_DATABASE when present
+function getCustomSkills() {
+  try { return JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}"); }
+  catch(e) { return {}; }
+}
+
+function saveCustomSkills(data) {
+  localStorage.setItem("zozo_custom_skills", JSON.stringify(data));
+}
+
+function getStaffSkills(realName) {
+  const custom = getCustomSkills();
+  // Try by real name (exact)
+  if (custom[realName]) return custom[realName];
+  // Try fuzzy match in custom
+  const n = _normName(realName);
+  for (const [k, v] of Object.entries(custom)) {
+    if (_normName(k) === n) return v;
+  }
+  // Fall back to SKILL_DATABASE
+  if (typeof SKILL_DATABASE !== "undefined") {
+    if (SKILL_DATABASE[realName]) return { depts: SKILL_DATABASE[realName], primary: SKILL_DATABASE[realName][0] };
+    for (const [k, v] of Object.entries(SKILL_DATABASE)) {
+      if (_normName(k) === n) return { depts: v, primary: v[0] };
+    }
+  }
+  return null;
+}
+
+function setStaffSkills(realName, depts, primary) {
+  const custom = getCustomSkills();
+  custom[realName] = { depts: depts, primary: primary };
+  saveCustomSkills(custom);
+}
+
 const API_URL = "https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec";
 
 let currentSite = localStorage.getItem("zozo_current_site") || "";
@@ -547,8 +745,10 @@ function renderList() {
         '<div class="badge badge-extra">⭐ Extra (tap to debug)</div>' +
         '</div>';
     }
-    return '<div class="staff-row ' + (s.reacted ? "reacted" : "missing") + '">' +
-      '<div><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
+    const leaderTag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    const rowClass = isLeader(s.real) ? "leader" : isSubLeader(s.real) ? "subleader" : (s.reacted ? "reacted" : "missing");
+    return '<div class="staff-row ' + rowClass + '">' +
+      '<div><div class="staff-name">' + escapeHtml(s.fb) + leaderTag + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
       '<div class="badge ' + (s.reacted ? "badge-yes" : "badge-no") + '">' + (s.reacted ? "✅ Reacted" : "❌ Missing") + '</div>' +
       '</div>';
   }).join("") : '<div class="empty">No results</div>';
@@ -566,9 +766,10 @@ function renderManage() {
   document.getElementById("manageList").innerHTML = list.length ? list.map(s => {
     const idx = s._idx;
     return '<div class="manage-row" id="mrow-' + idx + '">' +
-      '<div class="manage-names" id="mn-' + idx + '"><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
+      '<div class="manage-names" id="mn-' + idx + '"><div class="staff-name">' + escapeHtml(s.fb) + (isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '') + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div>' + (function(){ const sk = getStaffSkills(s.real); return sk.all.length ? '<div style="font-size:10px;color:var(--accent);margin-top:2px;font-weight:600;">🎯 ' + escapeHtml(sk.all.join(", ")) + '</div>' : ''; })() + '</div>' +
       '<div class="edit-area" id="me-' + idx + '"><input type="text" id="ef-' + idx + '" value="' + escapeHtml(s.fb) + '"/><input type="text" id="er-' + idx + '" value="' + escapeHtml(s.real) + '"/></div>' +
       '<div class="row-btns" id="mb-' + idx + '">' +
+        '<button class="btn-sm btn-gray" onclick="openSkillEditor(\'' + escapeHtml(s.fb).replace(/\'/g, "&#39;") + '\', \'' + escapeHtml(s.real).replace(/\'/g, "&#39;") + '\')" title="Edit skills">🎯</button>' +
         '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')">✏️</button>' +
         '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')">🗑</button>' +
       '</div>' +
@@ -698,6 +899,951 @@ function removeSite(name) {
       showToast("Failed!", "#dc2626");
     }
   };
+}
+
+
+
+// === SKILL DATABASE - persisted in localStorage ===
+function loadSkillOverrides() {
+  try { return JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) { return {}; }
+}
+function saveSkillOverrides(o) { localStorage.setItem("zozo_skills_v1", JSON.stringify(o)); }
+let skillOverrides = loadSkillOverrides();
+
+function getSkills(realName) {
+  // Override beats default
+  const norm = realName.toUpperCase().trim();
+  if (skillOverrides[norm]) return skillOverrides[norm];
+  // Try database (case-insensitive search)
+  for (const [key, val] of Object.entries(SKILL_DATABASE)) {
+    if (key.toUpperCase() === norm) return { depts: val, primary: val[0] };
+  }
+  return { depts: [], primary: null };
+}
+
+function setSkills(realName, depts, primary) {
+  const norm = realName.toUpperCase().trim();
+  skillOverrides[norm] = { depts, primary };
+  saveSkillOverrides(skillOverrides);
+}
+
+function renderSkillTags(realName) {
+  const s = getSkills(realName);
+  if (!s.depts || !s.depts.length) return '<div class="hint" style="color:#dc2626;margin-top:4px;">⚠ No skills set</div>';
+  return '<div style="margin-top:6px;">' + s.depts.map(d => 
+    '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>'
+  ).join("") + '</div>';
+}
+
+let skillEditTarget = null;
+let skillEditDepts = [];
+let skillEditPrimary = null;
+
+function openSkillEditor(realName) {
+  skillEditTarget = realName;
+  const s = getSkills(realName);
+  skillEditDepts = [...(s.depts || [])];
+  skillEditPrimary = s.primary || null;
+  document.getElementById("skillModalTitle").textContent = "🎯 " + realName;
+  renderSkillChips();
+  document.getElementById("skillModal").classList.add("show");
+}
+
+function closeSkillModal() {
+  document.getElementById("skillModal").classList.remove("show");
+  skillEditTarget = null;
+}
+
+function renderSkillChips() {
+  const c = document.getElementById("skillChipsContainer");
+  c.innerHTML = DEPARTMENTS.map(d => {
+    const isOn = skillEditDepts.includes(d);
+    const isPri = d === skillEditPrimary;
+    return '<span class="skill-chip ' + (isPri ? "primary" : isOn ? "active" : "") + '" onclick="toggleSkill(\'' + d + '\')">' + d + '</span>';
+  }).join("");
+  document.getElementById("skillSummary").innerHTML = skillEditDepts.length 
+    ? 'Skills: ' + skillEditDepts.length + (skillEditPrimary ? ' · Primary: <strong>' + skillEditPrimary + '</strong>' : '')
+    : 'Tap a department to add skill';
+}
+
+function toggleSkill(d) {
+  if (!skillEditDepts.includes(d)) {
+    // Not yet selected - add it
+    skillEditDepts.push(d);
+  } else if (d !== skillEditPrimary) {
+    // Already selected, not primary - make it primary
+    skillEditPrimary = d;
+    // Make sure primary is in depts
+    if (!skillEditDepts.includes(d)) skillEditDepts.push(d);
+  } else {
+    // Already primary - remove it
+    skillEditDepts = skillEditDepts.filter(x => x !== d);
+    skillEditPrimary = skillEditDepts[0] || null;
+  }
+  renderSkillChips();
+}
+
+function saveSkillEdit() {
+  if (!skillEditTarget) return;
+  if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
+  setSkills(skillEditTarget, skillEditDepts, skillEditPrimary);
+  closeSkillModal();
+  showToast("✅ Skills saved!");
+  renderManage();
+}
+
+// === SMART ASSIGNMENT SYSTEM ===
+const SKILL_DATABASE = {
+  "GAUTAM ANIL": ["管理","ソーター1","ソーター2","ソーター3"],
+  "KHATTRI SULAV": ["管理","ソーター1","ソーター2"],
+  "MAHAT RAJU": ["管理","ソーター1","ソーター2","ソーター3"],
+  "NEUPANE KAMAL": ["管理","ソーター2","ソーター3"],
+  "GHALE NAWARAJ": ["管理","ソーター1","ソーター3","棚入れ"],
+  "SHRESTHA BIKASH": ["管理","ソーター1","ソーター2"],
+  "THAPA RITESH": ["管理","ソーター1","ソーター2"],
+  "ADHIKARI BINOD": ["管理","ソーター2","ソーター3"],
+  "ADHIKARI PRATIBIMBA": ["管理","ソーター1","ソーター3"],
+  "DAHAL LIL BAHADUR": ["管理","ソーター1","ソーター2","ソーター3","単数","複数"],
+  "MAHATO BIJAYA": ["管理","ソーター3","棚入れ"],
+  "DARAI TIRTHA BAHADUR": ["管理","ソーター1","ソーター2"],
+  "TAMANG DURGA": ["棚入れ"],
+  "CHAND KALPANA": ["棚入れ","単数"],
+  "SAPKOTA RAMA": ["棚入れ","単数"],
+  "POKHREL RITA": ["棚入れ"],
+  "SHARMA SANGITA": ["棚入れ","単数"],
+  "BASNET KABITA": ["棚入れ","単搬"],
+  "KHADKA SUNIL": ["棚入れ","出庫搬送"],
+  "TAMANG HARSHIT": ["棚入れ","単搬"],
+  "THARU MAHESH": ["棚入れ"],
+  "KHADKA SUMAN": ["棚入れ"],
+  "DARJI BHARAT": ["棚入れ"],
+  "GIRI SUJAN": ["棚入れ","ソーター1"],
+  "PURI KABITA": ["棚入れ","単数"],
+  "PACHHAI GAIHRE KUSMA": ["棚入れ"],
+  "NEUPANE PANDEY SUPRIYA": ["棚入れ"],
+  "TAMANG SUMANA": ["棚入れ"],
+  "BHANDARI RUKU MAYA": ["棚入れ","複数"],
+  "AMGAI LAMICHHANE SUNITA": ["棚入れ","複数"],
+  "SHREES LAXMI": ["棚入れ"],
+  "ACHARYA PRADEEP": ["棚入れ"],
+  "DAHAL HEMANTA": ["ソーター1","複数"],
+  "TAMANG SUMAN": ["ソーター2","棚入れ"],
+  "ROKHA CHHETRI ANSU": ["棚入れ","複数"],
+  "GHARTI MAGAR DILSHOVA": ["棚入れ"],
+  "TAMANG RAJANI": ["投入","ソーター1","棚入れ"],
+  "TAMANG MEG MAYA": ["棚入れ","複数"],
+  "PAUDEL MANISH": ["単搬","単数"],
+  "TAMANG SUBASH": ["単搬"],
+  "KC GANESH BAHADUR": ["単搬"],
+  "BHANDARI PRABIN": ["単搬"],
+  "RUMBA PASANG": ["単搬"],
+  "CHHETRI SHISHIR": ["単搬"],
+  "GURUNG AMIN": ["単搬","ソーター1"],
+  "KUNWAR UJJWAL": ["単搬","ソーター3"],
+  "GURUNG FRIEND": ["単搬"],
+  "UPADHYAY GANESH RAJ": ["出庫搬送","単数"],
+  "KHADKA YAM BAHADUR": ["出庫搬送","投入"],
+  "LUNGELI KAMAL BAHADUR": ["投入","出庫搬送"],
+  "SHAH BIBEK DHOJ": ["投入"],
+  "BASNET TIKA": ["投入"],
+  "DAINAWAL PUJA": ["投入","単数"],
+  "CHAUDHARY HEM RAJ": ["投入"],
+  "GC ARJUN": ["投入","ソーター1","ソーター2"],
+  "GC ANUSHKA": ["投入","複数"],
+  "RIJAL SHIVA": ["投入","ソーター1","ソーター2"],
+  "PUDASAINI PUJAN": ["ソーター1","投入"],
+  "PAUDEL PRABIN": ["投入","ソーター1"],
+  "ADHIKARI ROSHAN": ["投入","ソーター1","単数"],
+  "ADHIKARI SANGITA": ["投入","複数","単数"],
+  "KHATRI SABIN": ["投入","ソーター2"],
+  "DHUNGANA BHARAT": ["ソーター1","投入"],
+  "SHREESH SAGAR": ["投入"],
+  "GAUTAM MAHESWAR": ["投入","ソーター1","ソーター2"],
+  "RAI SURAJ": ["投入"],
+  "CHHETRI HARI BAHADUR": ["投入","ソーター2"],
+  "THAPA RUSMITA": ["複数"],
+  "CHAUDHARY SANKALPA": ["複数"],
+  "MAJHI SUNITA": ["複数"],
+  "OLI PABITRA": ["複数"],
+  "KHADKA ANITA": ["複数"],
+  "GHARTI MAGAR TILAK": ["ソーター1","複数"],
+  "THARU RENUKA DEVI": ["複数"],
+  "BUDHA PUSPA": ["複数"],
+  "PANERU SUNIRA": ["複数","単数"],
+  "THAGUNNA SAPANA": ["複数"],
+  "POUDEL ASHOK": ["複数","ソーター1"],
+  "POUDEL NABINA": ["複数"],
+  "BUDHA MAGAR AASHIKA": ["複数","単数"],
+  "RAKASKOTI PUSPA": ["複数"],
+  "K M OM SHANTA": ["複数"],
+  "MAHATARA KOPILA": ["複数","単数"],
+  "K C PAUDEL SONA": ["複数"],
+  "BARAL ADHIKARI NIRMALA": ["複数","単数"],
+  "POKHREL ASMITA": ["複数","ソーター1","単数"],
+  "KANDEL PARBATI": ["複数","単数"],
+  "B K SUSMITA": ["複数","単数"],
+  "BANSI SAPANA": ["ソーター1","複数"],
+  "KAMI TIKA KUMARI": ["単数","複数"],
+  "BHANDARI APSARA": ["単数","ソーター1"],
+  "BARME SUSMITA": ["単数"],
+  "SAUD LOKSARI": ["単数"],
+  "GHIMIRE SUSMITA": ["単数"],
+  "THAPA PAIJA CHANDA": ["単数"],
+  "BHANDARI SHIVA": ["単数"],
+  "RAWAT SHIBA": ["単数"],
+  "BASNET GYAN KUMARI": ["単数"],
+  "PUN NIRUTA": ["単数"],
+  "KHADKA KHEM KUMARI": ["単数"],
+  "GIRI MENUKA": ["単数"],
+  "CHAUDHARY DIPIKA": ["単数"],
+  "GOPALI PREJINA": ["単数"],
+  "KHATRI KIRAN": ["単数"],
+  "CHAUDHARY KRISTINA": ["単数"],
+  "KHATRI RANJITA": ["単数","複数"],
+  "PUN SAMJHANA": ["単数","複数"],
+  "SUBEDI SUSHMA": ["単数","複数"],
+  "SAPKOTA TULASI": ["単数"],
+  "TIMALSINA SAMIR": ["ソーター1","棚入れ","単数"],
+  "PASI ARJUN": ["単数","ソーター1"],
+  "SAPKOTA SANDESH": ["単数","ソーター1"],
+  "KUMAL SWASTIKA": ["単数","複数"],
+  "TAMANG MEENA": ["単数"],
+  "DULAL NITESH": ["ソーター1","単数"],
+  "POKHREL SHANTI": ["ソーター1"],
+  "PAUDEL KRISHNA PRASAD": ["ソーター1","ソーター2"],
+  "TIMALSINA HARI PRASAD": ["ソーター1","ソーター2","棚入れ"],
+  "CHHETRI BASANTA BAHADUR": ["ソーター1","ソーター2"],
+  "B K MANDIP": ["ソーター1"],
+  "B K PREM": ["ソーター1","ソーター2"],
+  "BHANDARI MILAN": ["ソーター1"],
+  "GAJUREL SUDARSAN": ["ソーター1","ソーター2"],
+  "GURUNG SUNIL": ["ソーター1","ソーター2"],
+  "THARU BIPAN": ["ソーター2","複数"],
+  "MIJAR SABIN": ["ソーター1","ソーター2"],
+  "POUDEL BINAYA": ["ソーター1","ソーター2","投入"],
+  "MOKTAN LAMA SUBARAJ": ["ソーター1","TC"],
+  "ROKA KAMAL": ["ソーター3","ソーター1","ソーター2"],
+  "KARKI ASHOK": ["ソーター1","ソーター2"],
+  "PAUDEL ASBIN": ["ソーター1","ソーター2","ソーター3"],
+  "BK BIMAL": ["ソーター2","ソーター3"],
+  "SUBEDI NIRAJ": ["ソーター2","ソーター3","投入"],
+  "DAHAL PARWAT KUMAR": ["ソーター1","ソーター2","ソーター3"],
+  "RAI SANJIB": ["ソーター2","投入"],
+  "MOKTAN KUNSANG": ["TC","ソーター1","ソーター3"],
+  "BOHARA JANAK": ["TC","ソーター1"],
+  "K C GOBINDA": ["TC","ソーター1","ソーター2"],
+  "REGMI GANESH": ["TC","ソーター1","ソーター2"],
+  "UPRETY UNNAT": ["TC","ソーター1"],
+  "JAYAPALA MUDIYANSELAGE": ["TC"],
+  "SEN SAMARTH": ["TC"],
+  "DHAKAL CHUDAMANI": ["TC"],
+  "SAFAL ARYAL": ["TC"],
+  "OLI PREM": ["TC"],
+  "BUDHA MAGAR ROHIT": ["TC","ソーター3"],
+  "CHAUDHARY NIRAJAN": ["TC"],
+  "CHHETRI SUJAN BAHADUR": ["ソーター1","ソーター2"],
+  "ROKA NIRIJMA": ["ソーター1","投入"],
+  "SUNUWAR JHARANA": ["ソーター1","ソーター2"],
+  "BHUSAL PRISEELA": ["ソーター1"],
+  "DULAL SURAB": ["ソーター1","ソーター2"],
+  "DHUNGANA SANDIP": ["ソーター1"],
+  "BOHARA BIRENDAR": ["ソーター1","ソーター2"],
+  "GURUNG SANJEET": ["ソーター1","ソーター2"],
+  "CHAUDHARY SAROJ": ["ソーター1","ソーター2"],
+  "SAUD BIRENDRA": ["ソーター1","ソーター2"],
+  "KHATRI BINOD": ["ソーター2","ソーター1"],
+  "KHADKA SAGAR": ["ソーター1","ソーター2","ソーター3"],
+  "WAGLE UPENDRA": ["ソーター2","ソーター3"],
+  "GHARTI CHHETRI NIRMAL": ["ソーター1","ソーター3"],
+  "KHANAL RAJU": ["ソーター1","ソーター2"],
+  "CHAUDHARY PRATIMA": ["ソーター1","ソーター2"],
+  "SINHALAGE SURANGA SAMPATH WIMALARATHNA": ["ソーター1","ソーター2"],
+  "TAMANG RES KUMAR": ["ソーター1","ソーター2"],
+  "SUBEDI SUMITRA": ["ソーター1","ソーター3"],
+  "KHATRI THAPA GANGA KUMARI": ["ソーター1","ソーター2","複数"],
+  "ADHIKARI TEJ PRASAD": ["ソーター1","ソーター2"],
+  "PANTA RUPAK": ["ソーター1","ソーター2"],
+  "SHARMA KANDEL PUSPA DEVI": ["ソーター1","ソーター2"],
+  "GURUNG AJAY": ["ソーター1","ソーター3"],
+  "GURUNG KUMAR": ["ソーター1","ソーター2","ソーター3"],
+  "GHIMIRE PRAKASH": ["ソーター1","ソーター2"],
+  "ACHARYA ASHIM": ["ソーター1","ソーター2"],
+  "CHHETRI JEEVAN": ["ソーター1","ソーター2"],
+  "SHAH DABAL BAHADUR": ["ソーター1"],
+  "GURUNG SRISTI": ["ソーター1","ソーター2"],
+  "PRABEEN NETHMAL": ["ソーター1"],
+  "RAI IMA": ["複数","投入","ソーター1"],
+  "ALE MAGAR SAMITA": ["複数"],
+  "SHAHI REKHA": ["複数"],
+  "SHRESTHA AMRITA": ["ソーター1"],
+  "SHRESTHA ALISHA": ["複数"],
+  "SHIVAKOTI SHAKUNTALA": ["ソーター1","ソーター2"],
+  "AACHARYA SHARMA KRITI": ["ソーター1"],
+  "SARTUNGE PRABINA": ["ソーター1"],
+  "RANABHAT SARITA": ["複数","投入"],
+  "ACHHAMI ISHWOR BAHADUR": ["ソーター1","投入"],
+  "REGMI GANGA": ["ソーター1","複数"],
+  "BHUBANESWORI SHAHI": ["複数"],
+  "SAMANT SACHIN SINGH": ["ソーター1","ソーター2"],
+  "DHAKAL ADHIKARI HIRA": ["ソーター1","複数"],
+  "SHRESTHA NABIN": ["ソーター1","ソーター2"],
+  "SHRESTHA SUJAN": ["ソーター1","ソーター3"],
+  "BHANDARI RUPA KUMARI": ["ソーター1","単数"],
+  "RIJAL MANOJ": ["ソーター1","ソーター2"],
+  "PANDEY DINESH": ["ソーター1","ソーター2"],
+  "B K SUNIL": ["ソーター1","ソーター2"],
+  "OLI GANESH KUMAR": ["ソーター1"],
+  "DANGAL SABINA": ["ソーター1","複数"],
+  "GAIRE BABURAM": ["ソーター1"],
+  "MAHAT BARSHA": ["ソーター1"],
+  "MAHAT ROSHAN": ["ソーター1","ソーター2"],
+  "GAUTAM JANAKI": ["複数","単数"],
+  "KHATRI ISHWORI": ["単数"],
+  "DARNAL TEK BAHADUR": ["ソーター1","ソーター3","投入"],
+  "SHAHI BHUBANESWORI": ["ソーター1","複数"],
+  "PANDEY SHIVA": ["ソーター1","ソーター2"],
+  "DULAL SAURAB": ["ソーター1","ソーター2"],
+  "THAPA TILAK BAHADUR": ["ソーター1","ソーター2"],
+  "THAPA KRISHNA BAHADUR": ["ソーター1","ソーター2","棚入れ","投入"],
+  "KHATRI DURGA BAHADUR": ["ソーター1","ソーター2"],
+  "PAIJA PRADIP": ["投入"],
+  "KISAN DIPAK BAHADUR": ["ソーター1"],
+  "KISAN ABISHEK": ["ソーター1"],
+  "KISAN GANESH": ["ソーター1"],
+  "BUDHATHOKI SANDESH": ["ソーター1"],
+  "SEDHAIN BISHAL": ["ソーター1"],
+  "TAMANG RANJANI": ["ソーター1","ソーター2","棚入れ"],
+  "DAMHAL GAUTAM SABINA": ["複数"],
+  "SHARMA G C LAXMI": ["ソーター1","単数","投入"],
+  "DHAMALA GAUTAM SABIN": ["複数"],
+  "CHAND RIMA": ["単数"],
+  "SHARMA RITIK": ["ソーター1","ソーター2","ソーター3"],
+  "THAPA ANIL KUMAR": ["ソーター2"],
+  "CHAUDHARY SAMJHANA": ["ソーター1"],
+  "SHRESTHA MAHENDRA": ["ソーター1","複数"],
+  "KUMAR ARJUN": ["ソーター3","ソーター2"],
+  "KUMAL ARJUN": ["ソーター3","ソーター2"],
+  "SUNAR SANDIP": ["ソーター1","ソーター2"],
+  "LAMA HEMANT": ["ソーター1","ソーター2"],
+  "LAMICHHANE AJAY": ["ソーター1","ソーター2"],
+  "KHATRI BIDUR BAHADUR": ["ソーター1","投入"],
+  "DARJEE AKASH": ["ソーター1"],
+  "RANBHAT SARITA": ["複数"],
+  "PRAVEEN NETHMAL": ["ソーター1"],
+  "KHANAL DURGA": ["ソーター2"],
+  "TAMANG RANJITA": ["単数","ソーター1","棚入れ"],
+  "SHAH THAKURI RACHANA": ["ソーター2"],
+  "SHARMA PAUDEL PRABESH": ["ソーター3"],
+  "SHARMA GAIRE UMA": ["複数","単数"],
+  "BHANDARI PRAKASH": ["ソーター1"],
+  "KARKI ABHISEK": ["ソーター1"],
+  "KARKI JAYANTI": ["ソーター1"],
+  "BUDATHOKI SANDESH": ["ソーター2"],
+  "RAJANI BLON TAMANG": ["ソーター1"],
+  "DAMICHHANE AJAY": ["ソーター2"],
+  "RAJANI TAMANG": ["投入","ソーター1","棚入れ"],
+  "MOHAN POUDEL": ["ソーター1"],
+  "CHANDA THAPA PAIJA": ["単数"],
+  "DUKAL NITESH": ["ソーター1"],
+};
+
+const DEPARTMENTS = ["管理", "ソーター1", "ソーター2", "ソーター3", "TC", "棚入れ", "単搬", "出庫搬送", "投入", "複数", "単数"];
+
+let assignRoster = [];
+let assignmentResult = [];
+
+function findSkillsFor(name) {
+  // First check custom skills
+  const custom = getCustomSkills();
+  const n = normalize(name);
+  for (const [k, v] of Object.entries(custom)) {
+    if (normalize(k) === n) return {name: k, depts: v.depts, primary: v.primary};
+  }
+  // Then check SKILL_DATABASE
+  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
+    if (normalize(dbName) === n) return {name: dbName, depts: depts, primary: depts[0]};
+  }
+  // Fuzzy match
+  for (const [k, v] of Object.entries(custom)) {
+    const dn = normalize(k);
+    if (dn.includes(n) || n.includes(dn)) {
+      if (Math.abs(dn.length - n.length) < 5) return {name: k, depts: v.depts, primary: v.primary};
+    }
+  }
+  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
+    const dn = normalize(dbName);
+    if (dn.includes(n) || n.includes(dn)) {
+      if (Math.abs(dn.length - n.length) < 5) return {name: dbName, depts: depts, primary: depts[0]};
+    }
+  }
+  return null;
+}
+
+function loadAssignRoster() {
+  const raw = document.getElementById("assignRoster").value;
+  if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  assignRoster = [];
+  let unknown = 0;
+  const seen = new Set();
+  lines.forEach(name => {
+    const key = name.toLowerCase().trim();
+    if (seen.has(key)) return;
+    seen.add(key);
+    const skill = findSkillsFor(name);
+    assignRoster.push({
+      input: name,
+      name: skill ? skill.name : name,
+      depts: skill ? skill.depts : [],
+      primary: skill ? skill.primary : null,
+      assigned: null
+    });
+    if (!skill) unknown++;
+  });
+  document.getElementById("assignRosterCount").textContent = assignRoster.length + " loaded" + (unknown ? " (" + unknown + " unknown skills)" : "");
+  showToast(assignRoster.length + " staff loaded!");
+  buildDeptNeedsGrid();
+}
+
+function buildDeptNeedsGrid() {
+  const grid = document.getElementById("deptNeedsGrid");
+  grid.innerHTML = DEPARTMENTS.map(d => {
+    const count = assignRoster.filter(s => s.depts.includes(d)).length;
+    return '<div style="background:#fafaf8;border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">'+
+      '<div style="font-size:11px;font-weight:600;margin-bottom:4px;">' + d + '</div>'+
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">' + count + ' available</div>'+
+      '<input type="number" id="need-' + d + '" min="0" value="0" style="width:100%;padding:6px;border:1px solid var(--border2);border-radius:6px;text-align:center;font-weight:700;font-size:14px;" oninput="updateTotal()" />'+
+      '</div>';
+  }).join("");
+  updateTotal();
+}
+
+function updateTotal() {
+  let total = 0;
+  DEPARTMENTS.forEach(d => {
+    const v = parseInt(document.getElementById("need-" + d)?.value || 0);
+    total += v;
+  });
+  const el = document.getElementById("assignTotalNeeded");
+  if (el) el.textContent = "Total needed: " + total + " / Available: " + assignRoster.length;
+}
+
+function clearAssignNeeds() {
+  DEPARTMENTS.forEach(d => {
+    const el = document.getElementById("need-" + d);
+    if (el) el.value = 0;
+  });
+  document.getElementById("assignResults").style.display = "none";
+  updateTotal();
+}
+
+function runAssignment() {
+  if (!assignRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  
+  const needs = {};
+  DEPARTMENTS.forEach(d => {
+    needs[d] = parseInt(document.getElementById("need-" + d)?.value || 0);
+  });
+  
+  const totalNeeded = Object.values(needs).reduce((a,b) => a+b, 0);
+  if (totalNeeded === 0) { showToast("Set department needs!", "#dc2626"); return; }
+  
+  assignmentResult = assignRoster.map(s => ({...s, assigned: null, leaderRole: null}));
+  const remaining = {...needs};
+  
+  // STEP 1: PLACE LEADERS at ソーター1, ソーター2, ソーター3 (machines need leaders!)
+  // Each sorter line gets ONE leader as 管理 role
+  const availableLeaders = assignmentResult.filter(p => isLeader(p.name));
+  const sorterLines = ["ソーター1", "ソーター2", "ソーター3"];
+  
+  for (const line of sorterLines) {
+    if (remaining[line] <= 0) continue;
+    // Find a leader who can work this line
+    const leader = availableLeaders.find(p => !p.assigned && p.depts.includes(line));
+    if (leader) {
+      leader.assigned = line;
+      leader.leaderRole = "管理"; // mark as the 管理 of this line
+      remaining[line]--;
+    } else {
+      // Any leader will do
+      const anyLeader = availableLeaders.find(p => !p.assigned);
+      if (anyLeader) {
+        anyLeader.assigned = line;
+        anyLeader.leaderRole = "管理";
+        remaining[line]--;
+      }
+    }
+  }
+  
+  // STEP 2: Place sub-leaders next to leaders on sorter lines
+  for (const line of sorterLines) {
+    if (remaining[line] <= 0) continue;
+    const sub = assignmentResult.find(p => !p.assigned && isSubLeader(p.name) && p.depts.includes(line));
+    if (sub) {
+      sub.assigned = line;
+      sub.leaderRole = "sub";
+      remaining[line]--;
+    }
+  }
+  
+  // STEP 3: Assign 棚入れ specialists
+  for (const person of assignmentResult) {
+    if (person.assigned) continue;
+    if (person.depts[0] === "棚入れ" && remaining["棚入れ"] > 0) {
+      person.assigned = "棚入れ";
+      remaining["棚入れ"]--;
+    }
+  }
+  
+  // STEP 4: Assign 単数 specialists
+  for (const person of assignmentResult) {
+    if (person.assigned) continue;
+    if (person.depts.length === 1 && person.depts[0] === "単数" && remaining["単数"] > 0) {
+      person.assigned = "単数";
+      remaining["単数"]--;
+    }
+  }
+  
+  // STEP 5: Assign 複数 specialists
+  for (const person of assignmentResult) {
+    if (person.assigned) continue;
+    if (person.depts.length === 1 && person.depts[0] === "複数" && remaining["複数"] > 0) {
+      person.assigned = "複数";
+      remaining["複数"]--;
+    }
+  }
+  
+  // STEP 5b: Prioritize people by their PRIMARY skill (⭐)
+  for (const person of assignmentResult) {
+    if (person.assigned) continue;
+    if (person.primary && remaining[person.primary] > 0) {
+      person.assigned = person.primary;
+      remaining[person.primary]--;
+    }
+  }
+  
+  // STEP 6: Other single-skill specialists
+  for (const person of assignmentResult) {
+    if (person.assigned) continue;
+    if (person.depts.length === 1) {
+      const dept = person.depts[0];
+      if (remaining[dept] > 0) {
+        person.assigned = dept;
+        remaining[dept]--;
+      }
+    }
+  }
+  
+  // STEP 7: Special specialists - 単搬, 出庫搬送, 投入, TC (preferred match)
+  const specialDepts = ["単搬", "出庫搬送", "TC", "投入"];
+  for (const dept of specialDepts) {
+    while (remaining[dept] > 0) {
+      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept) && p.depts[0] === dept);
+      if (!candidate) break;
+      candidate.assigned = dept;
+      remaining[dept]--;
+    }
+    while (remaining[dept] > 0) {
+      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept));
+      if (!candidate) break;
+      candidate.assigned = dept;
+      remaining[dept]--;
+    }
+  }
+  
+  // STEP 8: Fill sorter lines (ソーター1, ソーター2, ソーター3)
+  for (const line of sorterLines) {
+    while (remaining[line] > 0) {
+      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(line));
+      if (!candidate) break;
+      candidate.assigned = line;
+      remaining[line]--;
+    }
+  }
+  
+  // STEP 9: Fill remaining 複数 / 単数 with people who have those skills
+  for (const dept of ["複数", "単数"]) {
+    while (remaining[dept] > 0) {
+      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept));
+      if (!candidate) break;
+      candidate.assigned = dept;
+      remaining[dept]--;
+    }
+  }
+  
+  // STEP 10: Force-fill any remaining slots
+  for (const dept of DEPARTMENTS) {
+    while (remaining[dept] > 0) {
+      const candidate = assignmentResult.find(p => !p.assigned);
+      if (!candidate) break;
+      candidate.assigned = dept;
+      candidate.forced = true;
+      remaining[dept]--;
+    }
+  }
+  
+  renderAssignmentResults(needs, remaining);
+}
+
+function renderAssignmentResults(needs, remaining) {
+  // Summary
+  let summary = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;">';
+  DEPARTMENTS.forEach(d => {
+    if (needs[d] === 0) return;
+    const assigned = assignmentResult.filter(p => p.assigned === d).length;
+    const ok = assigned >= needs[d];
+    summary += '<div style="background:' + (ok ? "#f0fdf4" : "#fef2f2") + ';border:1px solid ' + (ok ? "#bbf7d0" : "#fecaca") + ';border-radius:8px;padding:8px;text-align:center;">'+
+      '<div style="font-size:11px;font-weight:600;">' + d + '</div>'+
+      '<div style="font-size:14px;font-weight:700;color:' + (ok ? "var(--green)" : "var(--red)") + ';">' + assigned + '/' + needs[d] + '</div>'+
+      '</div>';
+  });
+  summary += '</div>';
+  document.getElementById("assignmentSummary").innerHTML = summary;
+  
+  // List by department
+  let html = "";
+  DEPARTMENTS.forEach(d => {
+    const people = assignmentResult.filter(p => p.assigned === d);
+    if (people.length === 0 && needs[d] === 0) return;
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;padding:6px 10px;background:var(--accent-light);border-radius:6px;color:var(--accent);">' + d + ' (' + people.length + ')</div>';
+    html += people.map(p => {
+      const isLed = isLeader(p.name);
+      const isSub = isSubLeader(p.name);
+      let rowStyle = "";
+      let badge = "";
+      if (p.leaderRole === "管理") {
+        rowStyle = "background:var(--leader-bg);border:2px solid var(--leader-border);";
+        badge = '<div class="badge" style="background:var(--leader-border);color:white;">👑 管理</div>';
+      } else if (p.leaderRole === "sub") {
+        rowStyle = "background:var(--subleader-bg);border:2px solid var(--subleader-border);";
+        badge = '<div class="badge" style="background:var(--subleader-border);color:white;">⭐ SUB</div>';
+      } else if (isLed) {
+        rowStyle = "background:var(--leader-bg);border:1px solid var(--leader-border);";
+        badge = '<span class="leader-tag">LEADER</span>';
+      } else if (isSub) {
+        rowStyle = "background:var(--subleader-bg);border:1px solid var(--subleader-border);";
+        badge = '<span class="subleader-tag">SUB</span>';
+      }
+      if (p.forced) { rowStyle += "background:#fffbeb;border-color:#fde68a;"; badge = '<div class="badge badge-extra">⚠ Forced</div>'; }
+      return '<div class="staff-row" style="' + rowStyle + '">'+
+        '<div><div class="staff-name">' + escapeHtml(p.name) + '</div>'+
+        (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">⚠ No skill data</div>') +
+        '</div>' + badge +
+        '</div>';
+    }).join("");
+    html += '</div>';
+  });
+  
+  // Unassigned
+  const unassigned = assignmentResult.filter(p => !p.assigned);
+  if (unassigned.length) {
+    html += '<div style="margin-top:14px;padding:12px;background:#f3f4f6;border-radius:8px;">';
+    html += '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">😴 Unassigned (' + unassigned.length + ')</div>';
+    html += unassigned.map(p => '<div style="font-size:12px;padding:4px 0;">' + escapeHtml(p.name) + '</div>').join("");
+    html += '</div>';
+  }
+  
+  document.getElementById("assignmentList").innerHTML = html;
+  document.getElementById("assignResults").style.display = "block";
+  setTimeout(() => document.getElementById("assignResults").scrollIntoView({behavior:"smooth"}), 100);
+}
+
+function copyAssignment() {
+  let text = "【今日の配置 / Today\'s Assignment】\n\n";
+  DEPARTMENTS.forEach(d => {
+    const people = assignmentResult.filter(p => p.assigned === d);
+    if (people.length === 0) return;
+    text += "■ " + d + " (" + people.length + ")\n";
+    people.forEach(p => {
+      let prefix = "  • ";
+      if (p.leaderRole === "管理") prefix = "  👑 ";
+      else if (p.leaderRole === "sub") prefix = "  ⭐ ";
+      text += prefix + p.name + (p.forced ? " ⚠" : "") + "\n";
+    });
+    text += "\n";
+  });
+  navigator.clipboard.writeText(text).then(() => showToast("✅ Copied!"));
+}
+
+
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("zozo_dark", isDark ? "1" : "0");
+  document.getElementById("darkBtn").textContent = isDark ? "☀️" : "🌙";
+}
+
+// Init dark mode from localStorage
+if (localStorage.getItem("zozo_dark") === "1") {
+  document.body.classList.add("dark");
+  setTimeout(() => { 
+    const btn = document.getElementById("darkBtn");
+    if (btn) btn.textContent = "☀️"; 
+  }, 100);
+}
+
+
+// === SKILL EDITOR ===
+function loadCustomSkills() {
+  try {
+    const custom = JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}");
+    return custom;
+  } catch(e) { return {}; }
+}
+
+function saveCustomSkills(skills) {
+  localStorage.setItem("zozo_custom_skills", JSON.stringify(skills));
+}
+
+function getStaffSkills(name) {
+  const custom = loadCustomSkills();
+  const key = _normName(name);
+  if (custom[key]) return custom[key];
+  // Fall back to default skill database
+  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
+    if (_normName(dbName) === key) return {primary: depts[0], all: depts};
+  }
+  return {primary: null, all: []};
+}
+
+function openSkillEditor(staffName, realName) {
+  const target = realName || staffName;
+  const skills = getStaffSkills(target);
+  
+  document.getElementById("skillModalTitle").textContent = "✏️ " + staffName;
+  document.getElementById("skillModalSubtitle").textContent = realName ? "Real name: " + realName : "";
+  
+  // Build dept dropdown
+  const primarySel = document.getElementById("primarySkill");
+  primarySel.innerHTML = '<option value="">-- None --</option>' + 
+    DEPARTMENTS.map(d => '<option value="' + d + '"' + (d === skills.primary ? ' selected' : '') + '>' + d + '</option>').join("");
+  
+  // Build checkboxes
+  document.getElementById("skillCheckboxes").innerHTML = DEPARTMENTS.map(d => {
+    const checked = skills.all.includes(d);
+    return '<label style="display:flex;align-items:center;gap:6px;padding:8px;background:' + (checked ? 'var(--accent-light)' : 'var(--bg)') + ';border:1px solid ' + (checked ? 'var(--accent)' : 'var(--border)') + ';border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;">' +
+      '<input type="checkbox" id="skill-' + d + '"' + (checked ? ' checked' : '') + ' style="cursor:pointer;" onchange="updateSkillRow(this)" data-dept="' + d + '" />' +
+      '<span>' + d + '</span></label>';
+  }).join("");
+  
+  // Save handler
+  document.getElementById("skillSaveBtn").onclick = function() {
+    const primary = document.getElementById("primarySkill").value;
+    const all = [];
+    DEPARTMENTS.forEach(d => {
+      if (document.getElementById("skill-" + d)?.checked) all.push(d);
+    });
+    // Make sure primary is in all
+    if (primary && !all.includes(primary)) all.unshift(primary);
+    
+    const custom = loadCustomSkills();
+    custom[_normName(target)] = {primary: primary || (all[0] || null), all: all};
+    saveCustomSkills(custom);
+    
+    showToast("✅ Skills updated for " + staffName);
+    closeSkillModal();
+    renderManage();
+  };
+  
+  document.getElementById("skillModal").classList.add("show");
+}
+
+function updateSkillRow(checkbox) {
+  const label = checkbox.closest("label");
+  if (checkbox.checked) {
+    label.style.background = "var(--accent-light)";
+    label.style.borderColor = "var(--accent)";
+  } else {
+    label.style.background = "var(--bg)";
+    label.style.borderColor = "var(--border)";
+  }
+}
+
+function closeSkillModal() {
+  document.getElementById("skillModal").classList.remove("show");
+}
+
+// Override findSkillsFor to use custom skills first
+const _originalFindSkills = findSkillsFor;
+function findSkillsFor(name) {
+  const custom = loadCustomSkills();
+  const n = _normName(name);
+  if (custom[n]) {
+    return {name: name, depts: custom[n].all};
+  }
+  return _originalFindSkills(name);
+}
+
+
+
+// === SKILLS EDITOR ===
+let editingStaffName = null;
+let editingDepts = [];
+let editingPrimary = null;
+
+function openSkillsEditor(realName) {
+  editingStaffName = realName;
+  const skills = getStaffSkills(realName);
+  editingDepts = skills ? [...skills.depts] : [];
+  editingPrimary = skills ? skills.primary : null;
+  document.getElementById("skillsName").textContent = realName;
+  renderSkillsEditor();
+  document.getElementById("skillsModal").classList.add("show");
+}
+
+function renderSkillsEditor() {
+  const html = DEPARTMENTS.map(d => {
+    const isSelected = editingDepts.includes(d);
+    const isPrimary = editingPrimary === d;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid ' + 
+      (isSelected ? "var(--accent)" : "var(--border)") + ';background:' +
+      (isSelected ? "var(--accent-light)" : "var(--card)") + ';cursor:pointer;" onclick="toggleSkillDept(\'' + d + '\')">'+
+      '<div style="flex:1;font-weight:' + (isSelected ? "700" : "500") + ';font-size:13px;">' + d + '</div>'+
+      (isSelected ? '<button onclick="event.stopPropagation();setPrimarySkill(\'' + d + '\')" style="background:' + 
+        (isPrimary ? "var(--orange)" : "transparent") + ';color:' + (isPrimary ? "white" : "var(--orange)") + 
+        ';border:1px solid var(--orange);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">' + 
+        (isPrimary ? "⭐ Primary" : "Set Primary") + '</button>' : '') +
+      '<div style="font-size:18px;color:' + (isSelected ? "var(--accent)" : "var(--text3)") + ';">' + 
+      (isSelected ? "✓" : "○") + '</div>' +
+      '</div>';
+  }).join("");
+  document.getElementById("skillsDeptList").innerHTML = html;
+}
+
+function toggleSkillDept(dept) {
+  const idx = editingDepts.indexOf(dept);
+  if (idx >= 0) {
+    editingDepts.splice(idx, 1);
+    if (editingPrimary === dept) {
+      editingPrimary = editingDepts.length > 0 ? editingDepts[0] : null;
+    }
+  } else {
+    editingDepts.push(dept);
+    if (!editingPrimary) editingPrimary = dept;
+  }
+  renderSkillsEditor();
+}
+
+function setPrimarySkill(dept) {
+  if (editingDepts.includes(dept)) {
+    editingPrimary = dept;
+    renderSkillsEditor();
+  }
+}
+
+function closeSkillsEditor() {
+  document.getElementById("skillsModal").classList.remove("show");
+}
+
+function saveSkillsEdit() {
+  if (!editingStaffName) return;
+  if (editingDepts.length === 0) {
+    showToast("Select at least 1 department!", "#dc2626");
+    return;
+  }
+  if (!editingPrimary || !editingDepts.includes(editingPrimary)) {
+    editingPrimary = editingDepts[0];
+  }
+  // Save with primary first in array
+  const orderedDepts = [editingPrimary, ...editingDepts.filter(d => d !== editingPrimary)];
+  setStaffSkills(editingStaffName, orderedDepts, editingPrimary);
+  showToast("✅ Skills updated!");
+  closeSkillsEditor();
+  renderManage();
+}
+
+
+
+// === SKILL EDITOR ===
+let editingSkillStaff = null;
+let editingSkillIdx = null;
+let tempSkills = [];
+
+// Custom skills override storage (saved in localStorage + synced)
+let customSkills = JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}");
+
+function getSkillsFor(name) {
+  // Check custom first, then default DB
+  const n = normalize(name);
+  // Check custom skills
+  for (const [k, v] of Object.entries(customSkills)) {
+    if (normalize(k) === n) return v;
+  }
+  // Check default DB
+  for (const [k, v] of Object.entries(SKILL_DATABASE)) {
+    if (normalize(k) === n) return v;
+  }
+  return [];
+}
+
+function saveCustomSkills() {
+  localStorage.setItem("zozo_custom_skills", JSON.stringify(customSkills));
+}
+
+function openSkillEditor(idx) {
+  const staff = staffMap[idx];
+  editingSkillStaff = staff;
+  editingSkillIdx = idx;
+  
+  document.getElementById("skillStaffName").textContent = staff.real + " (" + staff.fb + ")";
+  
+  // Get current skills for this person
+  tempSkills = [...getSkillsFor(staff.real)];
+  
+  renderSkillDeptList();
+  document.getElementById("skillModal").classList.add("show");
+}
+
+function renderSkillDeptList() {
+  const html = DEPARTMENTS.map(d => {
+    const idx = tempSkills.indexOf(d);
+    const isSelected = idx >= 0;
+    const isPrimary = idx === 0;
+    
+    return '<div onclick="toggleSkillDept(\'' + d + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:8px;cursor:pointer;border:2px solid ' + (isPrimary ? "var(--accent)" : isSelected ? "var(--green-border)" : "var(--border)") + ';background:' + (isPrimary ? "var(--accent-light)" : isSelected ? "var(--green-light)" : "var(--bg)") + ';">'+
+      '<div style="display:flex;align-items:center;gap:10px;">'+
+        (isPrimary ? '<span style="font-size:16px;">⭐</span>' : isSelected ? '<span style="font-size:14px;color:var(--green);">✓</span>' : '<span style="font-size:14px;color:var(--text3);">○</span>') +
+        '<span style="font-weight:' + (isSelected ? "700" : "500") + ';font-size:13px;">' + d + '</span>'+
+        (isPrimary ? '<span style="font-size:10px;background:var(--accent);color:white;padding:2px 6px;border-radius:8px;font-weight:700;">PRIMARY</span>' : '') +
+      '</div>'+
+      (isSelected && !isPrimary ? '<button onclick="event.stopPropagation();makePrimary(\'' + d + '\')" style="background:var(--accent-light);color:var(--accent);border:1px solid var(--accent);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">⭐ Primary</button>' : '') +
+    '</div>';
+  }).join("");
+  document.getElementById("skillDeptList").innerHTML = html;
+}
+
+function toggleSkillDept(dept) {
+  const idx = tempSkills.indexOf(dept);
+  if (idx >= 0) {
+    tempSkills.splice(idx, 1);
+  } else {
+    tempSkills.push(dept);
+  }
+  renderSkillDeptList();
+}
+
+function makePrimary(dept) {
+  const idx = tempSkills.indexOf(dept);
+  if (idx >= 0) {
+    tempSkills.splice(idx, 1);
+    tempSkills.unshift(dept);
+  }
+  renderSkillDeptList();
+}
+
+function saveSkills() {
+  if (!editingSkillStaff) return;
+  customSkills[editingSkillStaff.real] = tempSkills;
+  saveCustomSkills();
+  showToast("✅ Skills saved!");
+  closeSkillModal();
+  renderManage();
+}
+
+function closeSkillModal() {
+  document.getElementById("skillModal").classList.remove("show");
+  editingSkillStaff = null;
 }
 
 loadSites();
