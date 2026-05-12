@@ -152,6 +152,7 @@
   <div class="page-tabs">
     <div class="page-tab active" onclick="switchPage('checker',this)">&#9989; Checker</div>
     <div class="page-tab" onclick="switchPage('assign',this)">&#127919; Assign</div>
+    <div class="page-tab" onclick="switchPage('rankings',this)">&#128202; Rankings</div>
     <div class="page-tab" onclick="switchPage('manage',this)">&#128101; Manage</div>
   </div>
 
@@ -217,10 +218,32 @@
     <div class="card">
       <div class="step-header"><span class="step-num">2</span> Department needs</div>
       <div id="deptNeedsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;"></div>
+      <div id="shortageAlerts" style="display:none;margin-top:12px;"></div>
       <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <button class="btn" onclick="runAssignment()">&#127919; Auto Assign</button>
         <button class="btn-sm btn-gray" onclick="clearAssignNeeds()">Clear</button>
+        <button class="btn-sm btn-gray" onclick="toggleRules()" id="rulesBtn">&#9881; Rules</button>
         <span class="roster-count" id="assignTotalNeeded"></span>
+      </div>
+      <div id="rulesPanel" style="display:none;margin-top:14px;padding:14px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">&#9881; Assignment Rules</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleRequireLeader" checked />
+          <span>&#128081; Require 1 main leader on each &#12477;&#12540;&#12479;&#12540; line</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleRequireSubLeader" checked />
+          <span>&#11088; Place sub-leader next to leader when possible</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="rulePrimaryFirst" checked />
+          <span>&#127919; Prioritize people's primary skill first</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleNoForce" />
+          <span>&#128683; Don't force-assign people outside their skills</span>
+        </label>
+        <div class="hint">Rules are saved automatically</div>
       </div>
     </div>
     <div id="assignResults" style="display:none;">
@@ -230,6 +253,27 @@
         <button class="btn-sm btn-green" onclick="copyAssignment()" style="margin-bottom:12px;">&#128203; Copy</button>
         <div id="assignmentList"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-rankings">
+    <div class="info-box">
+      &#128202; <strong>Staff Rankings:</strong> See top performers, specialists, and your most flexible workers
+    </div>
+    <div class="card">
+      <div class="card-title">&#128269; Filter</div>
+      <select id="rankingType" onchange="renderRankings()" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;">
+        <option value="flexible">&#127918; Most Flexible (multi-skilled)</option>
+        <option value="leaders">&#128081; Leaders &amp; Sub-leaders</option>
+        <option value="specialists">&#11088; Department Specialists (single skill)</option>
+        <option value="dept">&#128218; By Department</option>
+        <option value="missing">&#9888;&#65039; Missing Skill Data</option>
+        <option value="notes">&#128221; Staff with Notes</option>
+      </select>
+      <select id="rankingDept" onchange="renderRankings()" style="display:none;width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;"></select>
+    </div>
+    <div class="card" style="padding:16px;">
+      <div id="rankingsList"></div>
     </div>
   </div>
 
@@ -271,6 +315,10 @@
     </div>
     <div id="skillChipsContainer" style="margin:16px 0;"></div>
     <div class="hint" id="skillSummary"></div>
+    <div style="margin-top:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#128221; Notes (private)</label>
+      <textarea id="skillNotes" placeholder="e.g. Has back injury - no heavy lifting&#10;Good Japanese speaker&#10;Prefers morning shift" style="height:70px;font-size:12px;"></textarea>
+    </div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
       <button style="color:white;background:var(--accent);" onclick="saveSkillEdit()">Save</button>
@@ -579,19 +627,30 @@ function isSubLeader(name) { const n = normalize(name); return SUBLEADERS.some(f
 // ============ SKILLS ============
 function getSkills(realName) {
   const norm = (realName||"").toUpperCase().trim();
-  if (skillOverrides[norm]) return skillOverrides[norm];
-  for (const key in SKILL_DATABASE) {
-    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0] };
+  if (skillOverrides[norm]) {
+    const o = skillOverrides[norm];
+    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "" };
   }
-  return { depts: [], primary: null };
+  for (const key in SKILL_DATABASE) {
+    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "" };
+  }
+  return { depts: [], primary: null, notes: "" };
 }
 function saveSkillsToStorage() { localStorage.setItem("zozo_skills_v1", JSON.stringify(skillOverrides)); }
 function renderSkillTags(realName) {
   const s = getSkills(realName);
-  if (!s.depts || !s.depts.length) return '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
-  return '<div style="margin-top:6px;">' + s.depts.map(function(d) {
-    return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
-  }).join("") + '</div>';
+  let html = "";
+  if (!s.depts || !s.depts.length) {
+    html = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
+  } else {
+    html = '<div style="margin-top:6px;">' + s.depts.map(function(d) {
+      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
+    }).join("") + '</div>';
+  }
+  if (s.notes) {
+    html += '<div style="margin-top:6px;padding:6px 10px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.4;"><strong>\u{1F4DD}</strong> ' + escapeHtml(s.notes) + '</div>';
+  }
+  return html;
 }
 
 function openSkillEditor(realName) {
@@ -600,6 +659,7 @@ function openSkillEditor(realName) {
   skillEditDepts = (s.depts || []).slice();
   skillEditPrimary = s.primary || null;
   document.getElementById("skillModalTitle").textContent = "\u{1F3AF} " + realName;
+  document.getElementById("skillNotes").value = s.notes || "";
   renderSkillChips();
   document.getElementById("skillModal").classList.add("show");
 }
@@ -638,15 +698,16 @@ function toggleSkill(d) {
 function saveSkillEdit() {
   if (!skillEditTarget) return;
   if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
+  const notes = (document.getElementById("skillNotes").value || "").trim();
   const norm = skillEditTarget.toUpperCase().trim();
-  if (skillEditDepts.length === 0) {
+  if (skillEditDepts.length === 0 && !notes) {
     delete skillOverrides[norm];
   } else {
-    skillOverrides[norm] = { depts: skillEditDepts, primary: skillEditPrimary };
+    skillOverrides[norm] = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes };
   }
   saveSkillsToStorage();
   closeSkillModal();
-  showToast("Skills saved!");
+  showToast("Saved!");
   renderManage();
 }
 
@@ -697,6 +758,7 @@ function switchPage(page, el) {
   document.getElementById("page-" + page).classList.add("active");
   el.classList.add("active");
   if (page === "manage") renderManage();
+  if (page === "rankings") { setupRankings(); renderRankings(); }
 }
 
 // ============ REACTION CHECKER ============
@@ -993,7 +1055,7 @@ function buildDeptNeedsGrid() {
     const count = assignRoster.filter(function(s){return s.depts.indexOf(d) !== -1;}).length;
     return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">' +
       '<div style="font-size:11px;font-weight:600;margin-bottom:4px;">' + d + '</div>' +
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">' + count + ' avail</div>' +
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;" id="avail-' + d + '">' + count + ' avail</div>' +
       '<input type="number" id="need-' + d + '" min="0" value="0" style="text-align:center;font-weight:700;font-size:14px;" oninput="updateTotal()" />' +
       '</div>';
   }).join("");
@@ -1001,12 +1063,65 @@ function buildDeptNeedsGrid() {
 }
 function updateTotal() {
   let total = 0;
+  const shortages = [];
   DEPARTMENTS.forEach(function(d) {
     const el = document.getElementById("need-" + d);
-    total += parseInt(el ? el.value : 0) || 0;
+    const need = parseInt(el ? el.value : 0) || 0;
+    total += need;
+    const avail = assignRoster.filter(function(s){return s.depts.indexOf(d) !== -1;}).length;
+    const availEl = document.getElementById("avail-" + d);
+    if (availEl) {
+      if (need > avail && need > 0) {
+        availEl.style.color = "#dc2626";
+        availEl.style.fontWeight = "700";
+        availEl.textContent = "\u26A0 " + avail + " avail";
+        shortages.push({ dept: d, need: need, avail: avail });
+      } else {
+        availEl.style.color = "var(--text2)";
+        availEl.style.fontWeight = "500";
+        availEl.textContent = avail + " avail";
+      }
+    }
   });
   const el = document.getElementById("assignTotalNeeded");
   if (el) el.textContent = "Need: " + total + " / Have: " + assignRoster.length;
+
+  // Show shortage alerts
+  const alertsEl = document.getElementById("shortageAlerts");
+  if (shortages.length && total > 0) {
+    let html = '<div style="padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#991b1b;font-size:12px;line-height:1.6;">';
+    html += '<div style="font-weight:700;margin-bottom:6px;">\u26A0 Staffing shortages detected:</div>';
+    shortages.forEach(function(s) {
+      const shortBy = s.need - s.avail;
+      html += '<div>\u2022 <strong>' + s.dept + '</strong>: need ' + s.need + ', only ' + s.avail + ' available (short by ' + shortBy + ')</div>';
+    });
+    // Suggest who could fill in
+    const suggestions = findShortageHelpers(shortages);
+    if (suggestions.length) {
+      html += '<div style="margin-top:8px;font-size:11px;font-weight:600;">\u{1F4A1} Could help with secondary skills:</div>';
+      suggestions.slice(0, 5).forEach(function(sug) {
+        html += '<div style="font-size:11px;margin-top:2px;">\u2022 ' + escapeHtml(sug.name) + ' (' + sug.depts.join(", ") + ')</div>';
+      });
+    }
+    html += '</div>';
+    alertsEl.innerHTML = html;
+    alertsEl.style.display = "block";
+  } else {
+    alertsEl.style.display = "none";
+  }
+}
+function findShortageHelpers(shortages) {
+  const shortDepts = shortages.map(function(s){return s.dept;});
+  const helpers = [];
+  assignRoster.forEach(function(p) {
+    if (!p.depts.length) return;
+    // Find someone who CAN do a shortage dept but it's NOT their primary
+    const canHelp = p.depts.filter(function(d){return shortDepts.indexOf(d) !== -1;});
+    if (canHelp.length && (!p.primary || shortDepts.indexOf(p.primary) === -1)) {
+      helpers.push({name: p.name, depts: canHelp});
+    }
+  });
+  return helpers;
 }
 function clearAssignNeeds() {
   DEPARTMENTS.forEach(function(d) {
@@ -1027,6 +1142,14 @@ function runAssignment() {
   });
   if (totalNeeded === 0) { showToast("Set needs!", "#dc2626"); return; }
 
+  // Load rules
+  const rules = {
+    requireLeader: document.getElementById("ruleRequireLeader") ? document.getElementById("ruleRequireLeader").checked : true,
+    requireSubLeader: document.getElementById("ruleRequireSubLeader") ? document.getElementById("ruleRequireSubLeader").checked : true,
+    primaryFirst: document.getElementById("rulePrimaryFirst") ? document.getElementById("rulePrimaryFirst").checked : true,
+    noForce: document.getElementById("ruleNoForce") ? document.getElementById("ruleNoForce").checked : false
+  };
+
   assignmentResult = assignRoster.map(function(s) {
     return {
       input: s.input, name: s.name, depts: s.depts.slice(), primary: s.primary,
@@ -1037,30 +1160,36 @@ function runAssignment() {
   for (const d in needs) remaining[d] = needs[d];
   const sorterLines = ["\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3"];
 
-  // STEP 1: Main leaders to sorter lines
-  const availableLeaders = assignmentResult.filter(function(p){return isLeader(p.name);});
-  sorterLines.forEach(function(line) {
-    if (remaining[line] <= 0) return;
-    let leader = availableLeaders.find(function(p){return !p.assigned && p.depts.indexOf(line) !== -1;});
-    if (!leader) leader = availableLeaders.find(function(p){return !p.assigned;});
-    if (leader) { leader.assigned = line; leader.leaderRole = "\u7BA1\u7406"; remaining[line]--; }
-  });
+  // STEP 1: Main leaders to sorter lines (if rule enabled)
+  if (rules.requireLeader) {
+    const availableLeaders = assignmentResult.filter(function(p){return isLeader(p.name);});
+    sorterLines.forEach(function(line) {
+      if (remaining[line] <= 0) return;
+      let leader = availableLeaders.find(function(p){return !p.assigned && p.depts.indexOf(line) !== -1;});
+      if (!leader) leader = availableLeaders.find(function(p){return !p.assigned;});
+      if (leader) { leader.assigned = line; leader.leaderRole = "\u7BA1\u7406"; remaining[line]--; }
+    });
+  }
 
-  // STEP 2: Sub-leaders to sorter lines
-  sorterLines.forEach(function(line) {
-    if (remaining[line] <= 0) return;
-    const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && p.depts.indexOf(line) !== -1;});
-    if (sub) { sub.assigned = line; sub.leaderRole = "sub"; remaining[line]--; }
-  });
+  // STEP 2: Sub-leaders to sorter lines (if rule enabled)
+  if (rules.requireSubLeader) {
+    sorterLines.forEach(function(line) {
+      if (remaining[line] <= 0) return;
+      const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && p.depts.indexOf(line) !== -1;});
+      if (sub) { sub.assigned = line; sub.leaderRole = "sub"; remaining[line]--; }
+    });
+  }
 
-  // STEP 3: Primary skill matches
-  assignmentResult.forEach(function(person) {
-    if (person.assigned) return;
-    if (person.primary && remaining[person.primary] > 0) {
-      person.assigned = person.primary;
-      remaining[person.primary]--;
-    }
-  });
+  // STEP 3: Primary skill matches (if rule enabled)
+  if (rules.primaryFirst) {
+    assignmentResult.forEach(function(person) {
+      if (person.assigned) return;
+      if (person.primary && remaining[person.primary] > 0) {
+        person.assigned = person.primary;
+        remaining[person.primary]--;
+      }
+    });
+  }
 
   // STEP 4: Single-skill specialists
   assignmentResult.forEach(function(person) {
@@ -1082,18 +1211,46 @@ function runAssignment() {
     }
   });
 
-  // STEP 6: Force-fill remaining
-  DEPARTMENTS.forEach(function(dept) {
-    while (remaining[dept] > 0) {
-      const candidate = assignmentResult.find(function(p){return !p.assigned;});
-      if (!candidate) break;
-      candidate.assigned = dept;
-      candidate.forced = true;
-      remaining[dept]--;
-    }
-  });
+  // STEP 6: Force-fill remaining (only if rule allows)
+  if (!rules.noForce) {
+    DEPARTMENTS.forEach(function(dept) {
+      while (remaining[dept] > 0) {
+        const candidate = assignmentResult.find(function(p){return !p.assigned;});
+        if (!candidate) break;
+        candidate.assigned = dept;
+        candidate.forced = true;
+        remaining[dept]--;
+      }
+    });
+  }
 
   renderAssignmentResults(needs);
+}
+
+function toggleRules() {
+  const panel = document.getElementById("rulesPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+function saveRulesToStorage() {
+  const rules = {
+    requireLeader: document.getElementById("ruleRequireLeader").checked,
+    requireSubLeader: document.getElementById("ruleRequireSubLeader").checked,
+    primaryFirst: document.getElementById("rulePrimaryFirst").checked,
+    noForce: document.getElementById("ruleNoForce").checked
+  };
+  localStorage.setItem("zozo_rules_v1", JSON.stringify(rules));
+}
+
+function loadRulesFromStorage() {
+  try {
+    const r = JSON.parse(localStorage.getItem("zozo_rules_v1") || "null");
+    if (!r) return;
+    if (document.getElementById("ruleRequireLeader")) document.getElementById("ruleRequireLeader").checked = !!r.requireLeader;
+    if (document.getElementById("ruleRequireSubLeader")) document.getElementById("ruleRequireSubLeader").checked = !!r.requireSubLeader;
+    if (document.getElementById("rulePrimaryFirst")) document.getElementById("rulePrimaryFirst").checked = !!r.primaryFirst;
+    if (document.getElementById("ruleNoForce")) document.getElementById("ruleNoForce").checked = !!r.noForce;
+  } catch(e) {}
 }
 function renderAssignmentResults(needs) {
   let summary = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;">';
@@ -1175,7 +1332,146 @@ if (localStorage.getItem("zozo_dark") === "1") {
   }, 50);
 }
 
+// ============ RANKINGS ============
+function setupRankings() {
+  const deptSelect = document.getElementById("rankingDept");
+  deptSelect.innerHTML = DEPARTMENTS.map(function(d) {
+    return '<option value="' + d + '">' + d + '</option>';
+  }).join("");
+  // Show/hide dept selector based on type
+  document.getElementById("rankingType").onchange = function() {
+    document.getElementById("rankingDept").style.display = this.value === "dept" ? "block" : "none";
+    renderRankings();
+  };
+}
+
+function getAllStaffWithSkills() {
+  // Combine staffMap with skill data
+  const result = [];
+  const seen = {};
+  // First add staffMap people
+  staffMap.forEach(function(s) {
+    const skills = getSkills(s.real);
+    const key = s.real.toUpperCase().trim();
+    seen[key] = true;
+    result.push({
+      name: s.real,
+      fb: s.fb,
+      depts: skills.depts || [],
+      primary: skills.primary,
+      notes: skills.notes || "",
+      isLeader: isLeader(s.real),
+      isSubLeader: isSubLeader(s.real),
+      inStaffMap: true
+    });
+  });
+  // Then add SKILL_DATABASE people not yet seen
+  for (const dbName in SKILL_DATABASE) {
+    const key = dbName.toUpperCase().trim();
+    if (seen[key]) continue;
+    const skills = getSkills(dbName);
+    result.push({
+      name: dbName,
+      fb: "",
+      depts: skills.depts || [],
+      primary: skills.primary,
+      notes: skills.notes || "",
+      isLeader: isLeader(dbName),
+      isSubLeader: isSubLeader(dbName),
+      inStaffMap: false
+    });
+  }
+  return result;
+}
+
+function renderRankings() {
+  const type = document.getElementById("rankingType").value;
+  const all = getAllStaffWithSkills();
+  let list = [];
+  let title = "";
+  
+  if (type === "flexible") {
+    list = all.filter(function(s){return s.depts.length >= 2;})
+      .sort(function(a,b){return b.depts.length - a.depts.length;})
+      .slice(0, 50);
+    title = "\u{1F3C6} Most Flexible (works in 2+ departments)";
+  } else if (type === "leaders") {
+    const leaders = all.filter(function(s){return s.isLeader;});
+    const subs = all.filter(function(s){return s.isSubLeader;});
+    list = leaders.concat(subs);
+    title = "\u{1F451} Leaders (" + leaders.length + ") + Sub-leaders (" + subs.length + ")";
+  } else if (type === "specialists") {
+    list = all.filter(function(s){return s.depts.length === 1;});
+    title = "\u2B50 Specialists (single department)";
+  } else if (type === "dept") {
+    const d = document.getElementById("rankingDept").value;
+    list = all.filter(function(s){return s.depts.indexOf(d) !== -1;})
+      .sort(function(a,b){
+        if (a.primary === d && b.primary !== d) return -1;
+        if (a.primary !== d && b.primary === d) return 1;
+        return 0;
+      });
+    title = "\u{1F4D8} Can work " + d + " (" + list.length + " people)";
+  } else if (type === "missing") {
+    list = all.filter(function(s){return s.depts.length === 0;});
+    title = "\u26A0\uFE0F Missing Skill Data (" + list.length + " people)";
+  } else if (type === "notes") {
+    list = all.filter(function(s){return s.notes && s.notes.length > 0;});
+    title = "\u{1F4DD} Staff with Notes (" + list.length + ")";
+  }
+  
+  let html = '<div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--accent);">' + title + '</div>';
+  
+  if (!list.length) {
+    html += '<div class="empty">No staff found</div>';
+  } else {
+    html += list.map(function(s, idx) {
+      let rowStyle = "";
+      let tag = "";
+      if (s.isLeader) { rowStyle = "background:var(--leader-bg);border:1px solid var(--leader-border);"; tag = '<span class="leader-tag">LEADER</span>'; }
+      else if (s.isSubLeader) { rowStyle = "background:var(--subleader-bg);border:1px solid var(--subleader-border);"; tag = '<span class="subleader-tag">SUB</span>'; }
+      
+      let skillsHtml = "";
+      if (s.depts.length) {
+        skillsHtml = '<div style="margin-top:4px;">' + s.depts.map(function(d) {
+          return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
+        }).join("") + '</div>';
+      } else {
+        skillsHtml = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills</div>';
+      }
+      
+      let notesHtml = "";
+      if (s.notes) {
+        notesHtml = '<div style="margin-top:6px;padding:6px 10px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.4;"><strong>\u{1F4DD}</strong> ' + escapeHtml(s.notes) + '</div>';
+      }
+      
+      return '<div class="staff-row" style="' + rowStyle + 'flex-direction:column;align-items:stretch;gap:0;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="staff-name">' + (idx+1) + '. ' + escapeHtml(s.name) + tag + '</div>' +
+            (s.fb ? '<div class="staff-real">FB: ' + escapeHtml(s.fb) + '</div>' : '') +
+          '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:4px 8px;border-radius:6px;white-space:nowrap;">' + s.depts.length + ' skills</div>' +
+        '</div>' +
+        skillsHtml +
+        notesHtml +
+      '</div>';
+    }).join("");
+  }
+  
+  document.getElementById("rankingsList").innerHTML = html;
+}
+
 // ============ INIT ============
+// Auto-save rules when changed + load saved rules
+setTimeout(function() {
+  ["ruleRequireLeader", "ruleRequireSubLeader", "rulePrimaryFirst", "ruleNoForce"].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", saveRulesToStorage);
+  });
+  loadRulesFromStorage();
+}, 100);
+
 loadSites();
 
 </script>
