@@ -17,6 +17,7 @@
     --orange: #d97706; --orange-light: #fffbeb; --orange-border: #fde68a;
     --leader-bg: #dbeafe; --leader-border: #2563eb;
     --subleader-bg: #d1fae5; --subleader-border: #16a34a;
+    --yellow: #fbbf24; --yellow-bg: #fef3c7; --yellow-text: #78350f;
   }
   body.dark {
     --bg: #0f172a; --card: #1e293b; --border: #334155; --border2: #475569;
@@ -28,23 +29,16 @@
     --leader-bg: #1e3a8a; --leader-border: #60a5fa;
     --subleader-bg: #14532d; --subleader-border: #4ade80;
   }
-  body.dark .info-box {
-    background: linear-gradient(135deg, #1e293b, #1e3a8a);
-    border-color: #3b82f6;
-    color: #93c5fd;
-  }
-  body.dark textarea, body.dark input[type=text], body.dark .search-input {
-    background: #0f172a; color: #f1f5f9;
-  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+  body.dark textarea, body.dark input { background: #0f172a; color: #f1f5f9; }
   body.dark .staff-row { background: #0f172a; }
   body.dark .staff-row.reacted { background: #14532d; border-color: #16a34a; }
   body.dark .staff-row.missing { background: #7f1d1d; border-color: #dc2626; }
   body.dark .staff-row.extra { background: #78350f; border-color: #d97706; }
   body.dark .manage-row { background: #0f172a; }
   body.dark .stat { background: #1e293b; }
-  body.dark .badge-yes, body.dark .badge-no, body.dark .badge-extra { background: #1e293b; }
   body.dark .modal-box { background: #1e293b; color: #f1f5f9; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+  body.dark .info-box { background: linear-gradient(135deg, #1e293b, #1e3a8a); border-color: #3b82f6; color: #93c5fd; }
   .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
   .logo { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
   .header-title { font-size: 14px; font-weight: 600; }
@@ -60,11 +54,12 @@
   .card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
   .card-sub { font-size: 12px; color: var(--text2); margin-bottom: 10px; line-height: 1.5; }
   textarea { width: 100%; height: 110px; padding: 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--bg); resize: vertical; outline: none; }
-  textarea:focus { border-color: var(--accent); background: white; }
-  input[type=text] { padding: 9px 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; color: var(--text); background: white; outline: none; width: 100%; }
+  textarea:focus { border-color: var(--accent); background: var(--card); }
+  input[type=text], input[type=number] { padding: 9px 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; color: var(--text); background: var(--card); outline: none; width: 100%; }
   .btn { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .btn-sm { padding: 10px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; border: none; font-weight: 500; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .btn-sm { padding: 9px 13px; font-size: 13px; border-radius: 8px; cursor: pointer; border: none; font-weight: 500; min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
   .btn-gray { background: #f3f4f6; color: var(--text2); border: 1px solid var(--border); }
+  body.dark .btn-gray { background: #334155; color: #f1f5f9; }
   .btn-red { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
   .btn-green { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
@@ -78,41 +73,31 @@
   .search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; background: var(--bg); outline: none; margin-bottom: 10px; }
   .staff-list { display: flex; flex-direction: column; gap: 6px; max-height: 500px; overflow-y: auto; padding-right: 4px; }
   .staff-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-radius: 8px; border: 1px solid var(--border); background: #fafaf8; gap: 8px; }
+  body.dark .staff-row { background: #0f172a; }
   .staff-row.reacted { border-color: var(--green-border); background: var(--green-light); }
   .staff-row.missing { border-color: var(--red-border); background: var(--red-light); }
   .staff-row.extra { border-color: var(--orange-border); background: var(--orange-light); }
-  .staff-row.leader { border-color: var(--leader-border); background: var(--leader-bg); border-width: 2px; }
-  .staff-row.subleader { border-color: var(--subleader-border); background: var(--subleader-bg); border-width: 2px; }
-  .leader-tag { display:inline-block; background:var(--leader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
-  .subleader-tag { display:inline-block; background:var(--subleader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
-  .skill-chip { display:inline-block; padding:4px 10px; margin:2px; border-radius:14px; font-size:11px; font-weight:600; cursor:pointer; user-select:none; transition:all 0.15s; border:1px solid var(--border2); background:white; color:var(--text2); }
-  body.dark .skill-chip { background:#0f172a; }
-  .skill-chip.active { background:var(--accent); color:white; border-color:var(--accent); }
-  .skill-chip.primary { background:#fbbf24; color:#78350f; border-color:#f59e0b; }
-  .skill-chip.primary::before { content:"⭐ "; }
-  .skill-chip:hover { transform:scale(1.05); }
-  .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
-  .skill-tag.primary { background:#fef3c7; color:#92400e; }
-  .skill-tag.primary::before { content:"⭐ "; }
-  .btn-skill { padding:6px 12px; font-size:11px; border-radius:6px; cursor:pointer; border:1px solid var(--accent); background:var(--accent-light); color:var(--accent); font-weight:600; }
+  .staff-row.leader-row { border-color: var(--leader-border); background: var(--leader-bg); border-width: 2px; }
+  .staff-row.subleader-row { border-color: var(--subleader-border); background: var(--subleader-bg); border-width: 2px; }
   .staff-name { font-size: 13px; font-weight: 600; }
   .staff-real { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .badge { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; flex-shrink: 0; background: white; }
+  .badge { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; flex-shrink: 0; background: var(--card); }
   .badge-yes { color: var(--green); border: 1px solid var(--green-border); }
   .badge-no { color: var(--red); border: 1px solid var(--red-border); }
   .badge-extra { color: var(--orange); border: 1px solid var(--orange-border); }
+  .leader-tag { display:inline-block; background:var(--leader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
+  .subleader-tag { display:inline-block; background:var(--subleader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
   .unmatched { background: var(--orange-light); border: 1px solid var(--orange-border); border-radius: 8px; padding: 12px 14px; margin-top: 12px; font-size: 12px; color: #92400e; line-height: 1.9; }
-  .unmatched .tag { display: inline-block; background: white; padding: 2px 8px; border-radius: 12px; margin: 2px; border: 1px solid var(--orange-border); }
+  .unmatched .tag { display: inline-block; background: var(--card); padding: 2px 8px; border-radius: 12px; margin: 2px; border: 1px solid var(--orange-border); }
   .info-box { background: linear-gradient(135deg, #eff6ff, #f0f9ff); border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #1e40af; line-height: 1.7; margin-bottom: 14px; }
   .step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 12px; font-weight: 700; margin-right: 8px; }
   .step-header { display: flex; align-items: center; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
   .manage-list { display: flex; flex-direction: column; gap: 6px; max-height: 500px; overflow-y: auto; padding-right: 4px; }
   .manage-row { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #fafaf8; }
   .manage-names { flex: 1; min-width: 0; }
-  .edit-area { display: none; flex: 1; gap: 6px; }
-  .edit-area input { flex: 1; padding: 6px 10px; font-size: 12px; }
-  .row-btns, .row-btns-edit { display: flex; gap: 5px; flex-shrink: 0; }
-  .row-btns-edit { display: none; }
+  .edit-area { display: none; flex: 1; gap: 6px; flex-direction: column; }
+  .row-btns { display: flex; gap: 5px; flex-shrink: 0; flex-wrap: wrap; }
+  .row-btns-edit { display: none; flex-direction: column; gap: 5px; flex-shrink: 0; }
   .add-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 10px; }
   .add-grid label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; font-weight: 500; }
   .page { display: none; }
@@ -124,15 +109,20 @@
   .empty { text-align: center; padding: 30px 20px; font-size: 13px; color: var(--text3); }
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.show { display: flex; }
-  .modal-box { background: white; border-radius: 16px; padding: 22px; max-width: 380px; width: 100%; max-height: 80vh; overflow-y: auto; }
+  .modal-box { background: var(--card); color: var(--text); border-radius: 16px; padding: 22px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto; }
   .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
   .modal-msg { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
   .modal-btns { display: flex; gap: 10px; margin-top: 12px; }
   .modal-btns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
-  .site-list-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #fafaf8; margin-bottom: 6px; }
+  .site-list-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 6px; }
   .site-list-item.active { border-color: var(--accent); background: var(--accent-light); }
   .site-name-text { flex: 1; font-weight: 600; font-size: 13px; }
   .site-count { font-size: 11px; color: var(--text2); }
+  .skill-chip { display:inline-block; padding:6px 12px; margin:3px; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer; user-select:none; border:1px solid var(--border2); background:var(--card); color:var(--text2); }
+  .skill-chip.active { background:var(--accent); color:white; border-color:var(--accent); }
+  .skill-chip.primary { background:var(--yellow); color:var(--yellow-text); border-color:#f59e0b; }
+  .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
+  .skill-tag.primary { background:var(--yellow-bg); color:var(--yellow-text); }
   @media (max-width: 500px) {
     .add-grid { grid-template-columns: 1fr; }
     .stat-num { font-size: 20px; }
@@ -148,62 +138,57 @@
   <div class="logo">ZZ</div>
   <div>
     <div class="header-title">Reaction Checker</div>
-    <div class="header-sub" id="siteCount">0 staff</div>
+    <div class="header-sub" id="siteCount">Loading...</div>
   </div>
   <div class="site-selector">
     <select class="site-dropdown" id="siteSelector" onchange="onSiteChange()"></select>
-    <button class="icon-btn" onclick="openSitesModal()" title="Sites">⚙️</button>
-    <button class="icon-btn" onclick="syncCurrent()" title="Sync">🔄</button>
-    <button class="icon-btn" onclick="toggleDark()" title="Dark mode" id="darkBtn">🌙</button>
+    <button class="icon-btn" onclick="openSitesModal()" title="Sites">&#9881;</button>
+    <button class="icon-btn" onclick="syncCurrent()" title="Sync">&#128260;</button>
+    <button class="icon-btn" onclick="toggleDark()" title="Dark mode" id="darkBtn">&#127769;</button>
   </div>
 </div>
 
 <div class="container">
   <div class="page-tabs">
-    <div class="page-tab active" onclick="switchPage('checker',this)">✅ Checker</div>
-    <div class="page-tab" onclick="switchPage('assign',this)">🎯 Assign</div>
-    <div class="page-tab" onclick="switchPage('manage',this)">👥 Manage</div>
+    <div class="page-tab active" onclick="switchPage('checker',this)">&#9989; Checker</div>
+    <div class="page-tab" onclick="switchPage('assign',this)">&#127919; Assign</div>
+    <div class="page-tab" onclick="switchPage('manage',this)">&#128101; Manage</div>
   </div>
 
   <div class="page active" id="page-checker">
     <div class="info-box">
-      ℹ️ <strong>How to use:</strong><br>
-      1️⃣ Paste today's shift roster<br>
-      2️⃣ Paste Facebook reactor names<br>
-      ✅ See missing + extra reactors instantly
+      &#8505;&#65039; <strong>How to use:</strong><br>
+      1&#65039;&#8419; Paste today's shift roster<br>
+      2&#65039;&#8419; Paste Facebook reactor names<br>
+      &#9989; See missing + extra reactors instantly
     </div>
-
     <div class="card">
       <div class="step-header"><span class="step-num">1</span> Today's shift roster</div>
-      <div class="card-sub">Paste staff names scheduled for today</div>
-      <textarea id="rosterInput" placeholder="TAMANG ASHMITA&#10;THAPA RITESH&#10;..."></textarea>
+      <textarea id="rosterInput" placeholder="TAMANG ASHMITA"></textarea>
       <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
         <button class="btn" onclick="loadRoster()">Load Roster</button>
         <button class="btn-sm btn-gray" onclick="clearRoster()">Clear</button>
         <span class="roster-count" id="rosterCount"></span>
       </div>
     </div>
-
     <div class="card">
       <div class="step-header"><span class="step-num">2</span> Reactor names from Facebook</div>
-      <div class="card-sub">Paste names from Facebook console script</div>
-      <textarea id="reactorInput" placeholder="Paste reactor names here..."></textarea>
+      <textarea id="reactorInput" placeholder="Paste reactor names..."></textarea>
       <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
         <button class="btn" onclick="checkReactions()">Check Reactions</button>
         <button class="btn-sm btn-gray" onclick="clearReactors()">Clear</button>
         <span class="roster-count" id="reactorCount"></span>
       </div>
     </div>
-
     <div id="results" style="display:none;">
       <div class="stats">
-        <div class="stat"><div class="stat-num s-green" id="reactedCount">0</div><div class="stat-label">✅ Reacted</div></div>
-        <div class="stat"><div class="stat-num s-red" id="missingCount">0</div><div class="stat-label">❌ Missing</div></div>
-        <div class="stat"><div class="stat-num s-blue" id="shiftCount">0</div><div class="stat-label">📋 Shift</div></div>
-        <div class="stat"><div class="stat-num s-orange" id="extraCount">0</div><div class="stat-label">⭐ Extra</div></div>
+        <div class="stat"><div class="stat-num s-green" id="reactedCount">0</div><div class="stat-label">&#9989; Reacted</div></div>
+        <div class="stat"><div class="stat-num s-red" id="missingCount">0</div><div class="stat-label">&#10060; Missing</div></div>
+        <div class="stat"><div class="stat-num s-blue" id="shiftCount">0</div><div class="stat-label">&#128203; Shift</div></div>
+        <div class="stat"><div class="stat-num s-orange" id="extraCount">0</div><div class="stat-label">&#11088; Extra</div></div>
       </div>
       <div class="card" style="padding:16px;">
-        <input class="search-input" id="searchBox" placeholder="🔍 Search name..." oninput="renderList()" />
+        <input class="search-input" id="searchBox" placeholder="&#128269; Search..." oninput="renderList()" />
         <div class="filter-tabs">
           <div class="f-tab" onclick="setTab('all',this)">All</div>
           <div class="f-tab" onclick="setTab('reacted',this)">Reacted</div>
@@ -216,58 +201,51 @@
     </div>
   </div>
 
-
   <div class="page" id="page-assign">
     <div class="info-box">
-      🎯 <strong>Smart Assignment Tool:</strong><br>
-      1️⃣ Paste today's roster<br>
-      2️⃣ Enter how many people you need per department<br>
-      3️⃣ Get auto-assigned based on each person's skills (from past haichi data)
+      &#127919; <strong>Smart Assignment:</strong><br>
+      1&#65039;&#8419; Paste today's roster<br>
+      2&#65039;&#8419; Set department needs<br>
+      &#9989; Auto-assigned (3 main leaders go to &#12477;&#12540;&#12479;&#12540;1/2/3)
     </div>
-
     <div class="card">
       <div class="step-header"><span class="step-num">1</span> Today's roster</div>
-      <div class="card-sub">Paste staff names available today</div>
-      <textarea id="assignRoster" placeholder="GAUTAM ANIL&#10;KHATTRI SULAV&#10;..."></textarea>
+      <textarea id="assignRoster" placeholder="TAMANG ASHMITA"></textarea>
       <button class="btn" onclick="loadAssignRoster()" style="margin-top:8px;">Load Roster</button>
       <span class="roster-count" id="assignRosterCount" style="margin-left:10px;"></span>
     </div>
-
     <div class="card">
       <div class="step-header"><span class="step-num">2</span> Department needs</div>
-      <div class="card-sub">How many people needed for each department?</div>
       <div id="deptNeedsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;"></div>
       <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <button class="btn" onclick="runAssignment()">🎯 Auto Assign</button>
+        <button class="btn" onclick="runAssignment()">&#127919; Auto Assign</button>
         <button class="btn-sm btn-gray" onclick="clearAssignNeeds()">Clear</button>
         <span class="roster-count" id="assignTotalNeeded"></span>
       </div>
     </div>
-
     <div id="assignResults" style="display:none;">
       <div class="card" style="padding:16px;">
-        <div class="card-title" style="margin-bottom:10px;">📋 Assignment Results</div>
+        <div class="card-title" style="margin-bottom:10px;">&#128203; Assignment Results</div>
         <div id="assignmentSummary" style="margin-bottom:12px;"></div>
-        <button class="btn-sm btn-green" onclick="copyAssignment()" style="margin-bottom:12px;">📋 Copy Assignment</button>
+        <button class="btn-sm btn-green" onclick="copyAssignment()" style="margin-bottom:12px;">&#128203; Copy</button>
         <div id="assignmentList"></div>
-        <div id="unassignedBox"></div>
       </div>
     </div>
   </div>
 
   <div class="page" id="page-manage">
     <div class="card">
-      <div class="card-title">➕ Add new staff member</div>
+      <div class="card-title">&#10133; Add new staff</div>
       <div class="add-grid">
         <div><label>Facebook name</label><input type="text" id="newFb" placeholder="e.g. Bijaya Mahato" /></div>
         <div><label>Real name</label><input type="text" id="newReal" placeholder="e.g. MAHATO BIJAYA" /></div>
         <button class="btn" onclick="addStaff()" style="margin-top:19px;">+ Add</button>
       </div>
-      <div class="hint">💾 Synced to Google Sheet automatically</div>
+      <div class="hint">&#128190; Synced to Google Sheet automatically</div>
     </div>
     <div class="card" style="padding:16px;">
       <div class="card-title" style="margin-bottom:10px;">Staff list</div>
-      <input class="search-input" id="manageSearch" placeholder="🔍 Search staff..." oninput="renderManage()" />
+      <input class="search-input" id="manageSearch" placeholder="&#128269; Search..." oninput="renderManage()" />
       <div class="manage-list" id="manageList"></div>
     </div>
   </div>
@@ -275,87 +253,38 @@
 
 <div class="modal-overlay" id="sitesModal">
   <div class="modal-box">
-    <div class="modal-title">⚙️ Manage Sites</div>
+    <div class="modal-title">&#9881; Manage Sites</div>
     <div class="modal-msg">Adding a site creates a new tab in your Google Sheet.</div>
     <div id="sitesList" style="margin-bottom:16px;"></div>
     <div class="card-title" style="margin-top:16px;">Add new site</div>
     <input type="text" id="newSiteName" placeholder="e.g. Amazon Nagareyama" />
     <button class="btn" onclick="addSite()" style="width:100%;margin-top:8px;">+ Add Site</button>
+    <div class="modal-btns"><button class="btn-gray" onclick="closeSitesModal()">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="skillModal">
+  <div class="modal-box">
+    <div class="modal-title" id="skillModalTitle">&#127919; Edit Skills</div>
+    <div class="modal-msg">
+      Tap once = add (blue) &middot; Tap again = &#11088; Primary (yellow) &middot; Tap again = remove
+    </div>
+    <div id="skillChipsContainer" style="margin:16px 0;"></div>
+    <div class="hint" id="skillSummary"></div>
     <div class="modal-btns">
-      <button class="btn-gray" onclick="closeSitesModal()">Close</button>
+      <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
+      <button style="color:white;background:var(--accent);" onclick="saveSkillEdit()">Save</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="confirmModal">
   <div class="modal-box">
-    <div class="modal-title" id="confirmTitle">⚠️ Confirm</div>
+    <div class="modal-title" id="confirmTitle">&#9888;&#65039; Confirm</div>
     <div class="modal-msg" id="confirmMsg">Are you sure?</div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeConfirm()">Cancel</button>
-      <button id="confirmOk" style="color:white;background:#dc2626;">Confirm</button>
-    </div>
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="skillModal">
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-title" id="skillModalTitle">✏️ Edit Skills</div>
-    <div class="modal-msg" id="skillModalSubtitle" style="font-size:11px;"></div>
-    <div style="margin:12px 0;">
-      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Primary Skill (best at):</div>
-      <select id="primarySkill" style="width:100%;padding:10px;border:1px solid var(--border2);border-radius:8px;background:white;font-size:13px;">
-        <option value="">-- None --</option>
-      </select>
-    </div>
-    <div style="margin:12px 0;">
-      <div style="font-size:12px;font-weight:600;margin-bottom:6px;">All departments they can work:</div>
-      <div id="skillCheckboxes" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"></div>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
-      <button id="skillSaveBtn" style="color:white;background:var(--accent);">Save</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Skills Editor Modal -->
-<div class="modal-overlay" id="skillsModal">
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-title">🎯 Edit Skills</div>
-    <div class="modal-msg" id="skillsName" style="font-weight:600;color:var(--accent);"></div>
-    
-    <div style="margin-top:12px;">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Tap to toggle departments. Tap ⭐ to set primary skill.</div>
-      <div id="skillsDeptList" style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;"></div>
-    </div>
-    
-    <div class="modal-btns">
-      <button class="btn-gray" onclick="closeSkillsEditor()">Cancel</button>
-      <button onclick="saveSkillsEdit()" style="color:white;background:var(--accent);">Save</button>
-    </div>
-  </div>
-</div>
-
-
-<div class="modal-overlay" id="skillModal">
-  <div class="modal-box" style="max-width:440px;">
-    <div class="modal-title" id="skillModalTitle">⚙️ Edit Skills</div>
-    <div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;">
-      <div style="color:var(--text2);">Staff member:</div>
-      <div style="font-weight:700;font-size:14px;margin-top:2px;" id="skillStaffName"></div>
-    </div>
-    
-    <div class="card-title">Departments they can work:</div>
-    <div class="card-sub">Tap to toggle. Their PRIMARY skill is the first one (reorder by tapping ⭐)</div>
-    
-    <div id="skillDeptList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
-    
-    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
-      <button class="btn-sm btn-gray" onclick="closeSkillModal()" style="flex:1;">Cancel</button>
-      <button class="btn" onclick="saveSkills()" style="flex:1;">💾 Save</button>
+      <button id="confirmOk" style="color:white;background:var(--red);">Confirm</button>
     </div>
   </div>
 </div>
@@ -363,636 +292,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// Leaders (always 管理)
-const LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
 
-// Sub-leaders
-const SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
-
-function _normName(s) { return (s||"").toLowerCase().normalize("NFC").replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, ""); }
-
-function isLeader(name) {
-  const n = _normName(name);
-  return LEADERS.some(l => _normName(l) === n);
-}
-
-function isSubLeader(name) {
-  const n = _normName(name);
-  return SUBLEADERS.some(l => _normName(l) === n);
-}
-
-// Custom skills storage - overrides SKILL_DATABASE when present
-function getCustomSkills() {
-  try { return JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}"); }
-  catch(e) { return {}; }
-}
-
-function saveCustomSkills(data) {
-  localStorage.setItem("zozo_custom_skills", JSON.stringify(data));
-}
-
-function getStaffSkills(realName) {
-  const custom = getCustomSkills();
-  // Try by real name (exact)
-  if (custom[realName]) return custom[realName];
-  // Try fuzzy match in custom
-  const n = _normName(realName);
-  for (const [k, v] of Object.entries(custom)) {
-    if (_normName(k) === n) return v;
-  }
-  // Fall back to SKILL_DATABASE
-  if (typeof SKILL_DATABASE !== "undefined") {
-    if (SKILL_DATABASE[realName]) return { depts: SKILL_DATABASE[realName], primary: SKILL_DATABASE[realName][0] };
-    for (const [k, v] of Object.entries(SKILL_DATABASE)) {
-      if (_normName(k) === n) return { depts: v, primary: v[0] };
-    }
-  }
-  return null;
-}
-
-function setStaffSkills(realName, depts, primary) {
-  const custom = getCustomSkills();
-  custom[realName] = { depts: depts, primary: primary };
-  saveCustomSkills(custom);
-}
-
+// ============ CONFIG ============
 const API_URL = "https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec";
 
-let currentSite = localStorage.getItem("zozo_current_site") || "";
-let sites = [];
-let staffMap = [];
-let todayRoster = [];
-let results = [];
-let unmatched = [];
-let extraReactors = [];
-let currentTab = "missing";
+const LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
+const SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
+const DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
 
-function showToast(msg, color) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.background = color || "#16a34a";
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2500);
-}
-
-function normalize(s) {
-  if (!s) return "";
-  // Normalize unicode (NFC) so Devanagari combining chars work right
-  let str = s.toLowerCase().normalize("NFC");
-  // Remove punctuation and whitespace but KEEP letters of all scripts
-  return str.replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, "");
-}
-
-function escapeHtml(s) {
-  return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-function nameMatches(name, staff) {
-  const n = normalize(name);
-  if (!n || n.length < 3) return false;
-  const fn = normalize(staff.fb);
-  const rn = normalize(staff.real);
-  if (!fn && !rn) return false;
-  // Exact match
-  if (fn === n || rn === n) return true;
-  // Containment - both directions, but require min 4 char overlap
-  if (n.length >= 4) {
-    if (fn && fn.includes(n)) return true;
-    if (rn && rn.includes(n)) return true;
-  }
-  if (fn && fn.length >= 4 && n.includes(fn)) return true;
-  if (rn && rn.length >= 4 && n.includes(rn)) return true;
-  // Token-based matching: split into words and check if any word matches
-  const nameTokens = n.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || [];
-  const fbTokens = (fn.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || []);
-  const realTokens = (rn.match(/[a-z\u0900-\u097f\u3040-\u30ff\u4e00-\u9fff]+/g) || []);
-  if (nameTokens.length === 0) return false;
-  // Count matching tokens (length >= 4)
-  let matches = 0;
-  for (const t of nameTokens) {
-    if (t.length < 4) continue;
-    if (fbTokens.some(ft => ft === t || (ft.length >= 4 && (ft.includes(t) || t.includes(ft))))) { matches++; continue; }
-    if (realTokens.some(rt => rt === t || (rt.length >= 4 && (rt.includes(t) || t.includes(rt))))) { matches++; }
-  }
-  // Need at least 1 strong token match
-  return matches >= 1;
-}
-
-async function loadSites() {
-  try {
-    const res = await fetch(API_URL + "?action=listSites");
-    sites = await res.json();
-    if (!sites.length) {
-      showToast("No sites found!", "#dc2626");
-      return;
-    }
-    if (!currentSite || !sites.find(s => s.name === currentSite)) {
-      currentSite = sites[0].name;
-      localStorage.setItem("zozo_current_site", currentSite);
-    }
-    renderSiteSelector();
-    await loadStaff();
-  } catch(e) {
-    showToast("Failed to load sites", "#dc2626");
-  }
-}
-
-function renderSiteSelector() {
-  const sel = document.getElementById("siteSelector");
-  sel.innerHTML = sites.map(s =>
-    '<option value="' + escapeHtml(s.name) + '"' + (s.name === currentSite ? ' selected' : '') + '>' + escapeHtml(s.name) + ' (' + s.count + ')</option>'
-  ).join("");
-}
-
-async function onSiteChange() {
-  currentSite = document.getElementById("siteSelector").value;
-  localStorage.setItem("zozo_current_site", currentSite);
-  document.getElementById("results").style.display = "none";
-  todayRoster = [];
-  results = [];
-  document.getElementById("rosterCount").textContent = "";
-  await loadStaff();
-  showToast("Switched to " + currentSite);
-}
-
-async function loadStaff() {
-  try {
-    const res = await fetch(API_URL + "?site=" + encodeURIComponent(currentSite));
-    staffMap = await res.json();
-    document.getElementById("siteCount").textContent = staffMap.length + " staff";
-    if (document.getElementById("page-manage").classList.contains("active")) renderManage();
-  } catch(e) {
-    showToast("Failed to load staff", "#dc2626");
-  }
-}
-
-async function syncCurrent() {
-  showToast("Syncing...");
-  await loadSites();
-  showToast("Synced!");
-}
-
-function switchPage(page, el) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".page-tab").forEach(t => t.classList.remove("active"));
-  document.getElementById("page-" + page).classList.add("active");
-  el.classList.add("active");
-  if (page === "manage") renderManage();
-}
-
-function findStaff(name) {
-  return staffMap.find(s => nameMatches(name, s));
-}
-
-let rosterDuplicates = [];
-let rosterUnknowns = [];
-
-function loadRoster() {
-  const raw = document.getElementById("rosterInput").value;
-  if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
-  const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  todayRoster = [];
-  rosterDuplicates = [];
-  rosterUnknowns = [];
-  const seenOriginal = new Set();
-  lines.forEach(name => {
-    const origKey = name.toLowerCase().trim();
-    if (seenOriginal.has(origKey)) {
-      rosterDuplicates.push(name);
-      return;
-    }
-    seenOriginal.add(origKey);
-    const found = findStaff(name);
-    const entry = found ? {fb: found.fb, real: found.real, _input: name} : {fb: name, real: "(not in database)", _input: name};
-    if (!found) rosterUnknowns.push(name);
-    todayRoster.push(entry);
-  });
-  let txt = todayRoster.length + "/" + lines.length + " loaded";
-  if (rosterDuplicates.length) txt += " · " + rosterDuplicates.length + " dup";
-  if (rosterUnknowns.length) txt += " · " + rosterUnknowns.length + " unknown";
-  document.getElementById("rosterCount").innerHTML = txt + (rosterDuplicates.length || rosterUnknowns.length ? ' <a href="#" onclick="showSkipped(event)" style="color:#2563eb;text-decoration:underline;font-weight:600;">view</a>' : "");
-  document.getElementById("results").style.display = "none";
-  showToast(todayRoster.length + " staff loaded!");
-}
-
-function showSkipped(e) {
-  if (e) e.preventDefault();
-  let html = "";
-  if (rosterDuplicates.length) {
-    html += '<div class="card-title" style="margin-top:8px;">🔁 Duplicates (' + rosterDuplicates.length + ')</div>';
-    html += '<div style="background:#fef3c7;border-radius:8px;padding:10px;font-size:12px;line-height:1.8;color:#92400e;">';
-    html += rosterDuplicates.map(n => '<div>• ' + escapeHtml(n) + '</div>').join("");
-    html += '</div>';
-  }
-  if (rosterUnknowns.length) {
-    html += '<div class="card-title" style="margin-top:12px;">❓ Not in database (' + rosterUnknowns.length + ')</div>';
-    html += '<div style="background:#fef2f2;border-radius:8px;padding:10px;font-size:12px;line-height:1.8;color:#991b1b;">';
-    html += rosterUnknowns.map(n => '<div>• ' + escapeHtml(n) + '</div>').join("");
-    html += '</div>';
-    html += '<div class="hint" style="margin-top:8px;">💡 Add unknown names via Manage Staff tab</div>';
-  }
-  document.getElementById("confirmTitle").textContent = "Roster Issues";
-  document.getElementById("confirmMsg").innerHTML = html;
-  document.getElementById("confirmOk").style.display = "none";
-  document.getElementById("confirmModal").classList.add("show");
-}
-
-function clearRoster() {
-  document.getElementById("rosterInput").value = "";
-  document.getElementById("rosterCount").textContent = "";
-  document.getElementById("results").style.display = "none";
-  todayRoster = [];
-  results = [];
-}
-
-function clearReactors() {
-  document.getElementById("reactorInput").value = "";
-  document.getElementById("reactorCount").textContent = "";
-  document.getElementById("results").style.display = "none";
-}
-
-function debugMatch(reactorName) {
-  const found = findStaff(reactorName);
-  let html = '<div style="font-family:monospace;font-size:11px;line-height:1.6;">';
-  html += '<b>Reactor:</b> "' + escapeHtml(reactorName) + '"<br>';
-  html += '<b>Normalized:</b> "' + escapeHtml(normalize(reactorName)) + '"<br>';
-  html += '<b>Found in DB:</b> ' + (found ? 'YES → fb="' + escapeHtml(found.fb) + '" real="' + escapeHtml(found.real) + '"' : 'NO') + '<br>';
-  if (found) {
-    html += '<b>DB normalized:</b> fb="' + escapeHtml(normalize(found.fb)) + '" real="' + escapeHtml(normalize(found.real)) + '"<br>';
-    html += '<br><b>Roster check:</b><br>';
-    let rosterMatch = false;
-    todayRoster.forEach(r => {
-      const fbMatch = normalize(r.fb) === normalize(found.fb);
-      const realMatch = normalize(r.real) === normalize(found.real);
-      if (fbMatch || realMatch) {
-        html += '✅ Roster has fb="' + escapeHtml(r.fb) + '" real="' + escapeHtml(r.real) + '" (fbMatch=' + fbMatch + ', realMatch=' + realMatch + ')<br>';
-        rosterMatch = true;
-      }
-    });
-    if (!rosterMatch) {
-      html += '❌ NOT FOUND in roster<br>';
-      html += '<br><b>Roster has these entries with similar real names:</b><br>';
-      todayRoster.forEach(r => {
-        if (r.real.toLowerCase().includes(found.real.toLowerCase().substring(0, 4))) {
-          html += '· fb="' + escapeHtml(r.fb) + '" real="' + escapeHtml(r.real) + '"<br>';
-          html += '  normalized fb="' + escapeHtml(normalize(r.fb)) + '" real="' + escapeHtml(normalize(r.real)) + '"<br>';
-        }
-      });
-    }
-  }
-  html += '</div>';
-  document.getElementById("confirmTitle").textContent = "🔍 Debug: " + reactorName;
-  document.getElementById("confirmMsg").innerHTML = html;
-  document.getElementById("confirmOk").style.display = "none";
-  document.getElementById("confirmModal").classList.add("show");
-}
-
-function checkReactions() {
-  if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
-  const raw = document.getElementById("reactorInput").value;
-  if (!raw.trim()) { showToast("Paste reactors!", "#dc2626"); return; }
-  
-  const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-  document.getElementById("reactorCount").textContent = lines.length + " detected";
-  
-  unmatched = [];
-  extraReactors = [];
-  results = todayRoster.map(s => ({fb: s.fb, real: s.real, reacted: false}));
-  
-  lines.forEach(name => {
-    if (!normalize(name)) return;
-    
-    // STEP 1: Find which staff person this reactor name maps to (using DATABASE)
-    const dbMatch = findStaff(name);
-    
-    // STEP 2: Check if this person is in today's roster
-    let foundInRoster = false;
-    if (dbMatch) {
-      // We know who they are - check roster by their identity (fb OR real)
-      for (let i = 0; i < results.length; i++) {
-        const r = results[i];
-        if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
-          r.reacted = true;
-          foundInRoster = true;
-        }
-      }
-      if (!foundInRoster) {
-        // In database but not on shift = EXTRA
-        if (!extraReactors.find(e => normalize(e.fb) === normalize(dbMatch.fb))) {
-          extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
-        }
-      }
-    } else {
-      // Not in database - try direct text match against roster as fallback
-      for (let i = 0; i < results.length; i++) {
-        if (nameMatches(name, results[i])) {
-          results[i].reacted = true;
-          foundInRoster = true;
-        }
-      }
-      if (!foundInRoster) {
-        unmatched.push(name);
-      }
-    }
-  });
-  
-  const reactedNum = results.filter(s => s.reacted).length;
-  document.getElementById("reactedCount").textContent = reactedNum;
-  document.getElementById("missingCount").textContent = results.length - reactedNum;
-  document.getElementById("shiftCount").textContent = results.length;
-  document.getElementById("extraCount").textContent = extraReactors.length;
-  document.getElementById("extraBadge").textContent = extraReactors.length ? "(" + extraReactors.length + ")" : "";
-  document.getElementById("results").style.display = "block";
-  
-  currentTab = "missing";
-  const tabs = document.querySelectorAll(".f-tab");
-  tabs.forEach((t, i) => t.classList.toggle("active", i === 2));
-  
-  renderList();
-}
-
-function setTab(tab, el) {
-  currentTab = tab;
-  document.querySelectorAll(".f-tab").forEach(t => t.classList.remove("active"));
-  el.classList.add("active");
-  renderList();
-}
-
-function renderList() {
-  const search = document.getElementById("searchBox").value.toLowerCase();
-  let list = [];
-  let isExtra = false;
-  
-  if (currentTab === "extra") {
-    list = extraReactors.slice();
-    isExtra = true;
-  } else if (currentTab === "reacted") {
-    list = results.filter(s => s.reacted);
-  } else if (currentTab === "missing") {
-    list = results.filter(s => !s.reacted);
-  } else {
-    list = results.slice();
-  }
-  
-  if (search) {
-    list = list.filter(s => s.fb.toLowerCase().includes(search) || s.real.toLowerCase().includes(search));
-  }
-  
-  document.getElementById("staffList").innerHTML = list.length ? list.map(s => {
-    if (isExtra) {
-      return '<div class="staff-row extra" onclick="debugMatch(\'' + escapeHtml(s.fb).replace(/'/g, "&#39;") + '\')" style="cursor:pointer;">' +
-        '<div><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
-        '<div class="badge badge-extra">⭐ Extra (tap to debug)</div>' +
-        '</div>';
-    }
-    const leaderTag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
-    const rowClass = isLeader(s.real) ? "leader" : isSubLeader(s.real) ? "subleader" : (s.reacted ? "reacted" : "missing");
-    return '<div class="staff-row ' + rowClass + '">' +
-      '<div><div class="staff-name">' + escapeHtml(s.fb) + leaderTag + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div>' +
-      '<div class="badge ' + (s.reacted ? "badge-yes" : "badge-no") + '">' + (s.reacted ? "✅ Reacted" : "❌ Missing") + '</div>' +
-      '</div>';
-  }).join("") : '<div class="empty">No results</div>';
-  
-  document.getElementById("unmatchedBox").innerHTML = unmatched.length ?
-    '<div class="unmatched"><strong>⚠ ' + unmatched.length + ' unknown reactors:</strong>' +
-    unmatched.map(n => '<span class="tag">' + escapeHtml(n) + '</span>').join(" ") + '</div>' : "";
-}
-
-function renderManage() {
-  const search = (document.getElementById("manageSearch").value || "").toLowerCase();
-  let list = staffMap.map((s, i) => ({fb: s.fb, real: s.real, _idx: i}));
-  if (search) list = list.filter(s => s.fb.toLowerCase().includes(search) || s.real.toLowerCase().includes(search));
-  
-  document.getElementById("manageList").innerHTML = list.length ? list.map(s => {
-    const idx = s._idx;
-    return '<div class="manage-row" id="mrow-' + idx + '">' +
-      '<div class="manage-names" id="mn-' + idx + '"><div class="staff-name">' + escapeHtml(s.fb) + (isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '') + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div>' + (function(){ const sk = getStaffSkills(s.real); return sk.all.length ? '<div style="font-size:10px;color:var(--accent);margin-top:2px;font-weight:600;">🎯 ' + escapeHtml(sk.all.join(", ")) + '</div>' : ''; })() + '</div>' +
-      '<div class="edit-area" id="me-' + idx + '"><input type="text" id="ef-' + idx + '" value="' + escapeHtml(s.fb) + '"/><input type="text" id="er-' + idx + '" value="' + escapeHtml(s.real) + '"/></div>' +
-      '<div class="row-btns" id="mb-' + idx + '">' +
-        '<button class="btn-sm btn-gray" onclick="openSkillEditor(\'' + escapeHtml(s.fb).replace(/\'/g, "&#39;") + '\', \'' + escapeHtml(s.real).replace(/\'/g, "&#39;") + '\')" title="Edit skills">🎯</button>' +
-        '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')">✏️</button>' +
-        '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')">🗑</button>' +
-      '</div>' +
-      '<div class="row-btns-edit" id="mbe-' + idx + '">' +
-        '<button class="btn-sm btn-green" onclick="saveEdit(' + idx + ')">✅</button>' +
-        '<button class="btn-sm btn-gray" onclick="cancelEdit(' + idx + ')">✕</button>' +
-      '</div></div>';
-  }).join("") : '<div class="empty">No staff. Add some!</div>';
-}
-
-async function addStaff() {
-  const fb = document.getElementById("newFb").value.trim();
-  const real = document.getElementById("newReal").value.trim();
-  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
-  staffMap.push({fb, real});
-  document.getElementById("siteCount").textContent = staffMap.length + " staff";
-  document.getElementById("newFb").value = "";
-  document.getElementById("newReal").value = "";
-  showToast(fb + " added!");
-  renderManage();
-  try {
-    await fetch(API_URL, {method: "POST", mode: "no-cors", body: JSON.stringify({action: "add", site: currentSite, fb, real})});
-  } catch(e) {}
-}
-
-function removeStaff(idx) {
-  const staff = staffMap[idx];
-  document.getElementById("confirmTitle").textContent = "🗑 Remove Staff";
-  document.getElementById("confirmMsg").textContent = "Remove '" + staff.fb + "'? This cannot be undone.";
-  document.getElementById("confirmOk").textContent = "Remove";
-  document.getElementById("confirmModal").classList.add("show");
-  document.getElementById("confirmOk").onclick = async function() {
-    staffMap.splice(idx, 1);
-    document.getElementById("siteCount").textContent = staffMap.length + " staff";
-    closeConfirm();
-    showToast(staff.fb + " removed", "#dc2626");
-    renderManage();
-    try {
-      await fetch(API_URL, {method: "POST", mode: "no-cors", body: JSON.stringify({action: "delete", site: currentSite, fb: staff.fb, real: staff.real})});
-    } catch(e) {}
-  };
-}
-
-function closeConfirm() { document.getElementById("confirmModal").classList.remove("show"); document.getElementById("confirmOk").style.display = ""; }
-
-function startEdit(idx) {
-  document.getElementById("mn-" + idx).style.display = "none";
-  document.getElementById("me-" + idx).style.display = "flex";
-  document.getElementById("mb-" + idx).style.display = "none";
-  document.getElementById("mbe-" + idx).style.display = "flex";
-}
-
-function cancelEdit(idx) {
-  document.getElementById("mn-" + idx).style.display = "block";
-  document.getElementById("me-" + idx).style.display = "none";
-  document.getElementById("mb-" + idx).style.display = "flex";
-  document.getElementById("mbe-" + idx).style.display = "none";
-}
-
-async function saveEdit(idx) {
-  const fb = document.getElementById("ef-" + idx).value.trim();
-  const real = document.getElementById("er-" + idx).value.trim();
-  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
-  const oldFb = staffMap[idx].fb;
-  const oldReal = staffMap[idx].real;
-  staffMap[idx] = {fb, real};
-  showToast("Updated!");
-  renderManage();
-  try {
-    await fetch(API_URL, {method: "POST", mode: "no-cors", body: JSON.stringify({action: "update", site: currentSite, oldFb, oldReal, newFb: fb, newReal: real})});
-  } catch(e) {}
-}
-
-function openSitesModal() {
-  renderSitesList();
-  document.getElementById("sitesModal").classList.add("show");
-}
-
-function closeSitesModal() { document.getElementById("sitesModal").classList.remove("show"); }
-
-function renderSitesList() {
-  document.getElementById("sitesList").innerHTML = sites.map(s =>
-    '<div class="site-list-item ' + (s.name === currentSite ? "active" : "") + '">' +
-    '<div style="flex:1;"><div class="site-name-text">' + escapeHtml(s.name) + '</div><div class="site-count">' + s.count + ' staff</div></div>' +
-    (sites.length > 1 ? '<button class="btn-sm btn-red" onclick="removeSite(\'' + escapeHtml(s.name).replace(/'/g, "&#39;") + '\')">🗑</button>' : "") +
-    '</div>'
-  ).join("");
-}
-
-async function addSite() {
-  const name = document.getElementById("newSiteName").value.trim();
-  if (!name) { showToast("Enter site name!", "#dc2626"); return; }
-  showToast("Creating site...");
-  try {
-    await fetch(API_URL, {method: "POST", mode: "no-cors", body: JSON.stringify({action: "addSite", siteName: name})});
-    setTimeout(async () => {
-      await loadSites();
-      currentSite = name;
-      localStorage.setItem("zozo_current_site", currentSite);
-      renderSiteSelector();
-      await loadStaff();
-      renderSitesList();
-      document.getElementById("newSiteName").value = "";
-      showToast("Site created!");
-    }, 1500);
-  } catch(e) {
-    showToast("Failed!", "#dc2626");
-  }
-}
-
-function removeSite(name) {
-  document.getElementById("confirmTitle").textContent = "🗑 Remove Site";
-  document.getElementById("confirmMsg").textContent = "Remove site '" + name + "' and ALL its staff? This cannot be undone!";
-  document.getElementById("confirmOk").textContent = "Remove";
-  document.getElementById("confirmModal").classList.add("show");
-  document.getElementById("confirmOk").onclick = async function() {
-    closeConfirm();
-    showToast("Removing...");
-    try {
-      await fetch(API_URL, {method: "POST", mode: "no-cors", body: JSON.stringify({action: "deleteSite", siteName: name})});
-      setTimeout(async () => {
-        await loadSites();
-        renderSitesList();
-        showToast("Site removed", "#dc2626");
-      }, 1500);
-    } catch(e) {
-      showToast("Failed!", "#dc2626");
-    }
-  };
-}
-
-
-
-// === SKILL DATABASE - persisted in localStorage ===
-function loadSkillOverrides() {
-  try { return JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) { return {}; }
-}
-function saveSkillOverrides(o) { localStorage.setItem("zozo_skills_v1", JSON.stringify(o)); }
-let skillOverrides = loadSkillOverrides();
-
-function getSkills(realName) {
-  // Override beats default
-  const norm = realName.toUpperCase().trim();
-  if (skillOverrides[norm]) return skillOverrides[norm];
-  // Try database (case-insensitive search)
-  for (const [key, val] of Object.entries(SKILL_DATABASE)) {
-    if (key.toUpperCase() === norm) return { depts: val, primary: val[0] };
-  }
-  return { depts: [], primary: null };
-}
-
-function setSkills(realName, depts, primary) {
-  const norm = realName.toUpperCase().trim();
-  skillOverrides[norm] = { depts, primary };
-  saveSkillOverrides(skillOverrides);
-}
-
-function renderSkillTags(realName) {
-  const s = getSkills(realName);
-  if (!s.depts || !s.depts.length) return '<div class="hint" style="color:#dc2626;margin-top:4px;">⚠ No skills set</div>';
-  return '<div style="margin-top:6px;">' + s.depts.map(d => 
-    '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>'
-  ).join("") + '</div>';
-}
-
-let skillEditTarget = null;
-let skillEditDepts = [];
-let skillEditPrimary = null;
-
-function openSkillEditor(realName) {
-  skillEditTarget = realName;
-  const s = getSkills(realName);
-  skillEditDepts = [...(s.depts || [])];
-  skillEditPrimary = s.primary || null;
-  document.getElementById("skillModalTitle").textContent = "🎯 " + realName;
-  renderSkillChips();
-  document.getElementById("skillModal").classList.add("show");
-}
-
-function closeSkillModal() {
-  document.getElementById("skillModal").classList.remove("show");
-  skillEditTarget = null;
-}
-
-function renderSkillChips() {
-  const c = document.getElementById("skillChipsContainer");
-  c.innerHTML = DEPARTMENTS.map(d => {
-    const isOn = skillEditDepts.includes(d);
-    const isPri = d === skillEditPrimary;
-    return '<span class="skill-chip ' + (isPri ? "primary" : isOn ? "active" : "") + '" onclick="toggleSkill(\'' + d + '\')">' + d + '</span>';
-  }).join("");
-  document.getElementById("skillSummary").innerHTML = skillEditDepts.length 
-    ? 'Skills: ' + skillEditDepts.length + (skillEditPrimary ? ' · Primary: <strong>' + skillEditPrimary + '</strong>' : '')
-    : 'Tap a department to add skill';
-}
-
-function toggleSkill(d) {
-  if (!skillEditDepts.includes(d)) {
-    // Not yet selected - add it
-    skillEditDepts.push(d);
-  } else if (d !== skillEditPrimary) {
-    // Already selected, not primary - make it primary
-    skillEditPrimary = d;
-    // Make sure primary is in depts
-    if (!skillEditDepts.includes(d)) skillEditDepts.push(d);
-  } else {
-    // Already primary - remove it
-    skillEditDepts = skillEditDepts.filter(x => x !== d);
-    skillEditPrimary = skillEditDepts[0] || null;
-  }
-  renderSkillChips();
-}
-
-function saveSkillEdit() {
-  if (!skillEditTarget) return;
-  if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
-  setSkills(skillEditTarget, skillEditDepts, skillEditPrimary);
-  closeSkillModal();
-  showToast("✅ Skills saved!");
-  renderManage();
-}
-
-// === SMART ASSIGNMENT SYSTEM ===
 const SKILL_DATABASE = {
   "GAUTAM ANIL": ["管理","ソーター1","ソーター2","ソーター3"],
   "KHATTRI SULAV": ["管理","ソーター1","ソーター2"],
@@ -1247,606 +554,626 @@ const SKILL_DATABASE = {
   "DUKAL NITESH": ["ソーター1"],
 };
 
-const DEPARTMENTS = ["管理", "ソーター1", "ソーター2", "ソーター3", "TC", "棚入れ", "単搬", "出庫搬送", "投入", "複数", "単数"];
+// ============ STATE ============
+let currentSite = localStorage.getItem("zozo_current_site") || "";
+let sites = [];
+let staffMap = [];
+let todayRoster = [], results = [], unmatched = [], extraReactors = [];
+let currentTab = "missing";
+let assignRoster = [], assignmentResult = [];
+let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null;
+let skillOverrides = {};
+try { skillOverrides = JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) {}
 
-let assignRoster = [];
-let assignmentResult = [];
+// ============ HELPERS ============
+function showToast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color || "#16a34a";
+  t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+function normalize(s) { return (s||"").toLowerCase().normalize("NFC").replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, ""); }
+function escapeHtml(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function isLeader(name) { const n = normalize(name); return LEADERS.some(function(l) { return normalize(l) === n; }); }
+function isSubLeader(name) { const n = normalize(name); return SUBLEADERS.some(function(l) { return normalize(l) === n; }); }
 
-function findSkillsFor(name) {
-  // First check custom skills
-  const custom = getCustomSkills();
-  const n = normalize(name);
-  for (const [k, v] of Object.entries(custom)) {
-    if (normalize(k) === n) return {name: k, depts: v.depts, primary: v.primary};
+// ============ SKILLS ============
+function getSkills(realName) {
+  const norm = (realName||"").toUpperCase().trim();
+  if (skillOverrides[norm]) return skillOverrides[norm];
+  for (const key in SKILL_DATABASE) {
+    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0] };
   }
-  // Then check SKILL_DATABASE
-  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
-    if (normalize(dbName) === n) return {name: dbName, depts: depts, primary: depts[0]};
+  return { depts: [], primary: null };
+}
+function saveSkillsToStorage() { localStorage.setItem("zozo_skills_v1", JSON.stringify(skillOverrides)); }
+function renderSkillTags(realName) {
+  const s = getSkills(realName);
+  if (!s.depts || !s.depts.length) return '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
+  return '<div style="margin-top:6px;">' + s.depts.map(function(d) {
+    return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
+  }).join("") + '</div>';
+}
+
+function openSkillEditor(realName) {
+  skillEditTarget = realName;
+  const s = getSkills(realName);
+  skillEditDepts = (s.depts || []).slice();
+  skillEditPrimary = s.primary || null;
+  document.getElementById("skillModalTitle").textContent = "\u{1F3AF} " + realName;
+  renderSkillChips();
+  document.getElementById("skillModal").classList.add("show");
+}
+function closeSkillModal() {
+  document.getElementById("skillModal").classList.remove("show");
+  skillEditTarget = null;
+}
+function renderSkillChips() {
+  const c = document.getElementById("skillChipsContainer");
+  c.innerHTML = DEPARTMENTS.map(function(d) {
+    const isOn = skillEditDepts.indexOf(d) !== -1;
+    const isPri = d === skillEditPrimary;
+    return '<span class="skill-chip ' + (isPri ? "primary" : isOn ? "active" : "") + '" onclick="toggleSkill(\'' + d + '\')">' + (isPri ? "\u2B50 " : "") + d + '</span>';
+  }).join("");
+  document.getElementById("skillSummary").innerHTML = skillEditDepts.length
+    ? 'Skills: ' + skillEditDepts.length + (skillEditPrimary ? ' &middot; Primary: <strong>' + skillEditPrimary + '</strong>' : '')
+    : 'Tap a department to add skill';
+}
+function toggleSkill(d) {
+  if (skillEditDepts.indexOf(d) === -1) {
+    skillEditDepts.push(d);
+    if (!skillEditPrimary) skillEditPrimary = d;
+  } else if (d !== skillEditPrimary) {
+    skillEditPrimary = d;
+  } else {
+    skillEditDepts = skillEditDepts.filter(function(x) { return x !== d; });
+    skillEditPrimary = skillEditDepts[0] || null;
   }
-  // Fuzzy match
-  for (const [k, v] of Object.entries(custom)) {
-    const dn = normalize(k);
-    if (dn.includes(n) || n.includes(dn)) {
-      if (Math.abs(dn.length - n.length) < 5) return {name: k, depts: v.depts, primary: v.primary};
+  renderSkillChips();
+}
+function saveSkillEdit() {
+  if (!skillEditTarget) return;
+  if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
+  const norm = skillEditTarget.toUpperCase().trim();
+  if (skillEditDepts.length === 0) {
+    delete skillOverrides[norm];
+  } else {
+    skillOverrides[norm] = { depts: skillEditDepts, primary: skillEditPrimary };
+  }
+  saveSkillsToStorage();
+  closeSkillModal();
+  showToast("Skills saved!");
+  renderManage();
+}
+
+// ============ SITES & STAFF ============
+async function loadSites() {
+  try {
+    const res = await fetch(API_URL + "?action=listSites");
+    sites = await res.json();
+    if (!sites.length) { showToast("No sites found!", "#dc2626"); return; }
+    if (!currentSite || !sites.find(function(s) { return s.name === currentSite; })) {
+      currentSite = sites[0].name;
+      localStorage.setItem("zozo_current_site", currentSite);
     }
-  }
-  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
-    const dn = normalize(dbName);
-    if (dn.includes(n) || n.includes(dn)) {
-      if (Math.abs(dn.length - n.length) < 5) return {name: dbName, depts: depts, primary: depts[0]};
-    }
+    renderSiteSelector();
+    await loadStaff();
+  } catch(e) { showToast("Failed to load sites", "#dc2626"); }
+}
+function renderSiteSelector() {
+  document.getElementById("siteSelector").innerHTML = sites.map(function(s) {
+    return '<option value="' + escapeHtml(s.name) + '"' + (s.name === currentSite ? ' selected' : '') + '>' + escapeHtml(s.name) + ' (' + s.count + ')</option>';
+  }).join("");
+}
+async function onSiteChange() {
+  currentSite = document.getElementById("siteSelector").value;
+  localStorage.setItem("zozo_current_site", currentSite);
+  document.getElementById("results").style.display = "none";
+  todayRoster = []; results = [];
+  document.getElementById("rosterCount").textContent = "";
+  await loadStaff();
+  showToast("Switched to " + currentSite);
+}
+async function loadStaff() {
+  try {
+    const res = await fetch(API_URL + "?site=" + encodeURIComponent(currentSite));
+    staffMap = await res.json();
+    document.getElementById("siteCount").textContent = staffMap.length + " staff";
+    if (document.getElementById("page-manage").classList.contains("active")) renderManage();
+  } catch(e) { showToast("Failed to load staff", "#dc2626"); }
+}
+async function syncCurrent() { showToast("Syncing..."); await loadSites(); showToast("Synced!"); }
+
+// ============ NAVIGATION ============
+function switchPage(page, el) {
+  const pages = document.querySelectorAll(".page");
+  for (let i=0; i<pages.length; i++) pages[i].classList.remove("active");
+  const tabs = document.querySelectorAll(".page-tab");
+  for (let i=0; i<tabs.length; i++) tabs[i].classList.remove("active");
+  document.getElementById("page-" + page).classList.add("active");
+  el.classList.add("active");
+  if (page === "manage") renderManage();
+}
+
+// ============ REACTION CHECKER ============
+function nameMatches(name, staff) {
+  const n = normalize(name); if (!n) return false;
+  const fn = normalize(staff.fb), rn = normalize(staff.real);
+  if (fn === n || rn === n) return true;
+  if (n.length >= 4 && ((fn && fn.indexOf(n) !== -1) || (rn && rn.indexOf(n) !== -1))) return true;
+  if (fn && fn.length >= 4 && n.indexOf(fn) !== -1) return true;
+  if (rn && rn.length >= 4 && n.indexOf(rn) !== -1) return true;
+  return false;
+}
+function findStaff(name) {
+  for (let i=0; i<staffMap.length; i++) {
+    if (nameMatches(name, staffMap[i])) return staffMap[i];
   }
   return null;
 }
 
+function loadRoster() {
+  const raw = document.getElementById("rosterInput").value;
+  if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  todayRoster = [];
+  const seen = {};
+  let unmatchedCount = 0;
+  lines.forEach(function(name) {
+    const k = name.toLowerCase().trim();
+    if (seen[k]) return;
+    seen[k] = true;
+    const found = findStaff(name);
+    if (found) todayRoster.push({fb: found.fb, real: found.real});
+    else { todayRoster.push({fb: name, real: "(not in database)"}); unmatchedCount++; }
+  });
+  document.getElementById("rosterCount").textContent = todayRoster.length + "/" + lines.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
+  document.getElementById("results").style.display = "none";
+  showToast(todayRoster.length + " loaded");
+}
+function clearRoster() {
+  document.getElementById("rosterInput").value = "";
+  document.getElementById("rosterCount").textContent = "";
+  document.getElementById("results").style.display = "none";
+  todayRoster = []; results = [];
+}
+function clearReactors() {
+  document.getElementById("reactorInput").value = "";
+  document.getElementById("reactorCount").textContent = "";
+  document.getElementById("results").style.display = "none";
+}
+function checkReactions() {
+  if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  const raw = document.getElementById("reactorInput").value;
+  if (!raw.trim()) { showToast("Paste reactors!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  document.getElementById("reactorCount").textContent = lines.length + " detected";
+  unmatched = []; extraReactors = [];
+  results = todayRoster.map(function(s) { return {fb: s.fb, real: s.real, reacted: false}; });
+  lines.forEach(function(name) {
+    if (!normalize(name)) return;
+    const dbMatch = findStaff(name);
+    let foundInRoster = false;
+    if (dbMatch) {
+      for (let i=0; i<results.length; i++) {
+        const r = results[i];
+        if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
+          r.reacted = true; foundInRoster = true;
+        }
+      }
+      if (!foundInRoster) {
+        let exists = false;
+        for (let i=0; i<extraReactors.length; i++) {
+          if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
+        }
+        if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
+      }
+    } else {
+      for (let i=0; i<results.length; i++) {
+        if (nameMatches(name, results[i])) { results[i].reacted = true; foundInRoster = true; }
+      }
+      if (!foundInRoster) unmatched.push(name);
+    }
+  });
+  const reactedNum = results.filter(function(s){return s.reacted;}).length;
+  document.getElementById("reactedCount").textContent = reactedNum;
+  document.getElementById("missingCount").textContent = results.length - reactedNum;
+  document.getElementById("shiftCount").textContent = results.length;
+  document.getElementById("extraCount").textContent = extraReactors.length;
+  document.getElementById("extraBadge").textContent = extraReactors.length ? "(" + extraReactors.length + ")" : "";
+  document.getElementById("results").style.display = "block";
+  currentTab = "missing";
+  const tabs = document.querySelectorAll(".f-tab");
+  for (let i=0; i<tabs.length; i++) {
+    if (i === 2) tabs[i].classList.add("active"); else tabs[i].classList.remove("active");
+  }
+  renderList();
+}
+function setTab(tab, el) {
+  currentTab = tab;
+  const tabs = document.querySelectorAll(".f-tab");
+  for (let i=0; i<tabs.length; i++) tabs[i].classList.remove("active");
+  el.classList.add("active");
+  renderList();
+}
+function renderList() {
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  let list = [], isExtra = false;
+  if (currentTab === "extra") { list = extraReactors.slice(); isExtra = true; }
+  else if (currentTab === "reacted") list = results.filter(function(s){return s.reacted;});
+  else if (currentTab === "missing") list = results.filter(function(s){return !s.reacted;});
+  else list = results.slice();
+  if (search) list = list.filter(function(s){return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;});
+  document.getElementById("staffList").innerHTML = list.length ? list.map(function(s) {
+    if (isExtra) {
+      return '<div class="staff-row extra"><div><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div><div class="badge badge-extra">Extra</div></div>';
+    }
+    const leaderTag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    return '<div class="staff-row ' + (s.reacted ? "reacted" : "missing") + '"><div><div class="staff-name">' + escapeHtml(s.fb) + leaderTag + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div><div class="badge ' + (s.reacted ? "badge-yes" : "badge-no") + '">' + (s.reacted ? "Reacted" : "Missing") + '</div></div>';
+  }).join("") : '<div class="empty">No results</div>';
+  document.getElementById("unmatchedBox").innerHTML = unmatched.length ?
+    '<div class="unmatched"><strong>' + unmatched.length + ' unknown:</strong>' +
+    unmatched.map(function(n){return '<span class="tag">' + escapeHtml(n) + '</span>';}).join(" ") + '</div>' : "";
+}
+
+// ============ MANAGE STAFF ============
+function renderManage() {
+  const search = (document.getElementById("manageSearch").value || "").toLowerCase();
+  let list = staffMap.map(function(s, i) { return {fb: s.fb, real: s.real, _idx: i}; });
+  if (search) list = list.filter(function(s){return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;});
+  document.getElementById("manageList").innerHTML = list.length ? list.map(function(s) {
+    const idx = s._idx;
+    const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    const realEscaped = s.real.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return '<div class="manage-row" id="mrow-' + idx + '">' +
+      '<div class="manage-names" id="mn-' + idx + '">' +
+        '<div class="staff-name">' + escapeHtml(s.fb) + tag + '</div>' +
+        '<div class="staff-real">' + escapeHtml(s.real) + '</div>' +
+        renderSkillTags(s.real) +
+      '</div>' +
+      '<div class="edit-area" id="me-' + idx + '">' +
+        '<input type="text" id="ef-' + idx + '" value="' + escapeHtml(s.fb) + '" placeholder="Facebook"/>' +
+        '<input type="text" id="er-' + idx + '" value="' + escapeHtml(s.real) + '" placeholder="Real"/>' +
+      '</div>' +
+      '<div class="row-btns" id="mb-' + idx + '">' +
+        '<button class="btn-sm btn-gray" onclick="openSkillEditor(\'' + realEscaped + '\')" title="Skills">\u{1F3AF}</button>' +
+        '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')">\u270F\uFE0F</button>' +
+        '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')">\u{1F5D1}</button>' +
+      '</div>' +
+      '<div class="row-btns-edit" id="mbe-' + idx + '">' +
+        '<button class="btn-sm btn-green" onclick="saveEdit(' + idx + ')">\u2705</button>' +
+        '<button class="btn-sm btn-gray" onclick="cancelEdit(' + idx + ')">\u2715</button>' +
+      '</div></div>';
+  }).join("") : '<div class="empty">No staff. Add some!</div>';
+}
+async function addStaff() {
+  const fb = document.getElementById("newFb").value.trim();
+  const real = document.getElementById("newReal").value.trim();
+  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
+  staffMap.push({fb: fb, real: real});
+  document.getElementById("siteCount").textContent = staffMap.length + " staff";
+  document.getElementById("newFb").value = ""; document.getElementById("newReal").value = "";
+  showToast(fb + " added!"); renderManage();
+  try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"add", site:currentSite, fb:fb, real:real})}); } catch(e) {}
+}
+function removeStaff(idx) {
+  const staff = staffMap[idx];
+  document.getElementById("confirmTitle").textContent = "Remove";
+  document.getElementById("confirmMsg").textContent = "Remove '" + staff.fb + "'?";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = async function() {
+    staffMap.splice(idx, 1);
+    document.getElementById("siteCount").textContent = staffMap.length + " staff";
+    closeConfirm();
+    showToast(staff.fb + " removed", "#dc2626");
+    renderManage();
+    try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"delete", site:currentSite, fb:staff.fb, real:staff.real})}); } catch(e) {}
+  };
+}
+function closeConfirm() {
+  document.getElementById("confirmModal").classList.remove("show");
+}
+function startEdit(idx) {
+  document.getElementById("mn-"+idx).style.display = "none";
+  document.getElementById("me-"+idx).style.display = "flex";
+  document.getElementById("mb-"+idx).style.display = "none";
+  document.getElementById("mbe-"+idx).style.display = "flex";
+}
+function cancelEdit(idx) {
+  document.getElementById("mn-"+idx).style.display = "block";
+  document.getElementById("me-"+idx).style.display = "none";
+  document.getElementById("mb-"+idx).style.display = "flex";
+  document.getElementById("mbe-"+idx).style.display = "none";
+}
+async function saveEdit(idx) {
+  const fb = document.getElementById("ef-"+idx).value.trim();
+  const real = document.getElementById("er-"+idx).value.trim();
+  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
+  const oldFb = staffMap[idx].fb, oldReal = staffMap[idx].real;
+  staffMap[idx] = {fb: fb, real: real};
+  showToast("Updated!"); renderManage();
+  try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"update", site:currentSite, oldFb:oldFb, oldReal:oldReal, newFb:fb, newReal:real})}); } catch(e) {}
+}
+
+// ============ SITES MODAL ============
+function openSitesModal() { renderSitesList(); document.getElementById("sitesModal").classList.add("show"); }
+function closeSitesModal() { document.getElementById("sitesModal").classList.remove("show"); }
+function renderSitesList() {
+  document.getElementById("sitesList").innerHTML = sites.map(function(s) {
+    const nameEsc = s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return '<div class="site-list-item ' + (s.name === currentSite ? "active" : "") + '">' +
+    '<div style="flex:1;"><div class="site-name-text">' + escapeHtml(s.name) + '</div><div class="site-count">' + s.count + ' staff</div></div>' +
+    (sites.length > 1 ? '<button class="btn-sm btn-red" onclick="removeSite(\'' + nameEsc + '\')">\u{1F5D1}</button>' : "") +
+    '</div>';
+  }).join("");
+}
+async function addSite() {
+  const name = document.getElementById("newSiteName").value.trim();
+  if (!name) { showToast("Enter name!", "#dc2626"); return; }
+  showToast("Creating...");
+  try {
+    await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"addSite", siteName:name})});
+    setTimeout(async function() {
+      await loadSites();
+      currentSite = name;
+      localStorage.setItem("zozo_current_site", currentSite);
+      renderSiteSelector(); await loadStaff(); renderSitesList();
+      document.getElementById("newSiteName").value = "";
+      showToast("Site created!");
+    }, 1500);
+  } catch(e) { showToast("Failed!", "#dc2626"); }
+}
+function removeSite(name) {
+  document.getElementById("confirmTitle").textContent = "Remove Site";
+  document.getElementById("confirmMsg").textContent = "Remove '" + name + "' and ALL staff?";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = async function() {
+    closeConfirm(); showToast("Removing...");
+    try {
+      await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"deleteSite", siteName:name})});
+      setTimeout(async function() { await loadSites(); renderSitesList(); showToast("Removed", "#dc2626"); }, 1500);
+    } catch(e) { showToast("Failed!", "#dc2626"); }
+  };
+}
+
+// ============ SMART ASSIGNMENT ============
+function findSkillsFor(name) {
+  const n = normalize(name);
+  const norm = (name||"").toUpperCase().trim();
+  if (skillOverrides[norm]) return {name: name, depts: skillOverrides[norm].depts, primary: skillOverrides[norm].primary};
+  for (const key in skillOverrides) {
+    if (normalize(key) === n) return {name: key, depts: skillOverrides[key].depts, primary: skillOverrides[key].primary};
+  }
+  for (const dbName in SKILL_DATABASE) {
+    if (normalize(dbName) === n) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
+  }
+  for (const dbName in SKILL_DATABASE) {
+    const dn = normalize(dbName);
+    if (dn.indexOf(n) !== -1 || n.indexOf(dn) !== -1) {
+      if (Math.abs(dn.length - n.length) < 5) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
+    }
+  }
+  return null;
+}
 function loadAssignRoster() {
   const raw = document.getElementById("assignRoster").value;
   if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
-  const lines = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
   assignRoster = [];
+  const seen = {};
   let unknown = 0;
-  const seen = new Set();
-  lines.forEach(name => {
-    const key = name.toLowerCase().trim();
-    if (seen.has(key)) return;
-    seen.add(key);
+  lines.forEach(function(name) {
+    const k = name.toLowerCase().trim();
+    if (seen[k]) return;
+    seen[k] = true;
     const skill = findSkillsFor(name);
     assignRoster.push({
       input: name,
       name: skill ? skill.name : name,
       depts: skill ? skill.depts : [],
       primary: skill ? skill.primary : null,
-      assigned: null
+      assigned: null,
+      leaderRole: null,
+      forced: false
     });
     if (!skill) unknown++;
   });
-  document.getElementById("assignRosterCount").textContent = assignRoster.length + " loaded" + (unknown ? " (" + unknown + " unknown skills)" : "");
-  showToast(assignRoster.length + " staff loaded!");
+  document.getElementById("assignRosterCount").textContent = assignRoster.length + " loaded" + (unknown ? " (" + unknown + " unknown)" : "");
+  showToast(assignRoster.length + " loaded");
   buildDeptNeedsGrid();
 }
-
 function buildDeptNeedsGrid() {
   const grid = document.getElementById("deptNeedsGrid");
-  grid.innerHTML = DEPARTMENTS.map(d => {
-    const count = assignRoster.filter(s => s.depts.includes(d)).length;
-    return '<div style="background:#fafaf8;border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">'+
-      '<div style="font-size:11px;font-weight:600;margin-bottom:4px;">' + d + '</div>'+
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">' + count + ' available</div>'+
-      '<input type="number" id="need-' + d + '" min="0" value="0" style="width:100%;padding:6px;border:1px solid var(--border2);border-radius:6px;text-align:center;font-weight:700;font-size:14px;" oninput="updateTotal()" />'+
+  grid.innerHTML = DEPARTMENTS.map(function(d) {
+    const count = assignRoster.filter(function(s){return s.depts.indexOf(d) !== -1;}).length;
+    return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">' +
+      '<div style="font-size:11px;font-weight:600;margin-bottom:4px;">' + d + '</div>' +
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">' + count + ' avail</div>' +
+      '<input type="number" id="need-' + d + '" min="0" value="0" style="text-align:center;font-weight:700;font-size:14px;" oninput="updateTotal()" />' +
       '</div>';
   }).join("");
   updateTotal();
 }
-
 function updateTotal() {
   let total = 0;
-  DEPARTMENTS.forEach(d => {
-    const v = parseInt(document.getElementById("need-" + d)?.value || 0);
-    total += v;
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    total += parseInt(el ? el.value : 0) || 0;
   });
   const el = document.getElementById("assignTotalNeeded");
-  if (el) el.textContent = "Total needed: " + total + " / Available: " + assignRoster.length;
+  if (el) el.textContent = "Need: " + total + " / Have: " + assignRoster.length;
 }
-
 function clearAssignNeeds() {
-  DEPARTMENTS.forEach(d => {
+  DEPARTMENTS.forEach(function(d) {
     const el = document.getElementById("need-" + d);
     if (el) el.value = 0;
   });
   document.getElementById("assignResults").style.display = "none";
   updateTotal();
 }
-
 function runAssignment() {
   if (!assignRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
-  
   const needs = {};
-  DEPARTMENTS.forEach(d => {
-    needs[d] = parseInt(document.getElementById("need-" + d)?.value || 0);
+  let totalNeeded = 0;
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    needs[d] = parseInt(el ? el.value : 0) || 0;
+    totalNeeded += needs[d];
   });
-  
-  const totalNeeded = Object.values(needs).reduce((a,b) => a+b, 0);
-  if (totalNeeded === 0) { showToast("Set department needs!", "#dc2626"); return; }
-  
-  assignmentResult = assignRoster.map(s => ({...s, assigned: null, leaderRole: null}));
-  const remaining = {...needs};
-  
-  // STEP 1: PLACE LEADERS at ソーター1, ソーター2, ソーター3 (machines need leaders!)
-  // Each sorter line gets ONE leader as 管理 role
-  const availableLeaders = assignmentResult.filter(p => isLeader(p.name));
-  const sorterLines = ["ソーター1", "ソーター2", "ソーター3"];
-  
-  for (const line of sorterLines) {
-    if (remaining[line] <= 0) continue;
-    // Find a leader who can work this line
-    const leader = availableLeaders.find(p => !p.assigned && p.depts.includes(line));
-    if (leader) {
-      leader.assigned = line;
-      leader.leaderRole = "管理"; // mark as the 管理 of this line
-      remaining[line]--;
-    } else {
-      // Any leader will do
-      const anyLeader = availableLeaders.find(p => !p.assigned);
-      if (anyLeader) {
-        anyLeader.assigned = line;
-        anyLeader.leaderRole = "管理";
-        remaining[line]--;
-      }
-    }
-  }
-  
-  // STEP 2: Place sub-leaders next to leaders on sorter lines
-  for (const line of sorterLines) {
-    if (remaining[line] <= 0) continue;
-    const sub = assignmentResult.find(p => !p.assigned && isSubLeader(p.name) && p.depts.includes(line));
-    if (sub) {
-      sub.assigned = line;
-      sub.leaderRole = "sub";
-      remaining[line]--;
-    }
-  }
-  
-  // STEP 3: Assign 棚入れ specialists
-  for (const person of assignmentResult) {
-    if (person.assigned) continue;
-    if (person.depts[0] === "棚入れ" && remaining["棚入れ"] > 0) {
-      person.assigned = "棚入れ";
-      remaining["棚入れ"]--;
-    }
-  }
-  
-  // STEP 4: Assign 単数 specialists
-  for (const person of assignmentResult) {
-    if (person.assigned) continue;
-    if (person.depts.length === 1 && person.depts[0] === "単数" && remaining["単数"] > 0) {
-      person.assigned = "単数";
-      remaining["単数"]--;
-    }
-  }
-  
-  // STEP 5: Assign 複数 specialists
-  for (const person of assignmentResult) {
-    if (person.assigned) continue;
-    if (person.depts.length === 1 && person.depts[0] === "複数" && remaining["複数"] > 0) {
-      person.assigned = "複数";
-      remaining["複数"]--;
-    }
-  }
-  
-  // STEP 5b: Prioritize people by their PRIMARY skill (⭐)
-  for (const person of assignmentResult) {
-    if (person.assigned) continue;
+  if (totalNeeded === 0) { showToast("Set needs!", "#dc2626"); return; }
+
+  assignmentResult = assignRoster.map(function(s) {
+    return {
+      input: s.input, name: s.name, depts: s.depts.slice(), primary: s.primary,
+      assigned: null, leaderRole: null, forced: false
+    };
+  });
+  const remaining = {};
+  for (const d in needs) remaining[d] = needs[d];
+  const sorterLines = ["\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3"];
+
+  // STEP 1: Main leaders to sorter lines
+  const availableLeaders = assignmentResult.filter(function(p){return isLeader(p.name);});
+  sorterLines.forEach(function(line) {
+    if (remaining[line] <= 0) return;
+    let leader = availableLeaders.find(function(p){return !p.assigned && p.depts.indexOf(line) !== -1;});
+    if (!leader) leader = availableLeaders.find(function(p){return !p.assigned;});
+    if (leader) { leader.assigned = line; leader.leaderRole = "\u7BA1\u7406"; remaining[line]--; }
+  });
+
+  // STEP 2: Sub-leaders to sorter lines
+  sorterLines.forEach(function(line) {
+    if (remaining[line] <= 0) return;
+    const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && p.depts.indexOf(line) !== -1;});
+    if (sub) { sub.assigned = line; sub.leaderRole = "sub"; remaining[line]--; }
+  });
+
+  // STEP 3: Primary skill matches
+  assignmentResult.forEach(function(person) {
+    if (person.assigned) return;
     if (person.primary && remaining[person.primary] > 0) {
       person.assigned = person.primary;
       remaining[person.primary]--;
     }
-  }
-  
-  // STEP 6: Other single-skill specialists
-  for (const person of assignmentResult) {
-    if (person.assigned) continue;
-    if (person.depts.length === 1) {
-      const dept = person.depts[0];
-      if (remaining[dept] > 0) {
-        person.assigned = dept;
-        remaining[dept]--;
-      }
+  });
+
+  // STEP 4: Single-skill specialists
+  assignmentResult.forEach(function(person) {
+    if (person.assigned) return;
+    if (person.depts.length === 1 && remaining[person.depts[0]] > 0) {
+      person.assigned = person.depts[0];
+      remaining[person.depts[0]]--;
     }
-  }
-  
-  // STEP 7: Special specialists - 単搬, 出庫搬送, 投入, TC (preferred match)
-  const specialDepts = ["単搬", "出庫搬送", "TC", "投入"];
-  for (const dept of specialDepts) {
+  });
+
+  // STEP 5: Fill by department priority
+  const fillOrder = ["\u7BA1\u7406", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "TC", "\u6295\u5165", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "\u8907\u6570", "\u5358\u6570"];
+  fillOrder.forEach(function(dept) {
     while (remaining[dept] > 0) {
-      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept) && p.depts[0] === dept);
+      const candidate = assignmentResult.find(function(p){return !p.assigned && p.depts.indexOf(dept) !== -1;});
       if (!candidate) break;
       candidate.assigned = dept;
       remaining[dept]--;
     }
+  });
+
+  // STEP 6: Force-fill remaining
+  DEPARTMENTS.forEach(function(dept) {
     while (remaining[dept] > 0) {
-      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept));
-      if (!candidate) break;
-      candidate.assigned = dept;
-      remaining[dept]--;
-    }
-  }
-  
-  // STEP 8: Fill sorter lines (ソーター1, ソーター2, ソーター3)
-  for (const line of sorterLines) {
-    while (remaining[line] > 0) {
-      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(line));
-      if (!candidate) break;
-      candidate.assigned = line;
-      remaining[line]--;
-    }
-  }
-  
-  // STEP 9: Fill remaining 複数 / 単数 with people who have those skills
-  for (const dept of ["複数", "単数"]) {
-    while (remaining[dept] > 0) {
-      const candidate = assignmentResult.find(p => !p.assigned && p.depts.includes(dept));
-      if (!candidate) break;
-      candidate.assigned = dept;
-      remaining[dept]--;
-    }
-  }
-  
-  // STEP 10: Force-fill any remaining slots
-  for (const dept of DEPARTMENTS) {
-    while (remaining[dept] > 0) {
-      const candidate = assignmentResult.find(p => !p.assigned);
+      const candidate = assignmentResult.find(function(p){return !p.assigned;});
       if (!candidate) break;
       candidate.assigned = dept;
       candidate.forced = true;
       remaining[dept]--;
     }
-  }
-  
-  renderAssignmentResults(needs, remaining);
-}
+  });
 
-function renderAssignmentResults(needs, remaining) {
-  // Summary
+  renderAssignmentResults(needs);
+}
+function renderAssignmentResults(needs) {
   let summary = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;">';
-  DEPARTMENTS.forEach(d => {
+  DEPARTMENTS.forEach(function(d) {
     if (needs[d] === 0) return;
-    const assigned = assignmentResult.filter(p => p.assigned === d).length;
+    const assigned = assignmentResult.filter(function(p){return p.assigned === d;}).length;
     const ok = assigned >= needs[d];
-    summary += '<div style="background:' + (ok ? "#f0fdf4" : "#fef2f2") + ';border:1px solid ' + (ok ? "#bbf7d0" : "#fecaca") + ';border-radius:8px;padding:8px;text-align:center;">'+
-      '<div style="font-size:11px;font-weight:600;">' + d + '</div>'+
-      '<div style="font-size:14px;font-weight:700;color:' + (ok ? "var(--green)" : "var(--red)") + ';">' + assigned + '/' + needs[d] + '</div>'+
-      '</div>';
+    summary += '<div style="background:' + (ok ? "var(--green-light)" : "var(--red-light)") + ';border:1px solid ' + (ok ? "var(--green-border)" : "var(--red-border)") + ';border-radius:8px;padding:8px;text-align:center;">' +
+      '<div style="font-size:11px;font-weight:600;">' + d + '</div>' +
+      '<div style="font-size:14px;font-weight:700;color:' + (ok ? "var(--green)" : "var(--red)") + ';">' + assigned + '/' + needs[d] + '</div></div>';
   });
   summary += '</div>';
   document.getElementById("assignmentSummary").innerHTML = summary;
-  
-  // List by department
+
   let html = "";
-  DEPARTMENTS.forEach(d => {
-    const people = assignmentResult.filter(p => p.assigned === d);
-    if (people.length === 0 && needs[d] === 0) return;
+  DEPARTMENTS.forEach(function(d) {
+    const people = assignmentResult.filter(function(p){return p.assigned === d;});
+    if (people.length === 0) return;
     html += '<div style="margin-bottom:14px;">';
     html += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;padding:6px 10px;background:var(--accent-light);border-radius:6px;color:var(--accent);">' + d + ' (' + people.length + ')</div>';
-    html += people.map(p => {
-      const isLed = isLeader(p.name);
-      const isSub = isSubLeader(p.name);
-      let rowStyle = "";
+    html += people.map(function(p) {
+      let rowClass = "staff-row";
       let badge = "";
-      if (p.leaderRole === "管理") {
-        rowStyle = "background:var(--leader-bg);border:2px solid var(--leader-border);";
-        badge = '<div class="badge" style="background:var(--leader-border);color:white;">👑 管理</div>';
+      if (p.leaderRole === "\u7BA1\u7406") {
+        rowClass += " leader-row";
+        badge = '<div class="badge" style="background:var(--leader-border);color:white;">\u{1F451} \u7BA1\u7406</div>';
       } else if (p.leaderRole === "sub") {
-        rowStyle = "background:var(--subleader-bg);border:2px solid var(--subleader-border);";
-        badge = '<div class="badge" style="background:var(--subleader-border);color:white;">⭐ SUB</div>';
-      } else if (isLed) {
-        rowStyle = "background:var(--leader-bg);border:1px solid var(--leader-border);";
-        badge = '<span class="leader-tag">LEADER</span>';
-      } else if (isSub) {
-        rowStyle = "background:var(--subleader-bg);border:1px solid var(--subleader-border);";
-        badge = '<span class="subleader-tag">SUB</span>';
-      }
-      if (p.forced) { rowStyle += "background:#fffbeb;border-color:#fde68a;"; badge = '<div class="badge badge-extra">⚠ Forced</div>'; }
-      return '<div class="staff-row" style="' + rowStyle + '">'+
-        '<div><div class="staff-name">' + escapeHtml(p.name) + '</div>'+
-        (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">⚠ No skill data</div>') +
-        '</div>' + badge +
-        '</div>';
+        rowClass += " subleader-row";
+        badge = '<div class="badge" style="background:var(--subleader-border);color:white;">\u2B50 SUB</div>';
+      } else if (isLeader(p.name)) badge = '<span class="leader-tag">LEADER</span>';
+      else if (isSubLeader(p.name)) badge = '<span class="subleader-tag">SUB</span>';
+      if (p.forced) badge = '<div class="badge badge-extra">Forced</div>';
+      return '<div class="' + rowClass + '"><div><div class="staff-name">' + escapeHtml(p.name) + '</div>' +
+        (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">No skill data</div>') +
+        '</div>' + badge + '</div>';
     }).join("");
     html += '</div>';
   });
-  
-  // Unassigned
-  const unassigned = assignmentResult.filter(p => !p.assigned);
+  const unassigned = assignmentResult.filter(function(p){return !p.assigned;});
   if (unassigned.length) {
-    html += '<div style="margin-top:14px;padding:12px;background:#f3f4f6;border-radius:8px;">';
-    html += '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">😴 Unassigned (' + unassigned.length + ')</div>';
-    html += unassigned.map(p => '<div style="font-size:12px;padding:4px 0;">' + escapeHtml(p.name) + '</div>').join("");
+    html += '<div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:8px;">';
+    html += '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">Unassigned (' + unassigned.length + ')</div>';
+    html += unassigned.map(function(p){return '<div style="font-size:12px;padding:4px 0;">' + escapeHtml(p.name) + '</div>';}).join("");
     html += '</div>';
   }
-  
   document.getElementById("assignmentList").innerHTML = html;
   document.getElementById("assignResults").style.display = "block";
-  setTimeout(() => document.getElementById("assignResults").scrollIntoView({behavior:"smooth"}), 100);
+  setTimeout(function(){document.getElementById("assignResults").scrollIntoView({behavior:"smooth"});}, 100);
 }
-
 function copyAssignment() {
-  let text = "【今日の配置 / Today\'s Assignment】\n\n";
-  DEPARTMENTS.forEach(d => {
-    const people = assignmentResult.filter(p => p.assigned === d);
+  let text = "Today's Assignment\n\n";
+  DEPARTMENTS.forEach(function(d) {
+    const people = assignmentResult.filter(function(p){return p.assigned === d;});
     if (people.length === 0) return;
-    text += "■ " + d + " (" + people.length + ")\n";
-    people.forEach(p => {
-      let prefix = "  • ";
-      if (p.leaderRole === "管理") prefix = "  👑 ";
-      else if (p.leaderRole === "sub") prefix = "  ⭐ ";
-      text += prefix + p.name + (p.forced ? " ⚠" : "") + "\n";
+    text += "[" + d + "] (" + people.length + ")\n";
+    people.forEach(function(p) {
+      let prefix = "  - ";
+      if (p.leaderRole === "\u7BA1\u7406") prefix = "  [LEADER] ";
+      else if (p.leaderRole === "sub") prefix = "  [SUB] ";
+      text += prefix + p.name + (p.forced ? " (forced)" : "") + "\n";
     });
     text += "\n";
   });
-  navigator.clipboard.writeText(text).then(() => showToast("✅ Copied!"));
+  navigator.clipboard.writeText(text).then(function(){showToast("Copied!");}).catch(function(){showToast("Copy failed", "#dc2626");});
 }
 
-
+// ============ DARK MODE ============
 function toggleDark() {
   document.body.classList.toggle("dark");
   const isDark = document.body.classList.contains("dark");
   localStorage.setItem("zozo_dark", isDark ? "1" : "0");
-  document.getElementById("darkBtn").textContent = isDark ? "☀️" : "🌙";
+  document.getElementById("darkBtn").textContent = isDark ? "\u2600\uFE0F" : "\u{1F319}";
 }
-
-// Init dark mode from localStorage
 if (localStorage.getItem("zozo_dark") === "1") {
   document.body.classList.add("dark");
-  setTimeout(() => { 
+  setTimeout(function() {
     const btn = document.getElementById("darkBtn");
-    if (btn) btn.textContent = "☀️"; 
-  }, 100);
+    if (btn) btn.textContent = "\u2600\uFE0F";
+  }, 50);
 }
 
-
-// === SKILL EDITOR ===
-function loadCustomSkills() {
-  try {
-    const custom = JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}");
-    return custom;
-  } catch(e) { return {}; }
-}
-
-function saveCustomSkills(skills) {
-  localStorage.setItem("zozo_custom_skills", JSON.stringify(skills));
-}
-
-function getStaffSkills(name) {
-  const custom = loadCustomSkills();
-  const key = _normName(name);
-  if (custom[key]) return custom[key];
-  // Fall back to default skill database
-  for (const [dbName, depts] of Object.entries(SKILL_DATABASE)) {
-    if (_normName(dbName) === key) return {primary: depts[0], all: depts};
-  }
-  return {primary: null, all: []};
-}
-
-function openSkillEditor(staffName, realName) {
-  const target = realName || staffName;
-  const skills = getStaffSkills(target);
-  
-  document.getElementById("skillModalTitle").textContent = "✏️ " + staffName;
-  document.getElementById("skillModalSubtitle").textContent = realName ? "Real name: " + realName : "";
-  
-  // Build dept dropdown
-  const primarySel = document.getElementById("primarySkill");
-  primarySel.innerHTML = '<option value="">-- None --</option>' + 
-    DEPARTMENTS.map(d => '<option value="' + d + '"' + (d === skills.primary ? ' selected' : '') + '>' + d + '</option>').join("");
-  
-  // Build checkboxes
-  document.getElementById("skillCheckboxes").innerHTML = DEPARTMENTS.map(d => {
-    const checked = skills.all.includes(d);
-    return '<label style="display:flex;align-items:center;gap:6px;padding:8px;background:' + (checked ? 'var(--accent-light)' : 'var(--bg)') + ';border:1px solid ' + (checked ? 'var(--accent)' : 'var(--border)') + ';border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;">' +
-      '<input type="checkbox" id="skill-' + d + '"' + (checked ? ' checked' : '') + ' style="cursor:pointer;" onchange="updateSkillRow(this)" data-dept="' + d + '" />' +
-      '<span>' + d + '</span></label>';
-  }).join("");
-  
-  // Save handler
-  document.getElementById("skillSaveBtn").onclick = function() {
-    const primary = document.getElementById("primarySkill").value;
-    const all = [];
-    DEPARTMENTS.forEach(d => {
-      if (document.getElementById("skill-" + d)?.checked) all.push(d);
-    });
-    // Make sure primary is in all
-    if (primary && !all.includes(primary)) all.unshift(primary);
-    
-    const custom = loadCustomSkills();
-    custom[_normName(target)] = {primary: primary || (all[0] || null), all: all};
-    saveCustomSkills(custom);
-    
-    showToast("✅ Skills updated for " + staffName);
-    closeSkillModal();
-    renderManage();
-  };
-  
-  document.getElementById("skillModal").classList.add("show");
-}
-
-function updateSkillRow(checkbox) {
-  const label = checkbox.closest("label");
-  if (checkbox.checked) {
-    label.style.background = "var(--accent-light)";
-    label.style.borderColor = "var(--accent)";
-  } else {
-    label.style.background = "var(--bg)";
-    label.style.borderColor = "var(--border)";
-  }
-}
-
-function closeSkillModal() {
-  document.getElementById("skillModal").classList.remove("show");
-}
-
-// Override findSkillsFor to use custom skills first
-const _originalFindSkills = findSkillsFor;
-function findSkillsFor(name) {
-  const custom = loadCustomSkills();
-  const n = _normName(name);
-  if (custom[n]) {
-    return {name: name, depts: custom[n].all};
-  }
-  return _originalFindSkills(name);
-}
-
-
-
-// === SKILLS EDITOR ===
-let editingStaffName = null;
-let editingDepts = [];
-let editingPrimary = null;
-
-function openSkillsEditor(realName) {
-  editingStaffName = realName;
-  const skills = getStaffSkills(realName);
-  editingDepts = skills ? [...skills.depts] : [];
-  editingPrimary = skills ? skills.primary : null;
-  document.getElementById("skillsName").textContent = realName;
-  renderSkillsEditor();
-  document.getElementById("skillsModal").classList.add("show");
-}
-
-function renderSkillsEditor() {
-  const html = DEPARTMENTS.map(d => {
-    const isSelected = editingDepts.includes(d);
-    const isPrimary = editingPrimary === d;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid ' + 
-      (isSelected ? "var(--accent)" : "var(--border)") + ';background:' +
-      (isSelected ? "var(--accent-light)" : "var(--card)") + ';cursor:pointer;" onclick="toggleSkillDept(\'' + d + '\')">'+
-      '<div style="flex:1;font-weight:' + (isSelected ? "700" : "500") + ';font-size:13px;">' + d + '</div>'+
-      (isSelected ? '<button onclick="event.stopPropagation();setPrimarySkill(\'' + d + '\')" style="background:' + 
-        (isPrimary ? "var(--orange)" : "transparent") + ';color:' + (isPrimary ? "white" : "var(--orange)") + 
-        ';border:1px solid var(--orange);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">' + 
-        (isPrimary ? "⭐ Primary" : "Set Primary") + '</button>' : '') +
-      '<div style="font-size:18px;color:' + (isSelected ? "var(--accent)" : "var(--text3)") + ';">' + 
-      (isSelected ? "✓" : "○") + '</div>' +
-      '</div>';
-  }).join("");
-  document.getElementById("skillsDeptList").innerHTML = html;
-}
-
-function toggleSkillDept(dept) {
-  const idx = editingDepts.indexOf(dept);
-  if (idx >= 0) {
-    editingDepts.splice(idx, 1);
-    if (editingPrimary === dept) {
-      editingPrimary = editingDepts.length > 0 ? editingDepts[0] : null;
-    }
-  } else {
-    editingDepts.push(dept);
-    if (!editingPrimary) editingPrimary = dept;
-  }
-  renderSkillsEditor();
-}
-
-function setPrimarySkill(dept) {
-  if (editingDepts.includes(dept)) {
-    editingPrimary = dept;
-    renderSkillsEditor();
-  }
-}
-
-function closeSkillsEditor() {
-  document.getElementById("skillsModal").classList.remove("show");
-}
-
-function saveSkillsEdit() {
-  if (!editingStaffName) return;
-  if (editingDepts.length === 0) {
-    showToast("Select at least 1 department!", "#dc2626");
-    return;
-  }
-  if (!editingPrimary || !editingDepts.includes(editingPrimary)) {
-    editingPrimary = editingDepts[0];
-  }
-  // Save with primary first in array
-  const orderedDepts = [editingPrimary, ...editingDepts.filter(d => d !== editingPrimary)];
-  setStaffSkills(editingStaffName, orderedDepts, editingPrimary);
-  showToast("✅ Skills updated!");
-  closeSkillsEditor();
-  renderManage();
-}
-
-
-
-// === SKILL EDITOR ===
-let editingSkillStaff = null;
-let editingSkillIdx = null;
-let tempSkills = [];
-
-// Custom skills override storage (saved in localStorage + synced)
-let customSkills = JSON.parse(localStorage.getItem("zozo_custom_skills") || "{}");
-
-function getSkillsFor(name) {
-  // Check custom first, then default DB
-  const n = normalize(name);
-  // Check custom skills
-  for (const [k, v] of Object.entries(customSkills)) {
-    if (normalize(k) === n) return v;
-  }
-  // Check default DB
-  for (const [k, v] of Object.entries(SKILL_DATABASE)) {
-    if (normalize(k) === n) return v;
-  }
-  return [];
-}
-
-function saveCustomSkills() {
-  localStorage.setItem("zozo_custom_skills", JSON.stringify(customSkills));
-}
-
-function openSkillEditor(idx) {
-  const staff = staffMap[idx];
-  editingSkillStaff = staff;
-  editingSkillIdx = idx;
-  
-  document.getElementById("skillStaffName").textContent = staff.real + " (" + staff.fb + ")";
-  
-  // Get current skills for this person
-  tempSkills = [...getSkillsFor(staff.real)];
-  
-  renderSkillDeptList();
-  document.getElementById("skillModal").classList.add("show");
-}
-
-function renderSkillDeptList() {
-  const html = DEPARTMENTS.map(d => {
-    const idx = tempSkills.indexOf(d);
-    const isSelected = idx >= 0;
-    const isPrimary = idx === 0;
-    
-    return '<div onclick="toggleSkillDept(\'' + d + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:8px;cursor:pointer;border:2px solid ' + (isPrimary ? "var(--accent)" : isSelected ? "var(--green-border)" : "var(--border)") + ';background:' + (isPrimary ? "var(--accent-light)" : isSelected ? "var(--green-light)" : "var(--bg)") + ';">'+
-      '<div style="display:flex;align-items:center;gap:10px;">'+
-        (isPrimary ? '<span style="font-size:16px;">⭐</span>' : isSelected ? '<span style="font-size:14px;color:var(--green);">✓</span>' : '<span style="font-size:14px;color:var(--text3);">○</span>') +
-        '<span style="font-weight:' + (isSelected ? "700" : "500") + ';font-size:13px;">' + d + '</span>'+
-        (isPrimary ? '<span style="font-size:10px;background:var(--accent);color:white;padding:2px 6px;border-radius:8px;font-weight:700;">PRIMARY</span>' : '') +
-      '</div>'+
-      (isSelected && !isPrimary ? '<button onclick="event.stopPropagation();makePrimary(\'' + d + '\')" style="background:var(--accent-light);color:var(--accent);border:1px solid var(--accent);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">⭐ Primary</button>' : '') +
-    '</div>';
-  }).join("");
-  document.getElementById("skillDeptList").innerHTML = html;
-}
-
-function toggleSkillDept(dept) {
-  const idx = tempSkills.indexOf(dept);
-  if (idx >= 0) {
-    tempSkills.splice(idx, 1);
-  } else {
-    tempSkills.push(dept);
-  }
-  renderSkillDeptList();
-}
-
-function makePrimary(dept) {
-  const idx = tempSkills.indexOf(dept);
-  if (idx >= 0) {
-    tempSkills.splice(idx, 1);
-    tempSkills.unshift(dept);
-  }
-  renderSkillDeptList();
-}
-
-function saveSkills() {
-  if (!editingSkillStaff) return;
-  customSkills[editingSkillStaff.real] = tempSkills;
-  saveCustomSkills();
-  showToast("✅ Skills saved!");
-  closeSkillModal();
-  renderManage();
-}
-
-function closeSkillModal() {
-  document.getElementById("skillModal").classList.remove("show");
-  editingSkillStaff = null;
-}
-
+// ============ INIT ============
 loadSites();
+
 </script>
 </body>
 </html>
