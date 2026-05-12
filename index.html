@@ -603,6 +603,11 @@ function openSkillEditor(realName) {
   renderSkillChips();
   document.getElementById("skillModal").classList.add("show");
 }
+function openSkillEditorByIdx(idx) {
+  const staff = staffMap[idx];
+  if (!staff) { showToast("Staff not found", "#dc2626"); return; }
+  openSkillEditor(staff.real);
+}
 function closeSkillModal() {
   document.getElementById("skillModal").classList.remove("show");
   skillEditTarget = null;
@@ -823,7 +828,6 @@ function renderManage() {
   document.getElementById("manageList").innerHTML = list.length ? list.map(function(s) {
     const idx = s._idx;
     const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
-    const realEscaped = s.real.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     return '<div class="manage-row" id="mrow-' + idx + '">' +
       '<div class="manage-names" id="mn-' + idx + '">' +
         '<div class="staff-name">' + escapeHtml(s.fb) + tag + '</div>' +
@@ -835,9 +839,9 @@ function renderManage() {
         '<input type="text" id="er-' + idx + '" value="' + escapeHtml(s.real) + '" placeholder="Real"/>' +
       '</div>' +
       '<div class="row-btns" id="mb-' + idx + '">' +
-        '<button class="btn-sm btn-gray" onclick="openSkillEditor(\'' + realEscaped + '\')" title="Skills">\u{1F3AF}</button>' +
-        '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')">\u270F\uFE0F</button>' +
-        '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')">\u{1F5D1}</button>' +
+        '<button class="btn-sm btn-gray" onclick="openSkillEditorByIdx(' + idx + ')" title="Edit skills">\u{1F3AF}</button>' +
+        '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')" title="Edit name">\u270F\uFE0F</button>' +
+        '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')" title="Delete">\u{1F5D1}</button>' +
       '</div>' +
       '<div class="row-btns-edit" id="mbe-' + idx + '">' +
         '<button class="btn-sm btn-green" onclick="saveEdit(' + idx + ')">\u2705</button>' +
