@@ -702,12 +702,15 @@ function saveSkillEdit() {
   const norm = skillEditTarget.toUpperCase().trim();
   if (skillEditDepts.length === 0 && !notes) {
     delete skillOverrides[norm];
+    deleteSkillFromSheet(norm);
   } else {
-    skillOverrides[norm] = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes };
+    const data = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes };
+    skillOverrides[norm] = data;
+    pushSkillToSheet(norm, data);
   }
   saveSkillsToStorage();
   closeSkillModal();
-  showToast("Saved!");
+  showToast("Saved & synced!");
   renderManage();
 }
 
@@ -747,7 +750,56 @@ async function loadStaff() {
     if (document.getElementById("page-manage").classList.contains("active")) renderManage();
   } catch(e) { showToast("Failed to load staff", "#dc2626"); }
 }
-async function syncCurrent() { showToast("Syncing..."); await loadSites(); showToast("Synced!"); }
+
+async function loadSkillsFromSheet() {
+  try {
+    const res = await fetch(API_URL + "?action=getSkills");
+    const sheetSkills = await res.json();
+    if (sheetSkills && typeof sheetSkills === "object" && !sheetSkills.error) {
+      // Merge with local: sheet wins (cloud is master)
+      const localOnly = {};
+      for (const k in skillOverrides) {
+        if (!sheetSkills[k]) localOnly[k] = skillOverrides[k];
+      }
+      skillOverrides = Object.assign({}, sheetSkills, localOnly);
+      saveSkillsToStorage();
+      // Push any local-only entries to sheet
+      for (const k in localOnly) {
+        pushSkillToSheet(k, localOnly[k]);
+      }
+    }
+  } catch(e) {
+    console.log("Skills sync failed, using local only", e);
+  }
+}
+
+async function pushSkillToSheet(name, data) {
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        action: "saveSkill",
+        name: name,
+        depts: data.depts || [],
+        primary: data.primary || "",
+        notes: data.notes || ""
+      })
+    });
+  } catch(e) {}
+}
+
+async function deleteSkillFromSheet(name) {
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ action: "deleteSkill", name: name })
+    });
+  } catch(e) {}
+}
+
+async function syncCurrent() { showToast("Syncing..."); await loadSites(); await loadSkillsFromSheet(); showToast("Synced!"); renderManage(); }
 
 // ============ NAVIGATION ============
 function switchPage(page, el) {
@@ -1472,7 +1524,11 @@ setTimeout(function() {
   loadRulesFromStorage();
 }, 100);
 
-loadSites();
+// Initial load: sites first, then skills from sheet
+(async function() {
+  await loadSites();
+  await loadSkillsFromSheet();
+})();
 
 </script>
 </body>
