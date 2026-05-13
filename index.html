@@ -123,6 +123,13 @@
   .skill-chip.primary { background:var(--yellow); color:var(--yellow-text); border-color:#f59e0b; }
   .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
   .skill-tag.primary { background:var(--yellow-bg); color:var(--yellow-text); }
+  .star-row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--bg); border-radius:6px; margin-bottom:4px; border:1px solid var(--border); }
+  .star-row .dept-name { font-size:12px; font-weight:600; flex:1; }
+  .stars { display:flex; gap:2px; }
+  .star { font-size:18px; cursor:pointer; user-select:none; line-height:1; color:#d1d5db; transition: color 0.1s; }
+  .star.on { color:#fbbf24; }
+  .star:hover { transform:scale(1.2); }
+  body.dark .star { color:#475569; }
   @media (max-width: 500px) {
     .add-grid { grid-template-columns: 1fr; }
     .stat-num { font-size: 20px; }
@@ -154,6 +161,8 @@
     <div class="page-tab" onclick="switchPage('assign',this)">&#127919; Assign</div>
     <div class="page-tab" onclick="switchPage('rankings',this)">&#128202; Rankings</div>
     <div class="page-tab" onclick="switchPage('manage',this)">&#128101; Manage</div>
+    <div class="page-tab" onclick="switchPage('settings',this)">&#9881; Settings</div>
+    <div class="page-tab" onclick="switchPage('settings',this)">&#9881; Settings</div>
   </div>
 
   <div class="page active" id="page-checker">
@@ -301,6 +310,55 @@
       <div class="manage-list" id="manageList"></div>
     </div>
   </div>
+
+  <div class="page" id="page-settings">
+    <div class="info-box">
+      &#9881; <strong>Settings:</strong> Manage leaders, sub-leaders, departments. Changes sync to Google Sheet.
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128081; Main Leaders <span id="leadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Always get &#31649;&#29702; role on &#12477;&#12540;&#12479;&#12540;1/2/3 machines</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newLeaderInput" placeholder="Type name to promote..." oninput="onLeaderInput()" style="flex:1;" />
+        <button class="btn" onclick="promoteToLeader()">+ Add</button>
+      </div>
+      <div id="leaderSuggestions" style="margin-bottom:10px;"></div>
+      <div id="leadersList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#11088; Sub-Leaders <span id="subleadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Placed next to leaders on sorter lines as backup</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newSubLeaderInput" placeholder="Type name to promote..." oninput="onSubLeaderInput()" style="flex:1;" />
+        <button class="btn" onclick="promoteToSubLeader()">+ Add</button>
+      </div>
+      <div id="subleaderSuggestions" style="margin-bottom:10px;"></div>
+      <div id="subleadersList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128218; Departments <span id="deptsCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Used in assignments, skill editor, and rankings</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newDeptInput" placeholder="e.g. &#26865;&#20986;&#12375; or Custom dept" style="flex:1;" />
+        <button class="btn" onclick="addDepartment()">+ Add</button>
+      </div>
+      <div id="deptsList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128202; Backup &amp; Reset</div>
+      <div class="card-sub">Export your settings or reset to defaults</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn-sm btn-gray" onclick="exportSettings()">&#128229; Export JSON</button>
+        <button class="btn-sm btn-gray" onclick="importSettings()">&#128228; Import JSON</button>
+        <button class="btn-sm btn-red" onclick="resetFairnessHistoryConfirm()">&#9851; Reset Fairness</button>
+      </div>
+      <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImportFile(event)" />
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="sitesModal">
@@ -323,6 +381,10 @@
     </div>
     <div id="skillChipsContainer" style="margin:16px 0;"></div>
     <div class="hint" id="skillSummary"></div>
+    <div id="skillRatingsSection" style="margin-top:14px;display:none;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#11088; Skill ratings (1-5)</label>
+      <div id="skillRatingsContainer"></div>
+    </div>
     <div style="margin-top:14px;">
       <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#128221; Notes (private)</label>
       <textarea id="skillNotes" placeholder="e.g. Has back injury - no heavy lifting&#10;Good Japanese speaker&#10;Prefers morning shift" style="height:70px;font-size:12px;"></textarea>
@@ -386,9 +448,28 @@
 // ============ CONFIG ============
 const API_URL = "https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec";
 
-const LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
-const SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
-const DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
+// ============ CONFIG (mutable - editable in Settings) ============
+let LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
+let SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
+let DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
+
+// Load any user customizations from localStorage
+try {
+  const savedL = JSON.parse(localStorage.getItem("zozo_leaders_v1") || "null");
+  if (savedL && Array.isArray(savedL)) LEADERS = savedL;
+} catch(e) {}
+try {
+  const savedSL = JSON.parse(localStorage.getItem("zozo_subleaders_v1") || "null");
+  if (savedSL && Array.isArray(savedSL)) SUBLEADERS = savedSL;
+} catch(e) {}
+try {
+  const savedD = JSON.parse(localStorage.getItem("zozo_depts_v1") || "null");
+  if (savedD && Array.isArray(savedD)) DEPARTMENTS = savedD;
+} catch(e) {}
+
+function saveLeaders() { localStorage.setItem("zozo_leaders_v1", JSON.stringify(LEADERS)); }
+function saveSubLeaders() { localStorage.setItem("zozo_subleaders_v1", JSON.stringify(SUBLEADERS)); }
+function saveDepartments() { localStorage.setItem("zozo_depts_v1", JSON.stringify(DEPARTMENTS)); }
 
 const SKILL_DATABASE = {
   "GAUTAM ANIL": ["管理","ソーター1","ソーター2","ソーター3"],
@@ -651,7 +732,7 @@ let staffMap = [];
 let todayRoster = [], results = [], unmatched = [], extraReactors = [];
 let currentTab = "missing";
 let assignRoster = [], assignmentResult = [];
-let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null;
+let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null, skillEditRatings = {};
 let skillOverrides = {};
 try { skillOverrides = JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) {}
 
@@ -686,12 +767,12 @@ function getSkills(realName) {
   const norm = (realName||"").toUpperCase().trim();
   if (skillOverrides[norm]) {
     const o = skillOverrides[norm];
-    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "" };
+    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "", ratings: o.ratings || {} };
   }
   for (const key in SKILL_DATABASE) {
-    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "" };
+    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "", ratings: {} };
   }
-  return { depts: [], primary: null, notes: "" };
+  return { depts: [], primary: null, notes: "", ratings: {} };
 }
 function saveSkillsToStorage() { localStorage.setItem("zozo_skills_v1", JSON.stringify(skillOverrides)); }
 function renderSkillTags(realName) {
@@ -701,7 +782,9 @@ function renderSkillTags(realName) {
     html = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
   } else {
     html = '<div style="margin-top:6px;">' + s.depts.map(function(d) {
-      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
+      const r = s.ratings && s.ratings[d] ? s.ratings[d] : 0;
+      const stars = r > 0 ? " " + "\u2605".repeat(r) : "";
+      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + stars + '</span>';
     }).join("") + '</div>';
   }
   if (s.notes) {
@@ -715,10 +798,43 @@ function openSkillEditor(realName) {
   const s = getSkills(realName);
   skillEditDepts = (s.depts || []).slice();
   skillEditPrimary = s.primary || null;
+  skillEditRatings = Object.assign({}, s.ratings || {});
   document.getElementById("skillModalTitle").textContent = "\u{1F3AF} " + realName;
   document.getElementById("skillNotes").value = s.notes || "";
   renderSkillChips();
+  renderSkillRatings();
   document.getElementById("skillModal").classList.add("show");
+}
+
+function renderSkillRatings() {
+  const section = document.getElementById("skillRatingsSection");
+  const container = document.getElementById("skillRatingsContainer");
+  if (!skillEditDepts.length) {
+    section.style.display = "none";
+    return;
+  }
+  section.style.display = "block";
+  container.innerHTML = skillEditDepts.map(function(d) {
+    const rating = skillEditRatings[d] || 0;
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+      stars += '<span class="star ' + (i <= rating ? "on" : "") + '" onclick="setSkillRating(\'' + d.replace(/'/g, "\\'") + '\', ' + i + ')">&#9733;</span>';
+    }
+    return '<div class="star-row">' +
+      '<div class="dept-name">' + escapeHtml(d) + (d === skillEditPrimary ? ' &#11088;' : '') + '</div>' +
+      '<div class="stars">' + stars + '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function setSkillRating(dept, rating) {
+  // Tap same star again to clear
+  if (skillEditRatings[dept] === rating) {
+    delete skillEditRatings[dept];
+  } else {
+    skillEditRatings[dept] = rating;
+  }
+  renderSkillRatings();
 }
 function openSkillEditorByIdx(idx) {
   const staff = staffMap[idx];
@@ -748,20 +864,27 @@ function toggleSkill(d) {
     skillEditPrimary = d;
   } else {
     skillEditDepts = skillEditDepts.filter(function(x) { return x !== d; });
+    delete skillEditRatings[d];
     skillEditPrimary = skillEditDepts[0] || null;
   }
   renderSkillChips();
+  renderSkillRatings();
 }
 function saveSkillEdit() {
   if (!skillEditTarget) return;
   if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
   const notes = (document.getElementById("skillNotes").value || "").trim();
   const norm = skillEditTarget.toUpperCase().trim();
+  // Clean up ratings - only keep depts that are still in the list
+  const cleanRatings = {};
+  for (const d in skillEditRatings) {
+    if (skillEditDepts.indexOf(d) !== -1) cleanRatings[d] = skillEditRatings[d];
+  }
   if (skillEditDepts.length === 0 && !notes) {
     delete skillOverrides[norm];
     deleteSkillFromSheet(norm);
   } else {
-    const data = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes };
+    const data = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes, ratings: cleanRatings };
     skillOverrides[norm] = data;
     pushSkillToSheet(norm, data);
   }
@@ -868,6 +991,7 @@ function switchPage(page, el) {
   el.classList.add("active");
   if (page === "manage") renderManage();
   if (page === "rankings") { setupRankings(); renderRankings(); }
+  if (page === "settings") renderSettings();
 }
 
 // ============ REACTION CHECKER ============
@@ -1143,11 +1267,13 @@ function loadAssignRoster() {
     if (seen[k]) return;
     seen[k] = true;
     const skill = findSkillsFor(name);
+    const ratings = skill ? (skillOverrides[(skill.name||"").toUpperCase().trim()] || {}).ratings || {} : {};
     assignRoster.push({
       input: name,
       name: skill ? skill.name : name,
       depts: skill ? skill.depts : [],
       primary: skill ? skill.primary : null,
+      ratings: ratings,
       assigned: null,
       leaderRole: null,
       forced: false
@@ -1327,17 +1453,22 @@ function runAssignment() {
     }
   });
 
-  // STEP 5: Fill by department priority (with fairness)
+  // STEP 5: Fill by department priority (with ratings + fairness)
   const fillOrder = ["\u7BA1\u7406", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "TC", "\u6295\u5165", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "\u8907\u6570", "\u5358\u6570"];
   fillOrder.forEach(function(dept) {
     while (remaining[dept] > 0) {
       let candidates = assignmentResult.filter(function(p){return !p.assigned && p.depts.indexOf(dept) !== -1 && !isBanned(p.name, dept);});
       if (candidates.length === 0) break;
-      if (rules.fairness) {
-        candidates.sort(function(a,b) {
+      // Sort: ratings (higher first), then fairness (lower first if enabled)
+      candidates.sort(function(a, b) {
+        const ra = (a.ratings && a.ratings[dept]) || 0;
+        const rb = (b.ratings && b.ratings[dept]) || 0;
+        if (rb !== ra) return rb - ra; // higher rating wins
+        if (rules.fairness) {
           return getFairnessScore(a.name, dept) - getFairnessScore(b.name, dept);
-        });
-      }
+        }
+        return 0;
+      });
       candidates[0].assigned = dept;
       remaining[dept]--;
     }
@@ -1422,7 +1553,10 @@ function renderAssignmentResults(needs) {
       } else if (isLeader(p.name)) badge = '<span class="leader-tag">LEADER</span>';
       else if (isSubLeader(p.name)) badge = '<span class="subleader-tag">SUB</span>';
       if (p.forced) badge = '<div class="badge badge-extra">Forced</div>';
-      return '<div class="' + rowClass + '"><div><div class="staff-name">' + escapeHtml(p.name) + '</div>' +
+      // Show rating for the assigned dept
+      const rating = (p.ratings && p.ratings[p.assigned]) || 0;
+      const ratingStars = rating > 0 ? '<span style="color:#fbbf24;margin-left:6px;font-size:13px;">' + "\u2605".repeat(rating) + '</span>' : '';
+      return '<div class="' + rowClass + '"><div><div class="staff-name">' + escapeHtml(p.name) + ratingStars + '</div>' +
         (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">No skill data</div>') +
         '</div>' + badge + '</div>';
     }).join("");
@@ -1642,6 +1776,259 @@ function resetFairnessHistory() {
   fairnessHistory = {};
   saveFairness();
   showToast("Fairness history reset");
+}
+
+// ============ SETTINGS PAGE ============
+function renderSettings() {
+  renderLeadersList();
+  renderSubLeadersList();
+  renderDepartmentsList();
+}
+
+function getAllKnownNames() {
+  const names = new Set();
+  staffMap.forEach(function(s){names.add(s.real.toUpperCase().trim());});
+  for (const k in SKILL_DATABASE) names.add(k.toUpperCase().trim());
+  for (const k in skillOverrides) names.add(k.toUpperCase().trim());
+  return Array.from(names).sort();
+}
+
+function onLeaderInput() {
+  const q = document.getElementById("newLeaderInput").value.trim().toLowerCase();
+  const sug = document.getElementById("leaderSuggestions");
+  if (q.length < 2) { sug.innerHTML = ""; return; }
+  const names = getAllKnownNames().filter(function(n) {
+    return n.toLowerCase().indexOf(q) !== -1 && LEADERS.indexOf(n) === -1;
+  }).slice(0, 5);
+  sug.innerHTML = names.map(function(n) {
+    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
+  }).join("");
+}
+
+function pickLeaderName(name) {
+  document.getElementById("newLeaderInput").value = name;
+  document.getElementById("leaderSuggestions").innerHTML = "";
+}
+
+function promoteToLeader() {
+  const name = document.getElementById("newLeaderInput").value.trim().toUpperCase();
+  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
+  if (LEADERS.indexOf(name) !== -1) { showToast("Already a leader", "#dc2626"); return; }
+  // Remove from sub-leaders if present
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  LEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  document.getElementById("newLeaderInput").value = "";
+  document.getElementById("leaderSuggestions").innerHTML = "";
+  showToast("\u{1F451} " + name + " promoted to LEADER");
+  renderSettings();
+}
+
+function demoteLeader(name) {
+  LEADERS = LEADERS.filter(function(n){return n !== name;});
+  saveLeaders();
+  showToast(name + " demoted");
+  renderSettings();
+}
+
+function renderLeadersList() {
+  document.getElementById("leadersCount").textContent = "(" + LEADERS.length + ")";
+  const html = LEADERS.length ? LEADERS.map(function(n) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--leader-bg);border:1px solid var(--leader-border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">&#128081; ' + escapeHtml(n) + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveLeaderToSub(\'' + n.replace(/'/g, "\\'") + '\')" title="Demote to Sub-leader">&darr; SUB</button>' +
+        '<button class="btn-sm btn-red" onclick="demoteLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No leaders</div>';
+  document.getElementById("leadersList").innerHTML = html;
+}
+
+function moveLeaderToSub(name) {
+  LEADERS = LEADERS.filter(function(n){return n !== name;});
+  if (SUBLEADERS.indexOf(name) === -1) SUBLEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  showToast(name + " moved to Sub-leader");
+  renderSettings();
+}
+
+function onSubLeaderInput() {
+  const q = document.getElementById("newSubLeaderInput").value.trim().toLowerCase();
+  const sug = document.getElementById("subleaderSuggestions");
+  if (q.length < 2) { sug.innerHTML = ""; return; }
+  const names = getAllKnownNames().filter(function(n) {
+    return n.toLowerCase().indexOf(q) !== -1 && SUBLEADERS.indexOf(n) === -1 && LEADERS.indexOf(n) === -1;
+  }).slice(0, 5);
+  sug.innerHTML = names.map(function(n) {
+    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickSubLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
+  }).join("");
+}
+
+function pickSubLeaderName(name) {
+  document.getElementById("newSubLeaderInput").value = name;
+  document.getElementById("subleaderSuggestions").innerHTML = "";
+}
+
+function promoteToSubLeader() {
+  const name = document.getElementById("newSubLeaderInput").value.trim().toUpperCase();
+  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
+  if (SUBLEADERS.indexOf(name) !== -1) { showToast("Already a sub-leader", "#dc2626"); return; }
+  if (LEADERS.indexOf(name) !== -1) { showToast("Already a main leader", "#dc2626"); return; }
+  SUBLEADERS.push(name);
+  saveSubLeaders();
+  document.getElementById("newSubLeaderInput").value = "";
+  document.getElementById("subleaderSuggestions").innerHTML = "";
+  showToast("\u2B50 " + name + " promoted to SUB-LEADER");
+  renderSettings();
+}
+
+function demoteSubLeader(name) {
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  saveSubLeaders();
+  showToast(name + " demoted");
+  renderSettings();
+}
+
+function moveSubToLeader(name) {
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  if (LEADERS.indexOf(name) === -1) LEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  showToast("\u{1F451} " + name + " promoted to LEADER");
+  renderSettings();
+}
+
+function renderSubLeadersList() {
+  document.getElementById("subleadersCount").textContent = "(" + SUBLEADERS.length + ")";
+  const html = SUBLEADERS.length ? SUBLEADERS.map(function(n) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--subleader-bg);border:1px solid var(--subleader-border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">&#11088; ' + escapeHtml(n) + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveSubToLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Promote to Leader">&uarr; LEADER</button>' +
+        '<button class="btn-sm btn-red" onclick="demoteSubLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No sub-leaders</div>';
+  document.getElementById("subleadersList").innerHTML = html;
+}
+
+function addDepartment() {
+  const name = document.getElementById("newDeptInput").value.trim();
+  if (!name) { showToast("Enter dept name!", "#dc2626"); return; }
+  if (DEPARTMENTS.indexOf(name) !== -1) { showToast("Already exists", "#dc2626"); return; }
+  DEPARTMENTS.push(name);
+  saveDepartments();
+  document.getElementById("newDeptInput").value = "";
+  showToast("\u2795 " + name + " added");
+  renderSettings();
+}
+
+function removeDepartment(name) {
+  // Confirm because this affects assignments
+  document.getElementById("confirmTitle").textContent = "Remove Department";
+  document.getElementById("confirmMsg").textContent = "Remove '" + name + "'? This will not affect existing skills, but the department won't appear in future assignments.";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = function() {
+    DEPARTMENTS = DEPARTMENTS.filter(function(d){return d !== name;});
+    saveDepartments();
+    closeConfirm();
+    showToast(name + " removed", "#dc2626");
+    renderSettings();
+  };
+}
+
+function moveDept(name, direction) {
+  const idx = DEPARTMENTS.indexOf(name);
+  if (idx === -1) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= DEPARTMENTS.length) return;
+  DEPARTMENTS.splice(idx, 1);
+  DEPARTMENTS.splice(newIdx, 0, name);
+  saveDepartments();
+  renderSettings();
+}
+
+function renderDepartmentsList() {
+  document.getElementById("deptsCount").textContent = "(" + DEPARTMENTS.length + ")";
+  const html = DEPARTMENTS.length ? DEPARTMENTS.map(function(d, i) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">' + escapeHtml(d) + '</div>' +
+      '<div style="display:flex;gap:4px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', -1)" title="Up" ' + (i === 0 ? 'disabled style="opacity:0.4;"' : '') + '>&uarr;</button>' +
+        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', 1)" title="Down" ' + (i === DEPARTMENTS.length - 1 ? 'disabled style="opacity:0.4;"' : '') + '>&darr;</button>' +
+        '<button class="btn-sm btn-red" onclick="removeDepartment(\'' + d.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No departments</div>';
+  document.getElementById("deptsList").innerHTML = html;
+}
+
+// ============ BACKUP / IMPORT ============
+function exportSettings() {
+  const data = {
+    leaders: LEADERS,
+    subleaders: SUBLEADERS,
+    departments: DEPARTMENTS,
+    skillOverrides: skillOverrides,
+    locks: locks,
+    bans: bans,
+    fairnessHistory: fairnessHistory,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "zozo-settings-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("\u{1F4E5} Exported!");
+}
+
+function importSettings() {
+  document.getElementById("importFile").click();
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.leaders) { LEADERS = data.leaders; saveLeaders(); }
+      if (data.subleaders) { SUBLEADERS = data.subleaders; saveSubLeaders(); }
+      if (data.departments) { DEPARTMENTS = data.departments; saveDepartments(); }
+      if (data.skillOverrides) { skillOverrides = data.skillOverrides; saveSkillsToStorage(); }
+      if (data.locks) { locks = data.locks; saveLocks(); }
+      if (data.bans) { bans = data.bans; saveBans(); }
+      if (data.fairnessHistory) { fairnessHistory = data.fairnessHistory; saveFairness(); }
+      showToast("\u{1F4E4} Imported!");
+      renderSettings();
+    } catch(err) {
+      showToast("Invalid file", "#dc2626");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetFairnessHistoryConfirm() {
+  document.getElementById("confirmTitle").textContent = "Reset Fairness";
+  document.getElementById("confirmMsg").textContent = "Clear all fairness tracking history? AI will no longer remember who got hard departments recently.";
+  document.getElementById("confirmOk").textContent = "Reset";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = function() {
+    fairnessHistory = {};
+    saveFairness();
+    closeConfirm();
+    showToast("Fairness history cleared");
+  };
 }
 
 // ============ RANKINGS ============
