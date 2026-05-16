@@ -348,6 +348,12 @@
     </div>
 
     <div class="card">
+      <div class="card-title">&#128279; Reactor Aliases <span id="aliasesCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">When you confirm an ambiguous reactor match in the Checker, it's saved here for instant matching next time</div>
+      <div id="aliasesList" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
       <div class="card-title">&#128202; Backup &amp; Reset</div>
       <div class="card-sub">Export your settings or reset to defaults</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
@@ -425,6 +431,17 @@
     </div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeLocksModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="disambiguateModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-title">&#129300; Did you mean?</div>
+    <div id="disambiguateList" style="margin-bottom:16px;max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="skipDisambiguation()">Skip / Mark Unknown</button>
+      <button style="color:white;background:var(--accent);" onclick="applyDisambiguation()">Apply &amp; Save</button>
     </div>
   </div>
 </div>
@@ -735,6 +752,12 @@ let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null, skillE
 let skillOverrides = {};
 try { skillOverrides = JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) {}
 
+// Aliases: maps reactor name → real staff name (or "__IGNORE__")
+// E.g. "ti ka" → "__IGNORE__" or "ram kumar" → "RAM BAHADUR KUMAR"
+let aliases = {};
+try { aliases = JSON.parse(localStorage.getItem("zozo_aliases_v1") || "{}"); } catch(e) {}
+function saveAliases() { localStorage.setItem("zozo_aliases_v1", JSON.stringify(aliases)); }
+
 // Locks: {NAME: {dept: "ソーター1"}} - always assign to this dept
 // Bans: {NAME: [dept1, dept2]} - never assign to these depts
 let locks = {};
@@ -994,20 +1017,112 @@ function switchPage(page, el) {
 }
 
 // ============ REACTION CHECKER ============
+function tokenize(s) {
+  return (s || "").toLowerCase()
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(function(t){return t.length >= 2;});
+}
+
 function nameMatches(name, staff) {
   const n = normalize(name); if (!n) return false;
   const fn = normalize(staff.fb), rn = normalize(staff.real);
+  // Exact normalized match
   if (fn === n || rn === n) return true;
-  if (n.length >= 4 && ((fn && fn.indexOf(n) !== -1) || (rn && rn.indexOf(n) !== -1))) return true;
-  if (fn && fn.length >= 4 && n.indexOf(fn) !== -1) return true;
-  if (rn && rn.length >= 4 && n.indexOf(rn) !== -1) return true;
-  return false;
+  // Token-level matching: require at least 2 word tokens of input to match staff tokens
+  const inputTokens = tokenize(name);
+  if (inputTokens.length < 2) return false;
+  const fbTokens = tokenize(staff.fb);
+  const realTokens = tokenize(staff.real);
+  const staffTokens = fbTokens.concat(realTokens);
+  if (staffTokens.length === 0) return false;
+  let matches = 0;
+  const usedIdx = {};
+  for (let j = 0; j < inputTokens.length; j++) {
+    const inTok = inputTokens[j];
+    if (inTok.length < 3) continue;
+    for (let i = 0; i < staffTokens.length; i++) {
+      if (usedIdx[i]) continue;
+      const sTok = staffTokens[i];
+      if (sTok.length < 3) continue;
+      if (inTok === sTok) { matches++; usedIdx[i] = true; break; }
+      // Prefix match for longer tokens (handles "ASHMI" vs "ASHMITA")
+      if (inTok.length >= 4 && sTok.length >= 4) {
+        if (inTok.indexOf(sTok) === 0 || sTok.indexOf(inTok) === 0) {
+          matches++; usedIdx[i] = true; break;
+        }
+      }
+    }
+  }
+  return matches >= 2;
 }
 function findStaff(name) {
   for (let i=0; i<staffMap.length; i++) {
     if (nameMatches(name, staffMap[i])) return staffMap[i];
   }
   return null;
+}
+
+// Confidence-based matching: returns score 0..1
+function scoreNameMatch(name, staff) {
+  const n = normalize(name); if (!n) return 0;
+  const fn = normalize(staff.fb), rn = normalize(staff.real);
+  if (fn === n || rn === n) return 1.0;
+  const inputTokens = tokenize(name).filter(function(t){return t.length >= 3;});
+  if (inputTokens.length === 0) return 0;
+  const staffTokens = tokenize(staff.fb).concat(tokenize(staff.real)).filter(function(t){return t.length >= 3;});
+  if (staffTokens.length === 0) return 0;
+  let matches = 0;
+  const used = {};
+  for (let j = 0; j < inputTokens.length; j++) {
+    const inTok = inputTokens[j];
+    for (let i = 0; i < staffTokens.length; i++) {
+      if (used[i]) continue;
+      const sTok = staffTokens[i];
+      if (inTok === sTok) { matches += 1; used[i] = true; break; }
+      if (inTok.length >= 4 && sTok.length >= 4 && (inTok.indexOf(sTok) === 0 || sTok.indexOf(inTok) === 0)) {
+        matches += 0.7; used[i] = true; break;
+      }
+    }
+  }
+  return Math.min(matches / inputTokens.length, 0.95);
+}
+
+// Find best matches with confidence levels
+function findStaffWithConfidence(name) {
+  // 1. Check aliases first
+  const normInput = normalize(name);
+  if (aliases[normInput] !== undefined) {
+    if (aliases[normInput] === "__IGNORE__") return { aliased: true, ignore: true, original: name };
+    const aliasedReal = aliases[normInput];
+    for (let i = 0; i < staffMap.length; i++) {
+      if (normalize(staffMap[i].real) === normalize(aliasedReal)) {
+        return { aliased: true, staff: staffMap[i], original: name };
+      }
+    }
+  }
+  
+  // 2. Score all staff
+  const scored = [];
+  for (let i = 0; i < staffMap.length; i++) {
+    const score = scoreNameMatch(name, staffMap[i]);
+    if (score > 0) scored.push({ staff: staffMap[i], score: score });
+  }
+  scored.sort(function(a,b){return b.score - a.score;});
+  
+  if (scored.length === 0) return { unknown: true, original: name };
+  
+  const best = scored[0];
+  // High confidence: auto-match
+  if (best.score >= 0.85) {
+    return { confident: true, staff: best.staff, score: best.score, original: name };
+  }
+  // Medium confidence: ambiguous, ask user
+  if (best.score >= 0.35) {
+    return { ambiguous: true, candidates: scored.slice(0, 5), original: name };
+  }
+  return { unknown: true, original: name };
 }
 
 function loadRoster() {
@@ -1048,31 +1163,56 @@ function checkReactions() {
   document.getElementById("reactorCount").textContent = lines.length + " detected";
   unmatched = []; extraReactors = [];
   results = todayRoster.map(function(s) { return {fb: s.fb, real: s.real, reacted: false}; });
+  
+  // First pass: collect confident matches, mark ambiguous ones for popup
+  const ambiguous = [];
+  const processedNames = {};
+  
   lines.forEach(function(name) {
     if (!normalize(name)) return;
-    const dbMatch = findStaff(name);
-    let foundInRoster = false;
-    if (dbMatch) {
-      for (let i=0; i<results.length; i++) {
-        const r = results[i];
-        if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
-          r.reacted = true; foundInRoster = true;
-        }
-      }
-      if (!foundInRoster) {
-        let exists = false;
-        for (let i=0; i<extraReactors.length; i++) {
-          if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
-        }
-        if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
-      }
+    const k = normalize(name);
+    if (processedNames[k]) return; // skip duplicates
+    processedNames[k] = true;
+    
+    const result = findStaffWithConfidence(name);
+    
+    if (result.ignore) return; // aliased to ignore
+    
+    if (result.aliased || result.confident) {
+      applyReactorMatch(result.staff, name);
+    } else if (result.ambiguous) {
+      ambiguous.push({ name: name, candidates: result.candidates });
     } else {
-      for (let i=0; i<results.length; i++) {
-        if (nameMatches(name, results[i])) { results[i].reacted = true; foundInRoster = true; }
-      }
-      if (!foundInRoster) unmatched.push(name);
+      unmatched.push(name);
     }
   });
+  
+  // If there are ambiguous matches, show popup
+  if (ambiguous.length > 0) {
+    showDisambiguateModal(ambiguous);
+  } else {
+    finalizeReactionResults();
+  }
+}
+
+function applyReactorMatch(dbMatch, originalName) {
+  let foundInRoster = false;
+  for (let i=0; i<results.length; i++) {
+    const r = results[i];
+    if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
+      r.reacted = true; foundInRoster = true;
+    }
+  }
+  if (!foundInRoster) {
+    let exists = false;
+    for (let i=0; i<extraReactors.length; i++) {
+      if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
+    }
+    if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
+  }
+}
+
+function finalizeReactionResults() {
   const reactedNum = results.filter(function(s){return s.reacted;}).length;
   document.getElementById("reactedCount").textContent = reactedNum;
   document.getElementById("missingCount").textContent = results.length - reactedNum;
@@ -1086,6 +1226,117 @@ function checkReactions() {
     if (i === 2) tabs[i].classList.add("active"); else tabs[i].classList.remove("active");
   }
   renderList();
+}
+
+// ============ DISAMBIGUATION MODAL ============
+let pendingAmbiguous = [];
+let userPicks = {}; // name -> choice ("real name" or "__IGNORE__")
+
+function showDisambiguateModal(ambiguous) {
+  pendingAmbiguous = ambiguous;
+  userPicks = {};
+  renderDisambiguateModal();
+  document.getElementById("disambiguateModal").classList.add("show");
+}
+
+function renderDisambiguateModal() {
+  const container = document.getElementById("disambiguateList");
+  let html = '<div style="margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6;">' +
+    '\u{1F4A1} ' + pendingAmbiguous.length + ' reactor name(s) need clarification. Pick the right person or mark as unknown. <strong>Your choices are saved</strong> so next time the same name comes up, it\'ll match automatically.' +
+  '</div>';
+  
+  pendingAmbiguous.forEach(function(item, idx) {
+    const reactorKey = "amb-" + idx;
+    html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">';
+    html += '<div style="font-weight:700;font-size:14px;margin-bottom:8px;">\u{1F914} <span style="color:var(--accent);">' + escapeHtml(item.name) + '</span></div>';
+    html += '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Did you mean...</div>';
+    
+    item.candidates.forEach(function(c, cidx) {
+      const confidencePct = Math.round(c.score * 100);
+      const cVal = c.staff.real.replace(/"/g, "&quot;");
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
+        '<input type="radio" name="' + reactorKey + '" value="' + cVal + '" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:13px;font-weight:600;">' + escapeHtml(c.staff.real) + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);">FB: ' + escapeHtml(c.staff.fb) + '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;font-weight:700;color:' + (confidencePct >= 70 ? "var(--green)" : confidencePct >= 50 ? "var(--orange)" : "var(--red)") + ';">' + confidencePct + '%</div>' +
+      '</label>';
+    });
+    
+    // None of these option
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
+      '<input type="radio" name="' + reactorKey + '" value="__IGNORE__" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
+      '<div style="flex:1;font-size:13px;color:var(--text2);">\u274C None of these (not a staff member)</div>' +
+    '</label>';
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function pickDisambiguate(reactorKey, choice, idx) {
+  const item = pendingAmbiguous[idx];
+  userPicks[item.name] = choice;
+}
+
+function applyDisambiguation() {
+  // Process each ambiguous match based on user pick
+  pendingAmbiguous.forEach(function(item) {
+    const pick = userPicks[item.name];
+    const normInput = normalize(item.name);
+    if (!pick) {
+      // No selection made → treat as unknown
+      unmatched.push(item.name);
+      return;
+    }
+    if (pick === "__IGNORE__") {
+      aliases[normInput] = "__IGNORE__";
+      return;
+    }
+    // Save alias and apply match
+    aliases[normInput] = pick;
+    for (let i = 0; i < staffMap.length; i++) {
+      if (normalize(staffMap[i].real) === normalize(pick)) {
+        applyReactorMatch(staffMap[i], item.name);
+        break;
+      }
+    }
+  });
+  saveAliases();
+  document.getElementById("disambiguateModal").classList.remove("show");
+  pendingAmbiguous = [];
+  userPicks = {};
+  finalizeReactionResults();
+  showToast("Saved aliases. Next time these auto-match!");
+}
+
+function skipDisambiguation() {
+  // Treat all unchosen as unknown
+  pendingAmbiguous.forEach(function(item) {
+    if (!userPicks[item.name]) unmatched.push(item.name);
+  });
+  // Apply any that were chosen
+  pendingAmbiguous.forEach(function(item) {
+    const pick = userPicks[item.name];
+    const normInput = normalize(item.name);
+    if (pick && pick !== "__IGNORE__") {
+      aliases[normInput] = pick;
+      for (let i = 0; i < staffMap.length; i++) {
+        if (normalize(staffMap[i].real) === normalize(pick)) {
+          applyReactorMatch(staffMap[i], item.name);
+          break;
+        }
+      }
+    } else if (pick === "__IGNORE__") {
+      aliases[normInput] = "__IGNORE__";
+    }
+  });
+  saveAliases();
+  document.getElementById("disambiguateModal").classList.remove("show");
+  pendingAmbiguous = [];
+  userPicks = {};
+  finalizeReactionResults();
 }
 function setTab(tab, el) {
   currentTab = tab;
@@ -1782,6 +2033,35 @@ function renderSettings() {
   renderLeadersList();
   renderSubLeadersList();
   renderDepartmentsList();
+  renderAliasesList();
+}
+
+function renderAliasesList() {
+  const keys = Object.keys(aliases);
+  document.getElementById("aliasesCount").textContent = "(" + keys.length + ")";
+  if (!keys.length) {
+    document.getElementById("aliasesList").innerHTML = '<div class="empty" style="padding:14px;font-size:12px;">No aliases yet. They\'ll appear as you confirm ambiguous matches.</div>';
+    return;
+  }
+  const html = keys.sort().map(function(k) {
+    const target = aliases[k];
+    const isIgnore = target === "__IGNORE__";
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:' + (isIgnore ? "var(--red-light)" : "var(--accent-light)") + ';border-radius:6px;margin-bottom:4px;">' +
+      '<div style="font-size:12px;flex:1;min-width:0;">' +
+        '<div style="font-weight:600;">' + escapeHtml(k) + '</div>' +
+        '<div style="color:var(--text2);">&rarr; ' + (isIgnore ? '\u274C Ignore' : escapeHtml(target)) + '</div>' +
+      '</div>' +
+      '<button class="btn-sm btn-red" onclick="removeAlias(\'' + k.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+    '</div>';
+  }).join("");
+  document.getElementById("aliasesList").innerHTML = html;
+}
+
+function removeAlias(key) {
+  delete aliases[key];
+  saveAliases();
+  renderAliasesList();
+  showToast("Alias removed");
 }
 
 function getAllKnownNames() {
@@ -1976,6 +2256,7 @@ function exportSettings() {
     locks: locks,
     bans: bans,
     fairnessHistory: fairnessHistory,
+    aliases: aliases,
     exportedAt: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
@@ -2008,6 +2289,7 @@ function handleImportFile(event) {
       if (data.locks) { locks = data.locks; saveLocks(); }
       if (data.bans) { bans = data.bans; saveBans(); }
       if (data.fairnessHistory) { fairnessHistory = data.fairnessHistory; saveFairness(); }
+      if (data.aliases) { aliases = data.aliases; saveAliases(); }
       showToast("\u{1F4E4} Imported!");
       renderSettings();
     } catch(err) {
