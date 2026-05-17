@@ -176,6 +176,7 @@
       <textarea id="rosterInput" placeholder="TAMANG ASHMITA"></textarea>
       <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
         <button class="btn" onclick="loadRoster()">Load Roster</button>
+        <button class="btn-sm btn-gray" onclick="viewLoadedRoster()" id="viewRosterBtn" style="display:none;">&#128064; View loaded</button>
         <button class="btn-sm btn-gray" onclick="clearRoster()">Clear</button>
         <span class="roster-count" id="rosterCount"></span>
       </div>
@@ -431,6 +432,18 @@
     </div>
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeLocksModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rosterModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-title">&#128064; Loaded Roster <span id="rosterModalCount" style="font-size:13px;color:var(--text2);font-weight:normal;"></span></div>
+    <div class="modal-msg">These are the people currently in today's shift. Tap &times; to remove anyone who shouldn't be here.</div>
+    <input type="text" class="search-input" id="rosterModalSearch" placeholder="&#128269; Search..." oninput="renderRosterModalList()" style="margin-bottom:10px;" />
+    <div id="rosterModalList" style="max-height:50vh;overflow-y:auto;margin-bottom:14px;"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeRosterModal()">Close</button>
     </div>
   </div>
 </div>
@@ -1137,17 +1150,66 @@ function loadRoster() {
     if (seen[k]) return;
     seen[k] = true;
     const found = findStaff(name);
-    if (found) todayRoster.push({fb: found.fb, real: found.real});
-    else { todayRoster.push({fb: name, real: "(not in database)"}); unmatchedCount++; }
+    if (found) todayRoster.push({fb: found.fb, real: found.real, input: name});
+    else { todayRoster.push({fb: name, real: "(not in database)", input: name}); unmatchedCount++; }
   });
   document.getElementById("rosterCount").textContent = todayRoster.length + "/" + lines.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
   document.getElementById("results").style.display = "none";
+  document.getElementById("viewRosterBtn").style.display = todayRoster.length ? "inline-flex" : "none";
   showToast(todayRoster.length + " loaded");
+}
+
+function viewLoadedRoster() {
+  if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  document.getElementById("rosterModal").classList.add("show");
+  document.getElementById("rosterModalSearch").value = "";
+  renderRosterModalList();
+}
+
+function closeRosterModal() {
+  document.getElementById("rosterModal").classList.remove("show");
+}
+
+function renderRosterModalList() {
+  const search = (document.getElementById("rosterModalSearch").value || "").toLowerCase();
+  const filtered = todayRoster.map(function(s, i){ return {fb: s.fb, real: s.real, input: s.input || s.fb, _idx: i}; })
+    .filter(function(s) {
+      if (!search) return true;
+      return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;
+    });
+  document.getElementById("rosterModalCount").textContent = "(" + todayRoster.length + ")";
+  const html = filtered.length ? filtered.map(function(s) {
+    const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    const isUnknown = s.real === "(not in database)";
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:' + (isUnknown ? "var(--red-light)" : "var(--bg)") + ';border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
+      '<div style="flex:1;min-width:0;font-size:12px;">' +
+        '<div style="font-weight:600;">' + escapeHtml(s.fb) + tag + '</div>' +
+        '<div style="color:var(--text3);">' + escapeHtml(s.real) + '</div>' +
+        (s.input && s.input !== s.fb ? '<div style="color:var(--text3);font-style:italic;font-size:10px;">typed: ' + escapeHtml(s.input) + '</div>' : '') +
+      '</div>' +
+      '<button class="btn-sm btn-red" onclick="removeFromRoster(' + s._idx + ')" title="Remove">&times;</button>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No matches</div>';
+  document.getElementById("rosterModalList").innerHTML = html;
+}
+
+function removeFromRoster(idx) {
+  const removed = todayRoster[idx];
+  todayRoster.splice(idx, 1);
+  document.getElementById("rosterCount").textContent = todayRoster.length + " loaded";
+  showToast("Removed " + (removed.real !== "(not in database)" ? removed.real : removed.fb), "#dc2626");
+  renderRosterModalList();
+  // If reactions already checked, hide stale results
+  if (document.getElementById("results").style.display !== "none") {
+    document.getElementById("results").style.display = "none";
+    showToast("Re-check reactions to update", "#d97706");
+  }
 }
 function clearRoster() {
   document.getElementById("rosterInput").value = "";
   document.getElementById("rosterCount").textContent = "";
   document.getElementById("results").style.display = "none";
+  document.getElementById("viewRosterBtn").style.display = "none";
   todayRoster = []; results = [];
 }
 function clearReactors() {
