@@ -123,13 +123,6 @@
   .skill-chip.primary { background:var(--yellow); color:var(--yellow-text); border-color:#f59e0b; }
   .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
   .skill-tag.primary { background:var(--yellow-bg); color:var(--yellow-text); }
-  .star-row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--bg); border-radius:6px; margin-bottom:4px; border:1px solid var(--border); }
-  .star-row .dept-name { font-size:12px; font-weight:600; flex:1; }
-  .stars { display:flex; gap:2px; }
-  .star { font-size:18px; cursor:pointer; user-select:none; line-height:1; color:#d1d5db; transition: color 0.1s; }
-  .star.on { color:#fbbf24; }
-  .star:hover { transform:scale(1.2); }
-  body.dark .star { color:#475569; }
   @media (max-width: 500px) {
     .add-grid { grid-template-columns: 1fr; }
     .stat-num { font-size: 20px; }
@@ -161,7 +154,6 @@
     <div class="page-tab" onclick="switchPage('assign',this)">&#127919; Assign</div>
     <div class="page-tab" onclick="switchPage('rankings',this)">&#128202; Rankings</div>
     <div class="page-tab" onclick="switchPage('manage',this)">&#128101; Manage</div>
-    <div class="page-tab" onclick="switchPage('settings',this)">&#9881; Settings</div>
   </div>
 
   <div class="page active" id="page-checker">
@@ -251,15 +243,7 @@
           <input type="checkbox" id="ruleNoForce" />
           <span>&#128683; Don't force-assign people outside their skills</span>
         </label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
-          <input type="checkbox" id="ruleFairness" />
-          <span>&#9878;&#65039; Fairness mode (rotate hard departments)</span>
-        </label>
-        <div class="hint" style="margin-bottom:10px;">Rules are saved automatically</div>
-        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px;">
-          <button class="btn-sm" style="background:var(--accent);color:white;width:100%;" onclick="openLocksModal()">&#128274; Manage Locks &amp; Bans</button>
-          <div class="hint" id="locksSummary" style="margin-top:6px;text-align:center;"></div>
-        </div>
+        <div class="hint">Rules are saved automatically</div>
       </div>
     </div>
     <div id="assignResults" style="display:none;">
@@ -309,61 +293,6 @@
       <div class="manage-list" id="manageList"></div>
     </div>
   </div>
-
-  <div class="page" id="page-settings">
-    <div class="info-box">
-      &#9881; <strong>Settings:</strong> Manage leaders, sub-leaders, departments. Changes sync to Google Sheet.
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#128081; Main Leaders <span id="leadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
-      <div class="card-sub">Always get &#31649;&#29702; role on &#12477;&#12540;&#12479;&#12540;1/2/3 machines</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input type="text" id="newLeaderInput" placeholder="Type name to promote..." oninput="onLeaderInput()" style="flex:1;" />
-        <button class="btn" onclick="promoteToLeader()">+ Add</button>
-      </div>
-      <div id="leaderSuggestions" style="margin-bottom:10px;"></div>
-      <div id="leadersList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#11088; Sub-Leaders <span id="subleadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
-      <div class="card-sub">Placed next to leaders on sorter lines as backup</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input type="text" id="newSubLeaderInput" placeholder="Type name to promote..." oninput="onSubLeaderInput()" style="flex:1;" />
-        <button class="btn" onclick="promoteToSubLeader()">+ Add</button>
-      </div>
-      <div id="subleaderSuggestions" style="margin-bottom:10px;"></div>
-      <div id="subleadersList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#128218; Departments <span id="deptsCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
-      <div class="card-sub">Used in assignments, skill editor, and rankings</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input type="text" id="newDeptInput" placeholder="e.g. &#26865;&#20986;&#12375; or Custom dept" style="flex:1;" />
-        <button class="btn" onclick="addDepartment()">+ Add</button>
-      </div>
-      <div id="deptsList"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#128279; Reactor Aliases <span id="aliasesCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
-      <div class="card-sub">When you confirm an ambiguous reactor match in the Checker, it's saved here for instant matching next time</div>
-      <div id="aliasesList" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#128202; Backup &amp; Reset</div>
-      <div class="card-sub">Export your settings or reset to defaults</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-        <button class="btn-sm btn-gray" onclick="exportSettings()">&#128229; Export JSON</button>
-        <button class="btn-sm btn-gray" onclick="importSettings()">&#128228; Import JSON</button>
-        <button class="btn-sm btn-red" onclick="resetFairnessHistoryConfirm()">&#9851; Reset Fairness</button>
-      </div>
-      <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImportFile(event)" />
-    </div>
-  </div>
 </div>
 
 <div class="modal-overlay" id="sitesModal">
@@ -386,10 +315,6 @@
     </div>
     <div id="skillChipsContainer" style="margin:16px 0;"></div>
     <div class="hint" id="skillSummary"></div>
-    <div id="skillRatingsSection" style="margin-top:14px;display:none;">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#11088; Skill ratings (1-5)</label>
-      <div id="skillRatingsContainer"></div>
-    </div>
     <div style="margin-top:14px;">
       <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#128221; Notes (private)</label>
       <textarea id="skillNotes" placeholder="e.g. Has back injury - no heavy lifting&#10;Good Japanese speaker&#10;Prefers morning shift" style="height:70px;font-size:12px;"></textarea>
@@ -397,51 +322,6 @@
     <div class="modal-btns">
       <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
       <button style="color:white;background:var(--accent);" onclick="saveSkillEdit()">Save</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="locksModal">
-  <div class="modal-box" style="max-width:500px;">
-    <div class="modal-title">&#128274; Locks &amp; Bans</div>
-    <div class="modal-msg">
-      &#128274; <strong>Lock</strong> = Always assign this person to this department<br>
-      &#128683; <strong>Ban</strong> = Never assign this person to this department
-    </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Type</label>
-      <div style="display:flex;gap:6px;">
-        <button id="lockTypeBtn" class="btn-sm" style="flex:1;background:var(--accent);color:white;" onclick="setLockType('lock')">&#128274; Lock</button>
-        <button id="banTypeBtn" class="btn-sm btn-gray" style="flex:1;" onclick="setLockType('ban')">&#128683; Ban</button>
-      </div>
-    </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Person</label>
-      <input type="text" id="lockPersonInput" placeholder="Type name (e.g. BUDHA MAGAR ROHIT)" oninput="onLockPersonInput()" />
-      <div id="lockPersonSuggestions" style="margin-top:4px;max-height:120px;overflow-y:auto;"></div>
-    </div>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Department</label>
-      <select id="lockDeptSelect" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;"></select>
-    </div>
-    <button class="btn" style="width:100%;margin-bottom:14px;" onclick="addLock()">+ Add</button>
-    <div style="border-top:1px solid var(--border);padding-top:10px;">
-      <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Current rules:</div>
-      <div id="locksList" style="max-height:200px;overflow-y:auto;"></div>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-gray" onclick="closeLocksModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="disambiguateModal">
-  <div class="modal-box" style="max-width:520px;">
-    <div class="modal-title">&#129300; Did you mean?</div>
-    <div id="disambiguateList" style="margin-bottom:16px;max-height:60vh;overflow-y:auto;"></div>
-    <div class="modal-btns">
-      <button class="btn-gray" onclick="skipDisambiguation()">Skip / Mark Unknown</button>
-      <button style="color:white;background:var(--accent);" onclick="applyDisambiguation()">Apply &amp; Save</button>
     </div>
   </div>
 </div>
@@ -464,28 +344,9 @@
 // ============ CONFIG ============
 const API_URL = "https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec";
 
-// ============ CONFIG (mutable - editable in Settings) ============
-let LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
-let SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
-let DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
-
-// Load any user customizations from localStorage
-try {
-  const savedL = JSON.parse(localStorage.getItem("zozo_leaders_v1") || "null");
-  if (savedL && Array.isArray(savedL)) LEADERS = savedL;
-} catch(e) {}
-try {
-  const savedSL = JSON.parse(localStorage.getItem("zozo_subleaders_v1") || "null");
-  if (savedSL && Array.isArray(savedSL)) SUBLEADERS = savedSL;
-} catch(e) {}
-try {
-  const savedD = JSON.parse(localStorage.getItem("zozo_depts_v1") || "null");
-  if (savedD && Array.isArray(savedD)) DEPARTMENTS = savedD;
-} catch(e) {}
-
-function saveLeaders() { localStorage.setItem("zozo_leaders_v1", JSON.stringify(LEADERS)); }
-function saveSubLeaders() { localStorage.setItem("zozo_subleaders_v1", JSON.stringify(SUBLEADERS)); }
-function saveDepartments() { localStorage.setItem("zozo_depts_v1", JSON.stringify(DEPARTMENTS)); }
+const LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
+const SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
+const DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
 
 const SKILL_DATABASE = {
   "GAUTAM ANIL": ["管理","ソーター1","ソーター2","ソーター3"],
@@ -748,30 +609,9 @@ let staffMap = [];
 let todayRoster = [], results = [], unmatched = [], extraReactors = [];
 let currentTab = "missing";
 let assignRoster = [], assignmentResult = [];
-let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null, skillEditRatings = {};
+let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null;
 let skillOverrides = {};
 try { skillOverrides = JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) {}
-
-// Aliases: maps reactor name → real staff name (or "__IGNORE__")
-// E.g. "ti ka" → "__IGNORE__" or "ram kumar" → "RAM BAHADUR KUMAR"
-let aliases = {};
-try { aliases = JSON.parse(localStorage.getItem("zozo_aliases_v1") || "{}"); } catch(e) {}
-function saveAliases() { localStorage.setItem("zozo_aliases_v1", JSON.stringify(aliases)); }
-
-// Locks: {NAME: {dept: "ソーター1"}} - always assign to this dept
-// Bans: {NAME: [dept1, dept2]} - never assign to these depts
-let locks = {};
-let bans = {};
-let fairnessHistory = {}; // {NAME: {dept: count}} - tracks recent hard-dept assignments
-try { locks = JSON.parse(localStorage.getItem("zozo_locks_v1") || "{}"); } catch(e) {}
-try { bans = JSON.parse(localStorage.getItem("zozo_bans_v1") || "{}"); } catch(e) {}
-try { fairnessHistory = JSON.parse(localStorage.getItem("zozo_fairness_v1") || "{}"); } catch(e) {}
-
-let lockType = "lock"; // current selection in locks modal
-
-function saveLocks() { localStorage.setItem("zozo_locks_v1", JSON.stringify(locks)); }
-function saveBans() { localStorage.setItem("zozo_bans_v1", JSON.stringify(bans)); }
-function saveFairness() { localStorage.setItem("zozo_fairness_v1", JSON.stringify(fairnessHistory)); }
 
 // ============ HELPERS ============
 function showToast(msg, color) {
@@ -789,12 +629,12 @@ function getSkills(realName) {
   const norm = (realName||"").toUpperCase().trim();
   if (skillOverrides[norm]) {
     const o = skillOverrides[norm];
-    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "", ratings: o.ratings || {} };
+    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "" };
   }
   for (const key in SKILL_DATABASE) {
-    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "", ratings: {} };
+    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "" };
   }
-  return { depts: [], primary: null, notes: "", ratings: {} };
+  return { depts: [], primary: null, notes: "" };
 }
 function saveSkillsToStorage() { localStorage.setItem("zozo_skills_v1", JSON.stringify(skillOverrides)); }
 function renderSkillTags(realName) {
@@ -804,9 +644,7 @@ function renderSkillTags(realName) {
     html = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
   } else {
     html = '<div style="margin-top:6px;">' + s.depts.map(function(d) {
-      const r = s.ratings && s.ratings[d] ? s.ratings[d] : 0;
-      const stars = r > 0 ? " " + "\u2605".repeat(r) : "";
-      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + stars + '</span>';
+      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
     }).join("") + '</div>';
   }
   if (s.notes) {
@@ -820,43 +658,10 @@ function openSkillEditor(realName) {
   const s = getSkills(realName);
   skillEditDepts = (s.depts || []).slice();
   skillEditPrimary = s.primary || null;
-  skillEditRatings = Object.assign({}, s.ratings || {});
   document.getElementById("skillModalTitle").textContent = "\u{1F3AF} " + realName;
   document.getElementById("skillNotes").value = s.notes || "";
   renderSkillChips();
-  renderSkillRatings();
   document.getElementById("skillModal").classList.add("show");
-}
-
-function renderSkillRatings() {
-  const section = document.getElementById("skillRatingsSection");
-  const container = document.getElementById("skillRatingsContainer");
-  if (!skillEditDepts.length) {
-    section.style.display = "none";
-    return;
-  }
-  section.style.display = "block";
-  container.innerHTML = skillEditDepts.map(function(d) {
-    const rating = skillEditRatings[d] || 0;
-    let stars = "";
-    for (let i = 1; i <= 5; i++) {
-      stars += '<span class="star ' + (i <= rating ? "on" : "") + '" onclick="setSkillRating(\'' + d.replace(/'/g, "\\'") + '\', ' + i + ')">&#9733;</span>';
-    }
-    return '<div class="star-row">' +
-      '<div class="dept-name">' + escapeHtml(d) + (d === skillEditPrimary ? ' &#11088;' : '') + '</div>' +
-      '<div class="stars">' + stars + '</div>' +
-    '</div>';
-  }).join("");
-}
-
-function setSkillRating(dept, rating) {
-  // Tap same star again to clear
-  if (skillEditRatings[dept] === rating) {
-    delete skillEditRatings[dept];
-  } else {
-    skillEditRatings[dept] = rating;
-  }
-  renderSkillRatings();
 }
 function openSkillEditorByIdx(idx) {
   const staff = staffMap[idx];
@@ -886,33 +691,23 @@ function toggleSkill(d) {
     skillEditPrimary = d;
   } else {
     skillEditDepts = skillEditDepts.filter(function(x) { return x !== d; });
-    delete skillEditRatings[d];
     skillEditPrimary = skillEditDepts[0] || null;
   }
   renderSkillChips();
-  renderSkillRatings();
 }
 function saveSkillEdit() {
   if (!skillEditTarget) return;
   if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
   const notes = (document.getElementById("skillNotes").value || "").trim();
   const norm = skillEditTarget.toUpperCase().trim();
-  // Clean up ratings - only keep depts that are still in the list
-  const cleanRatings = {};
-  for (const d in skillEditRatings) {
-    if (skillEditDepts.indexOf(d) !== -1) cleanRatings[d] = skillEditRatings[d];
-  }
   if (skillEditDepts.length === 0 && !notes) {
     delete skillOverrides[norm];
-    deleteSkillFromSheet(norm);
   } else {
-    const data = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes, ratings: cleanRatings };
-    skillOverrides[norm] = data;
-    pushSkillToSheet(norm, data);
+    skillOverrides[norm] = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes };
   }
   saveSkillsToStorage();
   closeSkillModal();
-  showToast("Saved & synced!");
+  showToast("Saved!");
   renderManage();
 }
 
@@ -952,56 +747,7 @@ async function loadStaff() {
     if (document.getElementById("page-manage").classList.contains("active")) renderManage();
   } catch(e) { showToast("Failed to load staff", "#dc2626"); }
 }
-
-async function loadSkillsFromSheet() {
-  try {
-    const res = await fetch(API_URL + "?action=getSkills");
-    const sheetSkills = await res.json();
-    if (sheetSkills && typeof sheetSkills === "object" && !sheetSkills.error) {
-      // Merge with local: sheet wins (cloud is master)
-      const localOnly = {};
-      for (const k in skillOverrides) {
-        if (!sheetSkills[k]) localOnly[k] = skillOverrides[k];
-      }
-      skillOverrides = Object.assign({}, sheetSkills, localOnly);
-      saveSkillsToStorage();
-      // Push any local-only entries to sheet
-      for (const k in localOnly) {
-        pushSkillToSheet(k, localOnly[k]);
-      }
-    }
-  } catch(e) {
-    console.log("Skills sync failed, using local only", e);
-  }
-}
-
-async function pushSkillToSheet(name, data) {
-  try {
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({
-        action: "saveSkill",
-        name: name,
-        depts: data.depts || [],
-        primary: data.primary || "",
-        notes: data.notes || ""
-      })
-    });
-  } catch(e) {}
-}
-
-async function deleteSkillFromSheet(name) {
-  try {
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({ action: "deleteSkill", name: name })
-    });
-  } catch(e) {}
-}
-
-async function syncCurrent() { showToast("Syncing..."); await loadSites(); await loadSkillsFromSheet(); showToast("Synced!"); renderManage(); }
+async function syncCurrent() { showToast("Syncing..."); await loadSites(); showToast("Synced!"); }
 
 // ============ NAVIGATION ============
 function switchPage(page, el) {
@@ -1013,116 +759,23 @@ function switchPage(page, el) {
   el.classList.add("active");
   if (page === "manage") renderManage();
   if (page === "rankings") { setupRankings(); renderRankings(); }
-  if (page === "settings") renderSettings();
 }
 
 // ============ REACTION CHECKER ============
-function tokenize(s) {
-  return (s || "").toLowerCase()
-    .normalize("NFC")
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .split(/\s+/)
-    .filter(function(t){return t.length >= 2;});
-}
-
 function nameMatches(name, staff) {
   const n = normalize(name); if (!n) return false;
   const fn = normalize(staff.fb), rn = normalize(staff.real);
-  // Exact normalized match
   if (fn === n || rn === n) return true;
-  // Token-level matching: require at least 2 word tokens of input to match staff tokens
-  const inputTokens = tokenize(name);
-  if (inputTokens.length < 2) return false;
-  const fbTokens = tokenize(staff.fb);
-  const realTokens = tokenize(staff.real);
-  const staffTokens = fbTokens.concat(realTokens);
-  if (staffTokens.length === 0) return false;
-  let matches = 0;
-  const usedIdx = {};
-  for (let j = 0; j < inputTokens.length; j++) {
-    const inTok = inputTokens[j];
-    if (inTok.length < 3) continue;
-    for (let i = 0; i < staffTokens.length; i++) {
-      if (usedIdx[i]) continue;
-      const sTok = staffTokens[i];
-      if (sTok.length < 3) continue;
-      if (inTok === sTok) { matches++; usedIdx[i] = true; break; }
-      // Prefix match for longer tokens (handles "ASHMI" vs "ASHMITA")
-      if (inTok.length >= 4 && sTok.length >= 4) {
-        if (inTok.indexOf(sTok) === 0 || sTok.indexOf(inTok) === 0) {
-          matches++; usedIdx[i] = true; break;
-        }
-      }
-    }
-  }
-  return matches >= 2;
+  if (n.length >= 4 && ((fn && fn.indexOf(n) !== -1) || (rn && rn.indexOf(n) !== -1))) return true;
+  if (fn && fn.length >= 4 && n.indexOf(fn) !== -1) return true;
+  if (rn && rn.length >= 4 && n.indexOf(rn) !== -1) return true;
+  return false;
 }
 function findStaff(name) {
   for (let i=0; i<staffMap.length; i++) {
     if (nameMatches(name, staffMap[i])) return staffMap[i];
   }
   return null;
-}
-
-// Confidence-based matching: returns score 0..1
-function scoreNameMatch(name, staff) {
-  const n = normalize(name); if (!n) return 0;
-  const fn = normalize(staff.fb), rn = normalize(staff.real);
-  if (fn === n || rn === n) return 1.0;
-  const inputTokens = tokenize(name).filter(function(t){return t.length >= 3;});
-  if (inputTokens.length === 0) return 0;
-  const staffTokens = tokenize(staff.fb).concat(tokenize(staff.real)).filter(function(t){return t.length >= 3;});
-  if (staffTokens.length === 0) return 0;
-  let matches = 0;
-  const used = {};
-  for (let j = 0; j < inputTokens.length; j++) {
-    const inTok = inputTokens[j];
-    for (let i = 0; i < staffTokens.length; i++) {
-      if (used[i]) continue;
-      const sTok = staffTokens[i];
-      if (inTok === sTok) { matches += 1; used[i] = true; break; }
-      if (inTok.length >= 4 && sTok.length >= 4 && (inTok.indexOf(sTok) === 0 || sTok.indexOf(inTok) === 0)) {
-        matches += 0.7; used[i] = true; break;
-      }
-    }
-  }
-  return Math.min(matches / inputTokens.length, 0.95);
-}
-
-// Find best matches with confidence levels
-function findStaffWithConfidence(name) {
-  // 1. Check aliases first
-  const normInput = normalize(name);
-  if (aliases[normInput] !== undefined) {
-    if (aliases[normInput] === "__IGNORE__") return { aliased: true, ignore: true, original: name };
-    const aliasedReal = aliases[normInput];
-    for (let i = 0; i < staffMap.length; i++) {
-      if (normalize(staffMap[i].real) === normalize(aliasedReal)) {
-        return { aliased: true, staff: staffMap[i], original: name };
-      }
-    }
-  }
-  
-  // 2. Score all staff
-  const scored = [];
-  for (let i = 0; i < staffMap.length; i++) {
-    const score = scoreNameMatch(name, staffMap[i]);
-    if (score > 0) scored.push({ staff: staffMap[i], score: score });
-  }
-  scored.sort(function(a,b){return b.score - a.score;});
-  
-  if (scored.length === 0) return { unknown: true, original: name };
-  
-  const best = scored[0];
-  // High confidence: auto-match
-  if (best.score >= 0.85) {
-    return { confident: true, staff: best.staff, score: best.score, original: name };
-  }
-  // Medium confidence: ambiguous, ask user
-  if (best.score >= 0.35) {
-    return { ambiguous: true, candidates: scored.slice(0, 5), original: name };
-  }
-  return { unknown: true, original: name };
 }
 
 function loadRoster() {
@@ -1163,56 +816,31 @@ function checkReactions() {
   document.getElementById("reactorCount").textContent = lines.length + " detected";
   unmatched = []; extraReactors = [];
   results = todayRoster.map(function(s) { return {fb: s.fb, real: s.real, reacted: false}; });
-  
-  // First pass: collect confident matches, mark ambiguous ones for popup
-  const ambiguous = [];
-  const processedNames = {};
-  
   lines.forEach(function(name) {
     if (!normalize(name)) return;
-    const k = normalize(name);
-    if (processedNames[k]) return; // skip duplicates
-    processedNames[k] = true;
-    
-    const result = findStaffWithConfidence(name);
-    
-    if (result.ignore) return; // aliased to ignore
-    
-    if (result.aliased || result.confident) {
-      applyReactorMatch(result.staff, name);
-    } else if (result.ambiguous) {
-      ambiguous.push({ name: name, candidates: result.candidates });
+    const dbMatch = findStaff(name);
+    let foundInRoster = false;
+    if (dbMatch) {
+      for (let i=0; i<results.length; i++) {
+        const r = results[i];
+        if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
+          r.reacted = true; foundInRoster = true;
+        }
+      }
+      if (!foundInRoster) {
+        let exists = false;
+        for (let i=0; i<extraReactors.length; i++) {
+          if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
+        }
+        if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
+      }
     } else {
-      unmatched.push(name);
+      for (let i=0; i<results.length; i++) {
+        if (nameMatches(name, results[i])) { results[i].reacted = true; foundInRoster = true; }
+      }
+      if (!foundInRoster) unmatched.push(name);
     }
   });
-  
-  // If there are ambiguous matches, show popup
-  if (ambiguous.length > 0) {
-    showDisambiguateModal(ambiguous);
-  } else {
-    finalizeReactionResults();
-  }
-}
-
-function applyReactorMatch(dbMatch, originalName) {
-  let foundInRoster = false;
-  for (let i=0; i<results.length; i++) {
-    const r = results[i];
-    if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
-      r.reacted = true; foundInRoster = true;
-    }
-  }
-  if (!foundInRoster) {
-    let exists = false;
-    for (let i=0; i<extraReactors.length; i++) {
-      if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
-    }
-    if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
-  }
-}
-
-function finalizeReactionResults() {
   const reactedNum = results.filter(function(s){return s.reacted;}).length;
   document.getElementById("reactedCount").textContent = reactedNum;
   document.getElementById("missingCount").textContent = results.length - reactedNum;
@@ -1226,117 +854,6 @@ function finalizeReactionResults() {
     if (i === 2) tabs[i].classList.add("active"); else tabs[i].classList.remove("active");
   }
   renderList();
-}
-
-// ============ DISAMBIGUATION MODAL ============
-let pendingAmbiguous = [];
-let userPicks = {}; // name -> choice ("real name" or "__IGNORE__")
-
-function showDisambiguateModal(ambiguous) {
-  pendingAmbiguous = ambiguous;
-  userPicks = {};
-  renderDisambiguateModal();
-  document.getElementById("disambiguateModal").classList.add("show");
-}
-
-function renderDisambiguateModal() {
-  const container = document.getElementById("disambiguateList");
-  let html = '<div style="margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6;">' +
-    '\u{1F4A1} ' + pendingAmbiguous.length + ' reactor name(s) need clarification. Pick the right person or mark as unknown. <strong>Your choices are saved</strong> so next time the same name comes up, it\'ll match automatically.' +
-  '</div>';
-  
-  pendingAmbiguous.forEach(function(item, idx) {
-    const reactorKey = "amb-" + idx;
-    html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">';
-    html += '<div style="font-weight:700;font-size:14px;margin-bottom:8px;">\u{1F914} <span style="color:var(--accent);">' + escapeHtml(item.name) + '</span></div>';
-    html += '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Did you mean...</div>';
-    
-    item.candidates.forEach(function(c, cidx) {
-      const confidencePct = Math.round(c.score * 100);
-      const cVal = c.staff.real.replace(/"/g, "&quot;");
-      html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
-        '<input type="radio" name="' + reactorKey + '" value="' + cVal + '" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
-        '<div style="flex:1;">' +
-          '<div style="font-size:13px;font-weight:600;">' + escapeHtml(c.staff.real) + '</div>' +
-          '<div style="font-size:11px;color:var(--text3);">FB: ' + escapeHtml(c.staff.fb) + '</div>' +
-        '</div>' +
-        '<div style="font-size:11px;font-weight:700;color:' + (confidencePct >= 70 ? "var(--green)" : confidencePct >= 50 ? "var(--orange)" : "var(--red)") + ';">' + confidencePct + '%</div>' +
-      '</label>';
-    });
-    
-    // None of these option
-    html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
-      '<input type="radio" name="' + reactorKey + '" value="__IGNORE__" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
-      '<div style="flex:1;font-size:13px;color:var(--text2);">\u274C None of these (not a staff member)</div>' +
-    '</label>';
-    html += '</div>';
-  });
-  
-  container.innerHTML = html;
-}
-
-function pickDisambiguate(reactorKey, choice, idx) {
-  const item = pendingAmbiguous[idx];
-  userPicks[item.name] = choice;
-}
-
-function applyDisambiguation() {
-  // Process each ambiguous match based on user pick
-  pendingAmbiguous.forEach(function(item) {
-    const pick = userPicks[item.name];
-    const normInput = normalize(item.name);
-    if (!pick) {
-      // No selection made → treat as unknown
-      unmatched.push(item.name);
-      return;
-    }
-    if (pick === "__IGNORE__") {
-      aliases[normInput] = "__IGNORE__";
-      return;
-    }
-    // Save alias and apply match
-    aliases[normInput] = pick;
-    for (let i = 0; i < staffMap.length; i++) {
-      if (normalize(staffMap[i].real) === normalize(pick)) {
-        applyReactorMatch(staffMap[i], item.name);
-        break;
-      }
-    }
-  });
-  saveAliases();
-  document.getElementById("disambiguateModal").classList.remove("show");
-  pendingAmbiguous = [];
-  userPicks = {};
-  finalizeReactionResults();
-  showToast("Saved aliases. Next time these auto-match!");
-}
-
-function skipDisambiguation() {
-  // Treat all unchosen as unknown
-  pendingAmbiguous.forEach(function(item) {
-    if (!userPicks[item.name]) unmatched.push(item.name);
-  });
-  // Apply any that were chosen
-  pendingAmbiguous.forEach(function(item) {
-    const pick = userPicks[item.name];
-    const normInput = normalize(item.name);
-    if (pick && pick !== "__IGNORE__") {
-      aliases[normInput] = pick;
-      for (let i = 0; i < staffMap.length; i++) {
-        if (normalize(staffMap[i].real) === normalize(pick)) {
-          applyReactorMatch(staffMap[i], item.name);
-          break;
-        }
-      }
-    } else if (pick === "__IGNORE__") {
-      aliases[normInput] = "__IGNORE__";
-    }
-  });
-  saveAliases();
-  document.getElementById("disambiguateModal").classList.remove("show");
-  pendingAmbiguous = [];
-  userPicks = {};
-  finalizeReactionResults();
 }
 function setTab(tab, el) {
   currentTab = tab;
@@ -1517,13 +1034,11 @@ function loadAssignRoster() {
     if (seen[k]) return;
     seen[k] = true;
     const skill = findSkillsFor(name);
-    const ratings = skill ? (skillOverrides[(skill.name||"").toUpperCase().trim()] || {}).ratings || {} : {};
     assignRoster.push({
       input: name,
       name: skill ? skill.name : name,
       depts: skill ? skill.depts : [],
       primary: skill ? skill.primary : null,
-      ratings: ratings,
       assigned: null,
       leaderRole: null,
       forced: false
@@ -1632,37 +1147,26 @@ function runAssignment() {
     requireLeader: document.getElementById("ruleRequireLeader") ? document.getElementById("ruleRequireLeader").checked : true,
     requireSubLeader: document.getElementById("ruleRequireSubLeader") ? document.getElementById("ruleRequireSubLeader").checked : true,
     primaryFirst: document.getElementById("rulePrimaryFirst") ? document.getElementById("rulePrimaryFirst").checked : true,
-    noForce: document.getElementById("ruleNoForce") ? document.getElementById("ruleNoForce").checked : false,
-    fairness: document.getElementById("ruleFairness") ? document.getElementById("ruleFairness").checked : false
+    noForce: document.getElementById("ruleNoForce") ? document.getElementById("ruleNoForce").checked : false
   };
 
   assignmentResult = assignRoster.map(function(s) {
     return {
       input: s.input, name: s.name, depts: s.depts.slice(), primary: s.primary,
-      assigned: null, leaderRole: null, forced: false, lockedFlag: false
+      assigned: null, leaderRole: null, forced: false
     };
   });
   const remaining = {};
   for (const d in needs) remaining[d] = needs[d];
   const sorterLines = ["\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3"];
 
-  // STEP 0: Apply LOCKS first (highest priority)
-  assignmentResult.forEach(function(person) {
-    const lockedDept = getLockedDept(person.name);
-    if (lockedDept && remaining[lockedDept] > 0) {
-      person.assigned = lockedDept;
-      person.lockedFlag = true;
-      remaining[lockedDept]--;
-    }
-  });
-
   // STEP 1: Main leaders to sorter lines (if rule enabled)
   if (rules.requireLeader) {
     const availableLeaders = assignmentResult.filter(function(p){return isLeader(p.name);});
     sorterLines.forEach(function(line) {
       if (remaining[line] <= 0) return;
-      let leader = availableLeaders.find(function(p){return !p.assigned && !isBanned(p.name, line) && p.depts.indexOf(line) !== -1;});
-      if (!leader) leader = availableLeaders.find(function(p){return !p.assigned && !isBanned(p.name, line);});
+      let leader = availableLeaders.find(function(p){return !p.assigned && p.depts.indexOf(line) !== -1;});
+      if (!leader) leader = availableLeaders.find(function(p){return !p.assigned;});
       if (leader) { leader.assigned = line; leader.leaderRole = "\u7BA1\u7406"; remaining[line]--; }
     });
   }
@@ -1671,64 +1175,47 @@ function runAssignment() {
   if (rules.requireSubLeader) {
     sorterLines.forEach(function(line) {
       if (remaining[line] <= 0) return;
-      const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && !isBanned(p.name, line) && p.depts.indexOf(line) !== -1;});
+      const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && p.depts.indexOf(line) !== -1;});
       if (sub) { sub.assigned = line; sub.leaderRole = "sub"; remaining[line]--; }
     });
   }
 
   // STEP 3: Primary skill matches (if rule enabled)
   if (rules.primaryFirst) {
-    // If fairness, sort by who has been picked LEAST for their primary dept
-    let candidates = assignmentResult.filter(function(p){return !p.assigned && p.primary && !isBanned(p.name, p.primary);});
-    if (rules.fairness) {
-      candidates.sort(function(a,b) {
-        return getFairnessScore(a.name, a.primary) - getFairnessScore(b.name, b.primary);
-      });
-    }
-    candidates.forEach(function(person) {
+    assignmentResult.forEach(function(person) {
       if (person.assigned) return;
-      if (remaining[person.primary] > 0) {
+      if (person.primary && remaining[person.primary] > 0) {
         person.assigned = person.primary;
         remaining[person.primary]--;
       }
     });
   }
 
-  // STEP 4: Single-skill specialists (respect bans)
+  // STEP 4: Single-skill specialists
   assignmentResult.forEach(function(person) {
     if (person.assigned) return;
-    if (person.depts.length === 1 && remaining[person.depts[0]] > 0 && !isBanned(person.name, person.depts[0])) {
+    if (person.depts.length === 1 && remaining[person.depts[0]] > 0) {
       person.assigned = person.depts[0];
       remaining[person.depts[0]]--;
     }
   });
 
-  // STEP 5: Fill by department priority (with ratings + fairness)
+  // STEP 5: Fill by department priority
   const fillOrder = ["\u7BA1\u7406", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "TC", "\u6295\u5165", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "\u8907\u6570", "\u5358\u6570"];
   fillOrder.forEach(function(dept) {
     while (remaining[dept] > 0) {
-      let candidates = assignmentResult.filter(function(p){return !p.assigned && p.depts.indexOf(dept) !== -1 && !isBanned(p.name, dept);});
-      if (candidates.length === 0) break;
-      // Sort: ratings (higher first), then fairness (lower first if enabled)
-      candidates.sort(function(a, b) {
-        const ra = (a.ratings && a.ratings[dept]) || 0;
-        const rb = (b.ratings && b.ratings[dept]) || 0;
-        if (rb !== ra) return rb - ra; // higher rating wins
-        if (rules.fairness) {
-          return getFairnessScore(a.name, dept) - getFairnessScore(b.name, dept);
-        }
-        return 0;
-      });
-      candidates[0].assigned = dept;
+      const candidate = assignmentResult.find(function(p){return !p.assigned && p.depts.indexOf(dept) !== -1;});
+      if (!candidate) break;
+      candidate.assigned = dept;
       remaining[dept]--;
     }
   });
 
-  // STEP 6: Force-fill remaining (only if rule allows, respect bans always)
+  // STEP 6: Force-fill remaining (only if rule allows)
   if (!rules.noForce) {
     DEPARTMENTS.forEach(function(dept) {
       while (remaining[dept] > 0) {
-        const candidate = assignmentResult.find(function(p){return !p.assigned && !isBanned(p.name, dept);});
+        const candidate = assignmentResult.find(function(p){return !p.assigned;});
         if (!candidate) break;
         candidate.assigned = dept;
         candidate.forced = true;
@@ -1736,9 +1223,6 @@ function runAssignment() {
       }
     });
   }
-
-  // Record fairness history
-  if (rules.fairness) recordFairnessForToday();
 
   renderAssignmentResults(needs);
 }
@@ -1753,8 +1237,7 @@ function saveRulesToStorage() {
     requireLeader: document.getElementById("ruleRequireLeader").checked,
     requireSubLeader: document.getElementById("ruleRequireSubLeader").checked,
     primaryFirst: document.getElementById("rulePrimaryFirst").checked,
-    noForce: document.getElementById("ruleNoForce").checked,
-    fairness: document.getElementById("ruleFairness") ? document.getElementById("ruleFairness").checked : false
+    noForce: document.getElementById("ruleNoForce").checked
   };
   localStorage.setItem("zozo_rules_v1", JSON.stringify(rules));
 }
@@ -1767,7 +1250,6 @@ function loadRulesFromStorage() {
     if (document.getElementById("ruleRequireSubLeader")) document.getElementById("ruleRequireSubLeader").checked = !!r.requireSubLeader;
     if (document.getElementById("rulePrimaryFirst")) document.getElementById("rulePrimaryFirst").checked = !!r.primaryFirst;
     if (document.getElementById("ruleNoForce")) document.getElementById("ruleNoForce").checked = !!r.noForce;
-    if (document.getElementById("ruleFairness")) document.getElementById("ruleFairness").checked = !!r.fairness;
   } catch(e) {}
 }
 function renderAssignmentResults(needs) {
@@ -1792,9 +1274,7 @@ function renderAssignmentResults(needs) {
     html += people.map(function(p) {
       let rowClass = "staff-row";
       let badge = "";
-      if (p.lockedFlag) {
-        badge = '<div class="badge" style="background:#7c3aed;color:white;">\u{1F512} LOCKED</div>';
-      } else if (p.leaderRole === "\u7BA1\u7406") {
+      if (p.leaderRole === "\u7BA1\u7406") {
         rowClass += " leader-row";
         badge = '<div class="badge" style="background:var(--leader-border);color:white;">\u{1F451} \u7BA1\u7406</div>';
       } else if (p.leaderRole === "sub") {
@@ -1803,10 +1283,7 @@ function renderAssignmentResults(needs) {
       } else if (isLeader(p.name)) badge = '<span class="leader-tag">LEADER</span>';
       else if (isSubLeader(p.name)) badge = '<span class="subleader-tag">SUB</span>';
       if (p.forced) badge = '<div class="badge badge-extra">Forced</div>';
-      // Show rating for the assigned dept
-      const rating = (p.ratings && p.ratings[p.assigned]) || 0;
-      const ratingStars = rating > 0 ? '<span style="color:#fbbf24;margin-left:6px;font-size:13px;">' + "\u2605".repeat(rating) + '</span>' : '';
-      return '<div class="' + rowClass + '"><div><div class="staff-name">' + escapeHtml(p.name) + ratingStars + '</div>' +
+      return '<div class="' + rowClass + '"><div><div class="staff-name">' + escapeHtml(p.name) + '</div>' +
         (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">No skill data</div>') +
         '</div>' + badge + '</div>';
     }).join("");
@@ -1853,463 +1330,6 @@ if (localStorage.getItem("zozo_dark") === "1") {
     const btn = document.getElementById("darkBtn");
     if (btn) btn.textContent = "\u2600\uFE0F";
   }, 50);
-}
-
-// ============ LOCKS, BANS & FAIRNESS ============
-function openLocksModal() {
-  document.getElementById("locksModal").classList.add("show");
-  // Populate dept dropdown
-  document.getElementById("lockDeptSelect").innerHTML = DEPARTMENTS.map(function(d) {
-    return '<option value="' + d + '">' + d + '</option>';
-  }).join("");
-  setLockType("lock");
-  renderLocksList();
-}
-
-function closeLocksModal() {
-  document.getElementById("locksModal").classList.remove("show");
-  document.getElementById("lockPersonInput").value = "";
-  document.getElementById("lockPersonSuggestions").innerHTML = "";
-  updateLocksSummary();
-}
-
-function setLockType(type) {
-  lockType = type;
-  const lockBtn = document.getElementById("lockTypeBtn");
-  const banBtn = document.getElementById("banTypeBtn");
-  if (type === "lock") {
-    lockBtn.style.background = "var(--accent)";
-    lockBtn.style.color = "white";
-    lockBtn.className = "btn-sm";
-    banBtn.style.background = "";
-    banBtn.style.color = "";
-    banBtn.className = "btn-sm btn-gray";
-  } else {
-    banBtn.style.background = "var(--red)";
-    banBtn.style.color = "white";
-    banBtn.className = "btn-sm";
-    lockBtn.style.background = "";
-    lockBtn.style.color = "";
-    lockBtn.className = "btn-sm btn-gray";
-  }
-}
-
-function onLockPersonInput() {
-  const q = document.getElementById("lockPersonInput").value.trim().toLowerCase();
-  const sug = document.getElementById("lockPersonSuggestions");
-  if (q.length < 2) { sug.innerHTML = ""; return; }
-  // Get all known names
-  const names = new Set();
-  staffMap.forEach(function(s){names.add(s.real);});
-  for (const k in SKILL_DATABASE) names.add(k);
-  const matches = Array.from(names).filter(function(n){return n.toLowerCase().indexOf(q) !== -1;}).slice(0, 6);
-  sug.innerHTML = matches.map(function(n) {
-    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickLockPerson(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
-  }).join("");
-}
-
-function pickLockPerson(name) {
-  document.getElementById("lockPersonInput").value = name;
-  document.getElementById("lockPersonSuggestions").innerHTML = "";
-}
-
-function addLock() {
-  const name = document.getElementById("lockPersonInput").value.trim().toUpperCase();
-  const dept = document.getElementById("lockDeptSelect").value;
-  if (!name) { showToast("Enter person name!", "#dc2626"); return; }
-  if (lockType === "lock") {
-    locks[name] = { dept: dept };
-    saveLocks();
-    showToast("🔒 " + name + " locked to " + dept);
-  } else {
-    if (!bans[name]) bans[name] = [];
-    if (bans[name].indexOf(dept) === -1) bans[name].push(dept);
-    saveBans();
-    showToast("🚫 " + name + " banned from " + dept);
-  }
-  document.getElementById("lockPersonInput").value = "";
-  renderLocksList();
-  updateLocksSummary();
-}
-
-function removeLock(name) {
-  delete locks[name];
-  saveLocks();
-  renderLocksList();
-  updateLocksSummary();
-}
-
-function removeBan(name, dept) {
-  if (!bans[name]) return;
-  bans[name] = bans[name].filter(function(d){return d !== dept;});
-  if (bans[name].length === 0) delete bans[name];
-  saveBans();
-  renderLocksList();
-  updateLocksSummary();
-}
-
-function renderLocksList() {
-  let html = "";
-  const lockNames = Object.keys(locks);
-  const banNames = Object.keys(bans);
-  
-  if (lockNames.length === 0 && banNames.length === 0) {
-    html = '<div class="empty" style="padding:20px;">No locks or bans yet</div>';
-  } else {
-    lockNames.forEach(function(name) {
-      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--accent-light);border-radius:6px;margin-bottom:4px;">' +
-        '<div style="font-size:12px;">&#128274; <strong>' + escapeHtml(name) + '</strong> &rarr; ' + escapeHtml(locks[name].dept) + '</div>' +
-        '<button class="btn-sm btn-red" onclick="removeLock(\'' + name.replace(/'/g, "\\'") + '\')" style="padding:4px 8px;min-width:30px;min-height:30px;">&times;</button>' +
-        '</div>';
-    });
-    banNames.forEach(function(name) {
-      bans[name].forEach(function(dept) {
-        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--red-light);border-radius:6px;margin-bottom:4px;">' +
-          '<div style="font-size:12px;">&#128683; <strong>' + escapeHtml(name) + '</strong> never ' + escapeHtml(dept) + '</div>' +
-          '<button class="btn-sm btn-red" onclick="removeBan(\'' + name.replace(/'/g, "\\'") + '\', \'' + dept + '\')" style="padding:4px 8px;min-width:30px;min-height:30px;">&times;</button>' +
-          '</div>';
-      });
-    });
-  }
-  document.getElementById("locksList").innerHTML = html;
-}
-
-function updateLocksSummary() {
-  const lockCount = Object.keys(locks).length;
-  let banCount = 0;
-  for (const k in bans) banCount += bans[k].length;
-  const el = document.getElementById("locksSummary");
-  if (el) {
-    if (lockCount + banCount === 0) {
-      el.textContent = "No locks or bans set";
-    } else {
-      el.innerHTML = "&#128274; " + lockCount + " locks &middot; &#128683; " + banCount + " bans";
-    }
-  }
-}
-
-function isLocked(name, dept) {
-  const norm = (name||"").toUpperCase().trim();
-  return locks[norm] && locks[norm].dept === dept;
-}
-
-function getLockedDept(name) {
-  const norm = (name||"").toUpperCase().trim();
-  return locks[norm] ? locks[norm].dept : null;
-}
-
-function isBanned(name, dept) {
-  const norm = (name||"").toUpperCase().trim();
-  return bans[norm] && bans[norm].indexOf(dept) !== -1;
-}
-
-function recordFairnessForToday() {
-  // Track who was assigned to "hard" departments today
-  const hardDepts = ["\u68DA\u5165\u308C", "\u51FA\u5EAB\u642C\u9001", "\u5358\u642C", "\u6295\u5165"];
-  assignmentResult.forEach(function(p) {
-    if (!p.assigned || hardDepts.indexOf(p.assigned) === -1) return;
-    const norm = (p.name||"").toUpperCase().trim();
-    if (!fairnessHistory[norm]) fairnessHistory[norm] = {};
-    fairnessHistory[norm][p.assigned] = (fairnessHistory[norm][p.assigned] || 0) + 1;
-  });
-  saveFairness();
-}
-
-function getFairnessScore(name, dept) {
-  // Lower score = picked less recently = should be picked
-  const norm = (name||"").toUpperCase().trim();
-  if (!fairnessHistory[norm]) return 0;
-  return fairnessHistory[norm][dept] || 0;
-}
-
-function resetFairnessHistory() {
-  fairnessHistory = {};
-  saveFairness();
-  showToast("Fairness history reset");
-}
-
-// ============ SETTINGS PAGE ============
-function renderSettings() {
-  renderLeadersList();
-  renderSubLeadersList();
-  renderDepartmentsList();
-  renderAliasesList();
-}
-
-function renderAliasesList() {
-  const keys = Object.keys(aliases);
-  document.getElementById("aliasesCount").textContent = "(" + keys.length + ")";
-  if (!keys.length) {
-    document.getElementById("aliasesList").innerHTML = '<div class="empty" style="padding:14px;font-size:12px;">No aliases yet. They\'ll appear as you confirm ambiguous matches.</div>';
-    return;
-  }
-  const html = keys.sort().map(function(k) {
-    const target = aliases[k];
-    const isIgnore = target === "__IGNORE__";
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:' + (isIgnore ? "var(--red-light)" : "var(--accent-light)") + ';border-radius:6px;margin-bottom:4px;">' +
-      '<div style="font-size:12px;flex:1;min-width:0;">' +
-        '<div style="font-weight:600;">' + escapeHtml(k) + '</div>' +
-        '<div style="color:var(--text2);">&rarr; ' + (isIgnore ? '\u274C Ignore' : escapeHtml(target)) + '</div>' +
-      '</div>' +
-      '<button class="btn-sm btn-red" onclick="removeAlias(\'' + k.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
-    '</div>';
-  }).join("");
-  document.getElementById("aliasesList").innerHTML = html;
-}
-
-function removeAlias(key) {
-  delete aliases[key];
-  saveAliases();
-  renderAliasesList();
-  showToast("Alias removed");
-}
-
-function getAllKnownNames() {
-  const names = new Set();
-  staffMap.forEach(function(s){names.add(s.real.toUpperCase().trim());});
-  for (const k in SKILL_DATABASE) names.add(k.toUpperCase().trim());
-  for (const k in skillOverrides) names.add(k.toUpperCase().trim());
-  return Array.from(names).sort();
-}
-
-function onLeaderInput() {
-  const q = document.getElementById("newLeaderInput").value.trim().toLowerCase();
-  const sug = document.getElementById("leaderSuggestions");
-  if (q.length < 2) { sug.innerHTML = ""; return; }
-  const names = getAllKnownNames().filter(function(n) {
-    return n.toLowerCase().indexOf(q) !== -1 && LEADERS.indexOf(n) === -1;
-  }).slice(0, 5);
-  sug.innerHTML = names.map(function(n) {
-    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
-  }).join("");
-}
-
-function pickLeaderName(name) {
-  document.getElementById("newLeaderInput").value = name;
-  document.getElementById("leaderSuggestions").innerHTML = "";
-}
-
-function promoteToLeader() {
-  const name = document.getElementById("newLeaderInput").value.trim().toUpperCase();
-  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
-  if (LEADERS.indexOf(name) !== -1) { showToast("Already a leader", "#dc2626"); return; }
-  // Remove from sub-leaders if present
-  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
-  LEADERS.push(name);
-  saveLeaders();
-  saveSubLeaders();
-  document.getElementById("newLeaderInput").value = "";
-  document.getElementById("leaderSuggestions").innerHTML = "";
-  showToast("\u{1F451} " + name + " promoted to LEADER");
-  renderSettings();
-}
-
-function demoteLeader(name) {
-  LEADERS = LEADERS.filter(function(n){return n !== name;});
-  saveLeaders();
-  showToast(name + " demoted");
-  renderSettings();
-}
-
-function renderLeadersList() {
-  document.getElementById("leadersCount").textContent = "(" + LEADERS.length + ")";
-  const html = LEADERS.length ? LEADERS.map(function(n) {
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--leader-bg);border:1px solid var(--leader-border);border-radius:8px;margin-bottom:6px;">' +
-      '<div style="font-weight:600;font-size:13px;">&#128081; ' + escapeHtml(n) + '</div>' +
-      '<div style="display:flex;gap:6px;">' +
-        '<button class="btn-sm btn-gray" onclick="moveLeaderToSub(\'' + n.replace(/'/g, "\\'") + '\')" title="Demote to Sub-leader">&darr; SUB</button>' +
-        '<button class="btn-sm btn-red" onclick="demoteLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
-      '</div>' +
-    '</div>';
-  }).join("") : '<div class="empty" style="padding:20px;">No leaders</div>';
-  document.getElementById("leadersList").innerHTML = html;
-}
-
-function moveLeaderToSub(name) {
-  LEADERS = LEADERS.filter(function(n){return n !== name;});
-  if (SUBLEADERS.indexOf(name) === -1) SUBLEADERS.push(name);
-  saveLeaders();
-  saveSubLeaders();
-  showToast(name + " moved to Sub-leader");
-  renderSettings();
-}
-
-function onSubLeaderInput() {
-  const q = document.getElementById("newSubLeaderInput").value.trim().toLowerCase();
-  const sug = document.getElementById("subleaderSuggestions");
-  if (q.length < 2) { sug.innerHTML = ""; return; }
-  const names = getAllKnownNames().filter(function(n) {
-    return n.toLowerCase().indexOf(q) !== -1 && SUBLEADERS.indexOf(n) === -1 && LEADERS.indexOf(n) === -1;
-  }).slice(0, 5);
-  sug.innerHTML = names.map(function(n) {
-    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickSubLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
-  }).join("");
-}
-
-function pickSubLeaderName(name) {
-  document.getElementById("newSubLeaderInput").value = name;
-  document.getElementById("subleaderSuggestions").innerHTML = "";
-}
-
-function promoteToSubLeader() {
-  const name = document.getElementById("newSubLeaderInput").value.trim().toUpperCase();
-  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
-  if (SUBLEADERS.indexOf(name) !== -1) { showToast("Already a sub-leader", "#dc2626"); return; }
-  if (LEADERS.indexOf(name) !== -1) { showToast("Already a main leader", "#dc2626"); return; }
-  SUBLEADERS.push(name);
-  saveSubLeaders();
-  document.getElementById("newSubLeaderInput").value = "";
-  document.getElementById("subleaderSuggestions").innerHTML = "";
-  showToast("\u2B50 " + name + " promoted to SUB-LEADER");
-  renderSettings();
-}
-
-function demoteSubLeader(name) {
-  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
-  saveSubLeaders();
-  showToast(name + " demoted");
-  renderSettings();
-}
-
-function moveSubToLeader(name) {
-  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
-  if (LEADERS.indexOf(name) === -1) LEADERS.push(name);
-  saveLeaders();
-  saveSubLeaders();
-  showToast("\u{1F451} " + name + " promoted to LEADER");
-  renderSettings();
-}
-
-function renderSubLeadersList() {
-  document.getElementById("subleadersCount").textContent = "(" + SUBLEADERS.length + ")";
-  const html = SUBLEADERS.length ? SUBLEADERS.map(function(n) {
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--subleader-bg);border:1px solid var(--subleader-border);border-radius:8px;margin-bottom:6px;">' +
-      '<div style="font-weight:600;font-size:13px;">&#11088; ' + escapeHtml(n) + '</div>' +
-      '<div style="display:flex;gap:6px;">' +
-        '<button class="btn-sm btn-gray" onclick="moveSubToLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Promote to Leader">&uarr; LEADER</button>' +
-        '<button class="btn-sm btn-red" onclick="demoteSubLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
-      '</div>' +
-    '</div>';
-  }).join("") : '<div class="empty" style="padding:20px;">No sub-leaders</div>';
-  document.getElementById("subleadersList").innerHTML = html;
-}
-
-function addDepartment() {
-  const name = document.getElementById("newDeptInput").value.trim();
-  if (!name) { showToast("Enter dept name!", "#dc2626"); return; }
-  if (DEPARTMENTS.indexOf(name) !== -1) { showToast("Already exists", "#dc2626"); return; }
-  DEPARTMENTS.push(name);
-  saveDepartments();
-  document.getElementById("newDeptInput").value = "";
-  showToast("\u2795 " + name + " added");
-  renderSettings();
-}
-
-function removeDepartment(name) {
-  // Confirm because this affects assignments
-  document.getElementById("confirmTitle").textContent = "Remove Department";
-  document.getElementById("confirmMsg").textContent = "Remove '" + name + "'? This will not affect existing skills, but the department won't appear in future assignments.";
-  document.getElementById("confirmOk").textContent = "Remove";
-  document.getElementById("confirmModal").classList.add("show");
-  document.getElementById("confirmOk").onclick = function() {
-    DEPARTMENTS = DEPARTMENTS.filter(function(d){return d !== name;});
-    saveDepartments();
-    closeConfirm();
-    showToast(name + " removed", "#dc2626");
-    renderSettings();
-  };
-}
-
-function moveDept(name, direction) {
-  const idx = DEPARTMENTS.indexOf(name);
-  if (idx === -1) return;
-  const newIdx = idx + direction;
-  if (newIdx < 0 || newIdx >= DEPARTMENTS.length) return;
-  DEPARTMENTS.splice(idx, 1);
-  DEPARTMENTS.splice(newIdx, 0, name);
-  saveDepartments();
-  renderSettings();
-}
-
-function renderDepartmentsList() {
-  document.getElementById("deptsCount").textContent = "(" + DEPARTMENTS.length + ")";
-  const html = DEPARTMENTS.length ? DEPARTMENTS.map(function(d, i) {
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">' +
-      '<div style="font-weight:600;font-size:13px;">' + escapeHtml(d) + '</div>' +
-      '<div style="display:flex;gap:4px;">' +
-        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', -1)" title="Up" ' + (i === 0 ? 'disabled style="opacity:0.4;"' : '') + '>&uarr;</button>' +
-        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', 1)" title="Down" ' + (i === DEPARTMENTS.length - 1 ? 'disabled style="opacity:0.4;"' : '') + '>&darr;</button>' +
-        '<button class="btn-sm btn-red" onclick="removeDepartment(\'' + d.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
-      '</div>' +
-    '</div>';
-  }).join("") : '<div class="empty" style="padding:20px;">No departments</div>';
-  document.getElementById("deptsList").innerHTML = html;
-}
-
-// ============ BACKUP / IMPORT ============
-function exportSettings() {
-  const data = {
-    leaders: LEADERS,
-    subleaders: SUBLEADERS,
-    departments: DEPARTMENTS,
-    skillOverrides: skillOverrides,
-    locks: locks,
-    bans: bans,
-    fairnessHistory: fairnessHistory,
-    aliases: aliases,
-    exportedAt: new Date().toISOString()
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "zozo-settings-" + new Date().toISOString().slice(0,10) + ".json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast("\u{1F4E5} Exported!");
-}
-
-function importSettings() {
-  document.getElementById("importFile").click();
-}
-
-function handleImportFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.leaders) { LEADERS = data.leaders; saveLeaders(); }
-      if (data.subleaders) { SUBLEADERS = data.subleaders; saveSubLeaders(); }
-      if (data.departments) { DEPARTMENTS = data.departments; saveDepartments(); }
-      if (data.skillOverrides) { skillOverrides = data.skillOverrides; saveSkillsToStorage(); }
-      if (data.locks) { locks = data.locks; saveLocks(); }
-      if (data.bans) { bans = data.bans; saveBans(); }
-      if (data.fairnessHistory) { fairnessHistory = data.fairnessHistory; saveFairness(); }
-      if (data.aliases) { aliases = data.aliases; saveAliases(); }
-      showToast("\u{1F4E4} Imported!");
-      renderSettings();
-    } catch(err) {
-      showToast("Invalid file", "#dc2626");
-    }
-  };
-  reader.readAsText(file);
-}
-
-function resetFairnessHistoryConfirm() {
-  document.getElementById("confirmTitle").textContent = "Reset Fairness";
-  document.getElementById("confirmMsg").textContent = "Clear all fairness tracking history? AI will no longer remember who got hard departments recently.";
-  document.getElementById("confirmOk").textContent = "Reset";
-  document.getElementById("confirmModal").classList.add("show");
-  document.getElementById("confirmOk").onclick = function() {
-    fairnessHistory = {};
-    saveFairness();
-    closeConfirm();
-    showToast("Fairness history cleared");
-  };
 }
 
 // ============ RANKINGS ============
@@ -2445,19 +1465,14 @@ function renderRankings() {
 // ============ INIT ============
 // Auto-save rules when changed + load saved rules
 setTimeout(function() {
-  ["ruleRequireLeader", "ruleRequireSubLeader", "rulePrimaryFirst", "ruleNoForce", "ruleFairness"].forEach(function(id) {
+  ["ruleRequireLeader", "ruleRequireSubLeader", "rulePrimaryFirst", "ruleNoForce"].forEach(function(id) {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", saveRulesToStorage);
   });
   loadRulesFromStorage();
-  updateLocksSummary();
 }, 100);
 
-// Initial load: sites first, then skills from sheet
-(async function() {
-  await loadSites();
-  await loadSkillsFromSheet();
-})();
+loadSites();
 
 </script>
 </body>
