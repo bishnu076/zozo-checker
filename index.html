@@ -2,927 +2,2683 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>QCB6 Bus Check-in</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5/papaparse.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Staff Reaction Checker</title>
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='.9em' x='.5em' font-size='60' fill='white' font-weight='bold' font-family='system-ui'>ZZ</text></svg>">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh}
-.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh}
-input[type="text"],input[type="number"],textarea{border:1px solid #ccc;border-radius:8px;padding:9px 13px;font-size:15px;font-family:inherit;width:100%;background:#fff;color:#1a1a1a}
-input:focus,textarea:focus{outline:none;border-color:#555}
-button{font-family:inherit;cursor:pointer}
-.bk{background:none;border:none;font-size:24px;padding:0;line-height:1;color:#666}
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1a1a1a;color:white;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;white-space:nowrap;max-width:90vw;text-align:center}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f0; --card: #ffffff; --border: #e0ddd6; --border2: #c8c4bc;
+    --text: #1a1a1a; --text2: #666; --text3: #999;
+    --accent: #2563eb; --accent-dark: #1d4ed8; --accent-light: #eff6ff;
+    --green: #16a34a; --green-light: #f0fdf4; --green-border: #bbf7d0;
+    --red: #dc2626; --red-light: #fef2f2; --red-border: #fecaca;
+    --orange: #d97706; --orange-light: #fffbeb; --orange-border: #fde68a;
+    --leader-bg: #dbeafe; --leader-border: #2563eb;
+    --subleader-bg: #d1fae5; --subleader-border: #16a34a;
+    --yellow: #fbbf24; --yellow-bg: #fef3c7; --yellow-text: #78350f;
+  }
+  body.dark {
+    --bg: #0f172a; --card: #1e293b; --border: #334155; --border2: #475569;
+    --text: #f1f5f9; --text2: #cbd5e1; --text3: #94a3b8;
+    --accent: #60a5fa; --accent-dark: #3b82f6; --accent-light: #1e3a8a;
+    --green: #4ade80; --green-light: #14532d; --green-border: #16a34a;
+    --red: #f87171; --red-light: #7f1d1d; --red-border: #dc2626;
+    --orange: #fbbf24; --orange-light: #78350f; --orange-border: #d97706;
+    --leader-bg: #1e3a8a; --leader-border: #60a5fa;
+    --subleader-bg: #14532d; --subleader-border: #4ade80;
+  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+  body.dark textarea, body.dark input { background: #0f172a; color: #f1f5f9; }
+  body.dark .staff-row { background: #0f172a; }
+  body.dark .staff-row.reacted { background: #14532d; border-color: #16a34a; }
+  body.dark .staff-row.missing { background: #7f1d1d; border-color: #dc2626; }
+  body.dark .staff-row.extra { background: #78350f; border-color: #d97706; }
+  body.dark .manage-row { background: #0f172a; }
+  body.dark .stat { background: #1e293b; }
+  body.dark .modal-box { background: #1e293b; color: #f1f5f9; }
+  body.dark .info-box { background: linear-gradient(135deg, #1e293b, #1e3a8a); border-color: #3b82f6; color: #93c5fd; }
+  .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+  .logo { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .header-title { font-size: 14px; font-weight: 600; }
+  .header-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .site-selector { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .site-dropdown { padding: 8px 12px; background: var(--accent-light); color: var(--accent); border: 1px solid #bfdbfe; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; max-width: 180px; }
+  .icon-btn { padding: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 14px; min-width: 36px; }
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .page-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .page-tab { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border2); color: var(--text2); background: var(--card); }
+  .page-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .card-sub { font-size: 12px; color: var(--text2); margin-bottom: 10px; line-height: 1.5; }
+  textarea { width: 100%; height: 110px; padding: 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--text); background: var(--bg); resize: vertical; outline: none; }
+  textarea:focus { border-color: var(--accent); background: var(--card); }
+  input[type=text], input[type=number] { padding: 9px 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; color: var(--text); background: var(--card); outline: none; width: 100%; }
+  .btn { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-sm { padding: 9px 13px; font-size: 13px; border-radius: 8px; cursor: pointer; border: none; font-weight: 500; min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+  .btn-gray { background: #f3f4f6; color: var(--text2); border: 1px solid var(--border); }
+  body.dark .btn-gray { background: #334155; color: #f1f5f9; }
+  .btn-red { background: var(--red-light); color: var(--red); border: 1px solid var(--red-border); }
+  .btn-green { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 10px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+  .s-green { color: var(--green); } .s-red { color: var(--red); } .s-blue { color: var(--accent); } .s-orange { color: var(--orange); }
+  .filter-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 12px; flex-wrap: wrap; }
+  .f-tab { padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .f-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .search-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border2); border-radius: 8px; font-size: 13px; background: var(--bg); outline: none; margin-bottom: 10px; }
+  .staff-list { display: flex; flex-direction: column; gap: 6px; max-height: 500px; overflow-y: auto; padding-right: 4px; }
+  .staff-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-radius: 8px; border: 1px solid var(--border); background: #fafaf8; gap: 8px; }
+  body.dark .staff-row { background: #0f172a; }
+  .staff-row.reacted { border-color: var(--green-border); background: var(--green-light); }
+  .staff-row.missing { border-color: var(--red-border); background: var(--red-light); }
+  .staff-row.extra { border-color: var(--orange-border); background: var(--orange-light); }
+  .staff-row.leader-row { border-color: var(--leader-border); background: var(--leader-bg); border-width: 2px; }
+  .staff-row.subleader-row { border-color: var(--subleader-border); background: var(--subleader-bg); border-width: 2px; }
+  .staff-name { font-size: 13px; font-weight: 600; }
+  .staff-real { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 20px; flex-shrink: 0; background: var(--card); }
+  .badge-yes { color: var(--green); border: 1px solid var(--green-border); }
+  .badge-no { color: var(--red); border: 1px solid var(--red-border); }
+  .badge-extra { color: var(--orange); border: 1px solid var(--orange-border); }
+  .leader-tag { display:inline-block; background:var(--leader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
+  .subleader-tag { display:inline-block; background:var(--subleader-border); color:white; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; margin-left:6px; }
+  .unmatched { background: var(--orange-light); border: 1px solid var(--orange-border); border-radius: 8px; padding: 12px 14px; margin-top: 12px; font-size: 12px; color: #92400e; line-height: 1.9; }
+  .unmatched .tag { display: inline-block; background: var(--card); padding: 2px 8px; border-radius: 12px; margin: 2px; border: 1px solid var(--orange-border); }
+  .info-box { background: linear-gradient(135deg, #eff6ff, #f0f9ff); border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #1e40af; line-height: 1.7; margin-bottom: 14px; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: white; font-size: 12px; font-weight: 700; margin-right: 8px; }
+  .step-header { display: flex; align-items: center; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .manage-list { display: flex; flex-direction: column; gap: 6px; max-height: 500px; overflow-y: auto; padding-right: 4px; }
+  .manage-row { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #fafaf8; }
+  .manage-names { flex: 1; min-width: 0; }
+  .edit-area { display: none; flex: 1; gap: 6px; flex-direction: column; }
+  .row-btns { display: flex; gap: 5px; flex-shrink: 0; flex-wrap: wrap; }
+  .row-btns-edit { display: none; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 10px; }
+  .add-grid label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; font-weight: 500; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 11px 22px; border-radius: 10px; font-size: 13px; font-weight: 600; color: white; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+  .roster-count { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .empty { text-align: center; padding: 30px 20px; font-size: 13px; color: var(--text3); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: var(--card); color: var(--text); border-radius: 16px; padding: 22px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .modal-msg { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 12px; }
+  .modal-btns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+  .site-list-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 6px; }
+  .site-list-item.active { border-color: var(--accent); background: var(--accent-light); }
+  .site-name-text { flex: 1; font-weight: 600; font-size: 13px; }
+  .site-count { font-size: 11px; color: var(--text2); }
+  .skill-chip { display:inline-block; padding:6px 12px; margin:3px; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer; user-select:none; border:1px solid var(--border2); background:var(--card); color:var(--text2); }
+  .skill-chip.active { background:var(--accent); color:white; border-color:var(--accent); }
+  .skill-chip.primary { background:var(--yellow); color:var(--yellow-text); border-color:#f59e0b; }
+  .skill-tag { display:inline-block; padding:2px 8px; margin:2px 2px 0 0; border-radius:10px; font-size:10px; background:var(--accent-light); color:var(--accent); font-weight:600; }
+  .skill-tag.primary { background:var(--yellow-bg); color:var(--yellow-text); }
+  .star-row { display:flex; align-items:center; justify-content:space-between; padding:6px 8px; background:var(--bg); border-radius:6px; margin-bottom:4px; border:1px solid var(--border); }
+  .star-row .dept-name { font-size:12px; font-weight:600; flex:1; }
+  .stars { display:flex; gap:2px; }
+  .star { font-size:18px; cursor:pointer; user-select:none; line-height:1; color:#d1d5db; transition: color 0.1s; }
+  .star.on { color:#fbbf24; }
+  .star:hover { transform:scale(1.2); }
+  body.dark .star { color:#475569; }
+  @media (max-width: 500px) {
+    .add-grid { grid-template-columns: 1fr; }
+    .stat-num { font-size: 20px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .container { padding: 12px; }
+    .site-dropdown { max-width: 130px; font-size: 12px; padding: 7px 10px; }
+  }
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+
+<div class="header">
+  <div class="logo">ZZ</div>
+  <div>
+    <div class="header-title">Reaction Checker</div>
+    <div class="header-sub" id="siteCount">Loading...</div>
+  </div>
+  <div class="site-selector">
+    <select class="site-dropdown" id="siteSelector" onchange="onSiteChange()"></select>
+    <button class="icon-btn" onclick="openSitesModal()" title="Sites">&#9881;</button>
+    <button class="icon-btn" onclick="syncCurrent()" title="Sync">&#128260;</button>
+    <button class="icon-btn" onclick="toggleDark()" title="Dark mode" id="darkBtn">&#127769;</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-tabs">
+    <div class="page-tab active" onclick="switchPage('checker',this)">&#9989; Checker</div>
+    <div class="page-tab" onclick="switchPage('assign',this)">&#127919; Assign</div>
+    <div class="page-tab" onclick="switchPage('rankings',this)">&#128202; Rankings</div>
+    <div class="page-tab" onclick="switchPage('manage',this)">&#128101; Manage</div>
+    <div class="page-tab" onclick="switchPage('settings',this)">&#9881; Settings</div>
+  </div>
+
+  <div class="page active" id="page-checker">
+    <div class="info-box">
+      &#8505;&#65039; <strong>How to use:</strong><br>
+      1&#65039;&#8419; Paste today's shift roster<br>
+      2&#65039;&#8419; Paste Facebook reactor names<br>
+      &#9989; See missing + extra reactors instantly
+    </div>
+    <div class="card">
+      <div class="step-header"><span class="step-num">1</span> Today's shift roster</div>
+      <textarea id="rosterInput" placeholder="TAMANG ASHMITA"></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="loadRoster()">Load Roster</button>
+        <button class="btn-sm btn-gray" onclick="viewLoadedRoster()" id="viewRosterBtn" style="display:none;">&#128064; View loaded</button>
+        <button class="btn-sm btn-gray" onclick="clearRoster()">Clear</button>
+        <span class="roster-count" id="rosterCount"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="step-header"><span class="step-num">2</span> Reactor names from Facebook</div>
+      <textarea id="reactorInput" placeholder="Paste reactor names..."></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="checkReactions()">Check Reactions</button>
+        <button class="btn-sm btn-gray" onclick="clearReactors()">Clear</button>
+        <span class="roster-count" id="reactorCount"></span>
+      </div>
+    </div>
+    <div id="results" style="display:none;">
+      <div class="stats">
+        <div class="stat"><div class="stat-num s-green" id="reactedCount">0</div><div class="stat-label">&#9989; Reacted</div></div>
+        <div class="stat"><div class="stat-num s-red" id="missingCount">0</div><div class="stat-label">&#10060; Missing</div></div>
+        <div class="stat"><div class="stat-num s-blue" id="shiftCount">0</div><div class="stat-label">&#128203; Shift</div></div>
+        <div class="stat"><div class="stat-num s-orange" id="extraCount">0</div><div class="stat-label">&#11088; Extra</div></div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <input class="search-input" id="searchBox" placeholder="&#128269; Search..." oninput="renderList()" />
+        <div class="filter-tabs">
+          <div class="f-tab" onclick="setTab('all',this)">All</div>
+          <div class="f-tab" onclick="setTab('reacted',this)">Reacted</div>
+          <div class="f-tab active" onclick="setTab('missing',this)">Missing</div>
+          <div class="f-tab" onclick="setTab('extra',this)">Extra <span id="extraBadge"></span></div>
+        </div>
+        <div class="staff-list" id="staffList"></div>
+        <div id="unmatchedBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-assign">
+    <div class="info-box">
+      &#127919; <strong>Smart Assignment:</strong><br>
+      1&#65039;&#8419; Paste today's roster<br>
+      2&#65039;&#8419; Set department needs<br>
+      &#9989; Auto-assigned (3 main leaders go to &#12477;&#12540;&#12479;&#12540;1/2/3)
+    </div>
+    <div class="card">
+      <div class="step-header"><span class="step-num">1</span> Today's roster</div>
+      <textarea id="assignRoster" placeholder="TAMANG ASHMITA"></textarea>
+      <button class="btn" onclick="loadAssignRoster()" style="margin-top:8px;">Load Roster</button>
+      <span class="roster-count" id="assignRosterCount" style="margin-left:10px;"></span>
+    </div>
+    <div class="card">
+      <div class="step-header"><span class="step-num">2</span> Department needs</div>
+      <div id="deptNeedsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;"></div>
+      <div id="shortageAlerts" style="display:none;margin-top:12px;"></div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="runAssignment()">&#127919; Auto Assign</button>
+        <button class="btn-sm btn-gray" onclick="clearAssignNeeds()">Clear</button>
+        <button class="btn-sm btn-gray" onclick="toggleRules()" id="rulesBtn">&#9881; Rules</button>
+        <span class="roster-count" id="assignTotalNeeded"></span>
+      </div>
+      <div id="rulesPanel" style="display:none;margin-top:14px;padding:14px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">&#9881; Assignment Rules</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleRequireLeader" checked />
+          <span>&#128081; Require 1 main leader on each &#12477;&#12540;&#12479;&#12540; line</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleRequireSubLeader" checked />
+          <span>&#11088; Place sub-leader next to leader when possible</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="rulePrimaryFirst" checked />
+          <span>&#127919; Prioritize people's primary skill first</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleNoForce" />
+          <span>&#128683; Don't force-assign people outside their skills</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="ruleFairness" />
+          <span>&#9878;&#65039; Fairness mode (rotate hard departments)</span>
+        </label>
+        <div class="hint" style="margin-bottom:10px;">Rules are saved automatically</div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px;">
+          <button class="btn-sm" style="background:var(--accent);color:white;width:100%;" onclick="openLocksModal()">&#128274; Manage Locks &amp; Bans</button>
+          <div class="hint" id="locksSummary" style="margin-top:6px;text-align:center;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="assignResults" style="display:none;">
+      <div class="card" style="padding:16px;">
+        <div class="card-title" style="margin-bottom:10px;">&#128203; Assignment Results</div>
+        <div id="assignmentSummary" style="margin-bottom:12px;"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+          <button class="btn-sm btn-green" onclick="copyAssignment()">&#128203; Copy</button>
+          <button id="editModeBtn" class="btn-sm" style="background:var(--accent);color:white;" onclick="toggleEditMode()">&#9999;&#65039; Edit</button>
+          <button id="resetEditBtn" class="btn-sm btn-gray" onclick="resetToAI()" style="display:none;">&#8634; Reset to AI</button>
+        </div>
+        <div id="editModeHint" class="hint" style="display:none;margin-bottom:10px;padding:8px;background:var(--accent-light);border-radius:6px;">
+          &#128172; Tap any person to move them to a different department
+        </div>
+        <div id="assignmentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-rankings">
+    <div class="info-box">
+      &#128202; <strong>Staff Rankings:</strong> See top performers, specialists, and your most flexible workers
+    </div>
+    <div class="card">
+      <div class="card-title">&#128269; Filter</div>
+      <select id="rankingType" onchange="renderRankings()" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;">
+        <option value="flexible">&#127918; Most Flexible (multi-skilled)</option>
+        <option value="leaders">&#128081; Leaders &amp; Sub-leaders</option>
+        <option value="specialists">&#11088; Department Specialists (single skill)</option>
+        <option value="dept">&#128218; By Department</option>
+        <option value="missing">&#9888;&#65039; Missing Skill Data</option>
+        <option value="notes">&#128221; Staff with Notes</option>
+      </select>
+      <select id="rankingDept" onchange="renderRankings()" style="display:none;width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;"></select>
+    </div>
+    <div class="card" style="padding:16px;">
+      <div id="rankingsList"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-manage">
+    <div class="card">
+      <div class="card-title">&#10133; Add new staff</div>
+      <div class="add-grid">
+        <div><label>Facebook name</label><input type="text" id="newFb" placeholder="e.g. Bijaya Mahato" /></div>
+        <div><label>Real name</label><input type="text" id="newReal" placeholder="e.g. MAHATO BIJAYA" /></div>
+        <button class="btn" onclick="addStaff()" style="margin-top:19px;">+ Add</button>
+      </div>
+      <div class="hint">&#128190; Synced to Google Sheet automatically</div>
+    </div>
+    <div class="card" style="padding:16px;">
+      <div class="card-title" style="margin-bottom:10px;">Staff list</div>
+      <input class="search-input" id="manageSearch" placeholder="&#128269; Search..." oninput="renderManage()" />
+      <div class="manage-list" id="manageList"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-settings">
+    <div class="info-box">
+      &#9881; <strong>Settings:</strong> Manage leaders, sub-leaders, departments. Changes sync to Google Sheet.
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128081; Main Leaders <span id="leadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Always get &#31649;&#29702; role on &#12477;&#12540;&#12479;&#12540;1/2/3 machines</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newLeaderInput" placeholder="Type name to promote..." oninput="onLeaderInput()" style="flex:1;" />
+        <button class="btn" onclick="promoteToLeader()">+ Add</button>
+      </div>
+      <div id="leaderSuggestions" style="margin-bottom:10px;"></div>
+      <div id="leadersList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#11088; Sub-Leaders <span id="subleadersCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Placed next to leaders on sorter lines as backup</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newSubLeaderInput" placeholder="Type name to promote..." oninput="onSubLeaderInput()" style="flex:1;" />
+        <button class="btn" onclick="promoteToSubLeader()">+ Add</button>
+      </div>
+      <div id="subleaderSuggestions" style="margin-bottom:10px;"></div>
+      <div id="subleadersList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128218; Departments <span id="deptsCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">Used in assignments, skill editor, and rankings</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="newDeptInput" placeholder="e.g. &#26865;&#20986;&#12375; or Custom dept" style="flex:1;" />
+        <button class="btn" onclick="addDepartment()">+ Add</button>
+      </div>
+      <div id="deptsList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128279; Reactor Aliases <span id="aliasesCount" style="font-size:11px;color:var(--text2);font-weight:normal;margin-left:6px;"></span></div>
+      <div class="card-sub">When you confirm an ambiguous reactor match in the Checker, it's saved here for instant matching next time</div>
+      <div id="aliasesList" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128202; Backup &amp; Reset</div>
+      <div class="card-sub">Export your settings or reset to defaults</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn-sm btn-gray" onclick="exportSettings()">&#128229; Export JSON</button>
+        <button class="btn-sm btn-gray" onclick="importSettings()">&#128228; Import JSON</button>
+        <button class="btn-sm btn-red" onclick="resetFairnessHistoryConfirm()">&#9851; Reset Fairness</button>
+      </div>
+      <input type="file" id="importFile" style="display:none;" accept=".json" onchange="handleImportFile(event)" />
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sitesModal">
+  <div class="modal-box">
+    <div class="modal-title">&#9881; Manage Sites</div>
+    <div class="modal-msg">Adding a site creates a new tab in your Google Sheet.</div>
+    <div id="sitesList" style="margin-bottom:16px;"></div>
+    <div class="card-title" style="margin-top:16px;">Add new site</div>
+    <input type="text" id="newSiteName" placeholder="e.g. Amazon Nagareyama" />
+    <button class="btn" onclick="addSite()" style="width:100%;margin-top:8px;">+ Add Site</button>
+    <div class="modal-btns"><button class="btn-gray" onclick="closeSitesModal()">Close</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="skillModal">
+  <div class="modal-box">
+    <div class="modal-title" id="skillModalTitle">&#127919; Edit Skills</div>
+    <div class="modal-msg">
+      Tap once = add (blue) &middot; Tap again = &#11088; Primary (yellow) &middot; Tap again = remove
+    </div>
+    <div id="skillChipsContainer" style="margin:16px 0;"></div>
+    <div class="hint" id="skillSummary"></div>
+    <div id="skillRatingsSection" style="margin-top:14px;display:none;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#11088; Skill ratings (1-5)</label>
+      <div id="skillRatingsContainer"></div>
+    </div>
+    <div style="margin-top:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">&#128221; Notes (private)</label>
+      <textarea id="skillNotes" placeholder="e.g. Has back injury - no heavy lifting&#10;Good Japanese speaker&#10;Prefers morning shift" style="height:70px;font-size:12px;"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeSkillModal()">Cancel</button>
+      <button style="color:white;background:var(--accent);" onclick="saveSkillEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="movePersonModal">
+  <div class="modal-box">
+    <div class="modal-title" id="movePersonTitle">Move person</div>
+    <div class="modal-msg" id="movePersonMsg"></div>
+    <div id="moveDeptGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0;"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeMovePerson()">Cancel</button>
+      <button class="btn-red" id="moveUnassignBtn" onclick="unassignPerson()">Unassign</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="locksModal">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-title">&#128274; Locks &amp; Bans</div>
+    <div class="modal-msg">
+      &#128274; <strong>Lock</strong> = Always assign this person to this department<br>
+      &#128683; <strong>Ban</strong> = Never assign this person to this department
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Type</label>
+      <div style="display:flex;gap:6px;">
+        <button id="lockTypeBtn" class="btn-sm" style="flex:1;background:var(--accent);color:white;" onclick="setLockType('lock')">&#128274; Lock</button>
+        <button id="banTypeBtn" class="btn-sm btn-gray" style="flex:1;" onclick="setLockType('ban')">&#128683; Ban</button>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Person</label>
+      <input type="text" id="lockPersonInput" placeholder="Type name (e.g. BUDHA MAGAR ROHIT)" oninput="onLockPersonInput()" />
+      <div id="lockPersonSuggestions" style="margin-top:4px;max-height:120px;overflow-y:auto;"></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;">Department</label>
+      <select id="lockDeptSelect" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:13px;"></select>
+    </div>
+    <button class="btn" style="width:100%;margin-bottom:14px;" onclick="addLock()">+ Add</button>
+    <div style="border-top:1px solid var(--border);padding-top:10px;">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px;">Current rules:</div>
+      <div id="locksList" style="max-height:200px;overflow-y:auto;"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeLocksModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="rosterModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-title">&#128064; Loaded Roster <span id="rosterModalCount" style="font-size:13px;color:var(--text2);font-weight:normal;"></span></div>
+    <div class="modal-msg">These are the people currently in today's shift. Tap &times; to remove anyone who shouldn't be here.</div>
+    <input type="text" class="search-input" id="rosterModalSearch" placeholder="&#128269; Search..." oninput="renderRosterModalList()" style="margin-bottom:10px;" />
+    <div id="rosterModalList" style="max-height:50vh;overflow-y:auto;margin-bottom:14px;"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeRosterModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="disambiguateModal">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-title">&#129300; Did you mean?</div>
+    <div id="disambiguateList" style="margin-bottom:16px;max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="skipDisambiguation()">Skip / Mark Unknown</button>
+      <button style="color:white;background:var(--accent);" onclick="applyDisambiguation()">Apply &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">&#9888;&#65039; Confirm</div>
+    <div class="modal-msg" id="confirmMsg">Are you sure?</div>
+    <div class="modal-btns">
+      <button class="btn-gray" onclick="closeConfirm()">Cancel</button>
+      <button id="confirmOk" style="color:white;background:var(--red);">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const SURL='https://rfgahqjayrvrhgebdmdw.supabase.co';
-const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZ2FocWpheXJ2cmhnZWJkbWR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzQwNjQsImV4cCI6MjA5NTIxMDA2NH0.XJCYWDIDxdtZxMW1Y9GwkJKhEdRhGylfui-h544d3zs';
-const SHEET_ID='1SMbxwo9VtF44_kFApGM45v-izNG8KkvW2Dc9GNsptkc';
-const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzG_L_Ks_3pzCVvzC7u03RXHr-HhYvgbj_Wlv8_jLvWlYcs8gXzAKJAmFkSqp5FnyXECw/exec';
-const sb=supabase.createClient(SURL,SKEY);
 
-const STN={
-  A:{code:'A',name:'柏駅',           gid:'0',         bg:'#FAECE7',bd:'#D85A30',tx:'#993C1D',dk:'#4A1B0C',emoji:'🔴'},
-  B:{code:'B',name:'流山おおたかの森駅',gid:'920957076', bg:'#E6F1FB',bd:'#378ADD',tx:'#185FA5',dk:'#042C53',emoji:'🔵'},
-  C:{code:'C',name:'南流山駅',         gid:'1282817497',bg:'#EAF3DE',bd:'#639922',tx:'#3B6D11',dk:'#173404',emoji:'🟢'}
+// ============ CONFIG ============
+const API_URL = "https://script.google.com/macros/s/AKfycbxaRjValqMf9JQ9c63oQeAJ4GTSSrwaKxwc33YZY-7JQyl6_L872JDiGtAgB-wkvU8/exec";
+
+// ============ CONFIG (mutable - editable in Settings) ============
+let LEADERS = ["TAMANG ASHMITA", "DAHAL LIL BAHADUR", "DARAI TIRTHA BAHADUR"];
+let SUBLEADERS = ["MAHAT RAJU", "ADHIKARI PRATIBIMBA", "SHRESTHA BIKASH", "THAPA RITESH", "NEUPANE KAMAL", "MAHATO BIJAYA", "TAMANG DURGA", "GAUTAM ANIL", "GHALE NAWARAJ", "KHATTRI SULAV", "ADHIKARI BINOD", "BUDHA MAGAR ROHIT"];
+let DEPARTMENTS = ["\u7BA1\u7406", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "TC", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "\u6295\u5165", "\u8907\u6570", "\u5358\u6570"];
+
+// Load any user customizations from localStorage
+try {
+  const savedL = JSON.parse(localStorage.getItem("zozo_leaders_v1") || "null");
+  if (savedL && Array.isArray(savedL)) LEADERS = savedL;
+} catch(e) {}
+try {
+  const savedSL = JSON.parse(localStorage.getItem("zozo_subleaders_v1") || "null");
+  if (savedSL && Array.isArray(savedSL)) SUBLEADERS = savedSL;
+} catch(e) {}
+try {
+  const savedD = JSON.parse(localStorage.getItem("zozo_depts_v1") || "null");
+  if (savedD && Array.isArray(savedD)) DEPARTMENTS = savedD;
+} catch(e) {}
+
+function saveLeaders() { localStorage.setItem("zozo_leaders_v1", JSON.stringify(LEADERS)); }
+function saveSubLeaders() { localStorage.setItem("zozo_subleaders_v1", JSON.stringify(SUBLEADERS)); }
+function saveDepartments() { localStorage.setItem("zozo_depts_v1", JSON.stringify(DEPARTMENTS)); }
+
+const SKILL_DATABASE = {
+  "GAUTAM ANIL": ["管理","ソーター1","ソーター2","ソーター3"],
+  "KHATTRI SULAV": ["管理","ソーター1","ソーター2"],
+  "MAHAT RAJU": ["管理","ソーター1","ソーター2","ソーター3"],
+  "NEUPANE KAMAL": ["管理","ソーター2","ソーター3"],
+  "GHALE NAWARAJ": ["管理","ソーター1","ソーター3","棚入れ"],
+  "SHRESTHA BIKASH": ["管理","ソーター1","ソーター2"],
+  "THAPA RITESH": ["管理","ソーター1","ソーター2"],
+  "ADHIKARI BINOD": ["管理","ソーター2","ソーター3"],
+  "ADHIKARI PRATIBIMBA": ["管理","ソーター1","ソーター3"],
+  "DAHAL LIL BAHADUR": ["管理","ソーター1","ソーター2","ソーター3","単数","複数"],
+  "MAHATO BIJAYA": ["管理","ソーター3","棚入れ"],
+  "DARAI TIRTHA BAHADUR": ["管理","ソーター1","ソーター2"],
+  "TAMANG DURGA": ["棚入れ"],
+  "CHAND KALPANA": ["棚入れ","単数"],
+  "SAPKOTA RAMA": ["棚入れ","単数"],
+  "POKHREL RITA": ["棚入れ"],
+  "SHARMA SANGITA": ["棚入れ","単数"],
+  "BASNET KABITA": ["棚入れ","単搬"],
+  "KHADKA SUNIL": ["棚入れ","出庫搬送"],
+  "TAMANG HARSHIT": ["棚入れ","単搬"],
+  "THARU MAHESH": ["棚入れ"],
+  "KHADKA SUMAN": ["棚入れ"],
+  "DARJI BHARAT": ["棚入れ"],
+  "GIRI SUJAN": ["棚入れ","ソーター1"],
+  "PURI KABITA": ["棚入れ","単数"],
+  "PACHHAI GAIHRE KUSMA": ["棚入れ"],
+  "NEUPANE PANDEY SUPRIYA": ["棚入れ"],
+  "TAMANG SUMANA": ["棚入れ"],
+  "BHANDARI RUKU MAYA": ["棚入れ","複数"],
+  "AMGAI LAMICHHANE SUNITA": ["棚入れ","複数"],
+  "SHREES LAXMI": ["棚入れ"],
+  "ACHARYA PRADEEP": ["棚入れ"],
+  "DAHAL HEMANTA": ["ソーター1","複数"],
+  "TAMANG SUMAN": ["ソーター2","棚入れ"],
+  "ROKHA CHHETRI ANSU": ["棚入れ","複数"],
+  "GHARTI MAGAR DILSHOVA": ["棚入れ"],
+  "TAMANG RAJANI": ["投入","ソーター1","棚入れ"],
+  "TAMANG MEG MAYA": ["棚入れ","複数"],
+  "PAUDEL MANISH": ["単搬","単数"],
+  "TAMANG SUBASH": ["単搬"],
+  "KC GANESH BAHADUR": ["単搬"],
+  "BHANDARI PRABIN": ["単搬"],
+  "RUMBA PASANG": ["単搬"],
+  "CHHETRI SHISHIR": ["単搬"],
+  "GURUNG AMIN": ["単搬","ソーター1"],
+  "KUNWAR UJJWAL": ["単搬","ソーター3"],
+  "GURUNG FRIEND": ["単搬"],
+  "UPADHYAY GANESH RAJ": ["出庫搬送","単数"],
+  "KHADKA YAM BAHADUR": ["出庫搬送","投入"],
+  "LUNGELI KAMAL BAHADUR": ["投入","出庫搬送"],
+  "SHAH BIBEK DHOJ": ["投入"],
+  "BASNET TIKA": ["投入"],
+  "DAINAWAL PUJA": ["投入","単数"],
+  "CHAUDHARY HEM RAJ": ["投入"],
+  "GC ARJUN": ["投入","ソーター1","ソーター2"],
+  "GC ANUSHKA": ["投入","複数"],
+  "RIJAL SHIVA": ["投入","ソーター1","ソーター2"],
+  "PUDASAINI PUJAN": ["ソーター1","投入"],
+  "PAUDEL PRABIN": ["投入","ソーター1"],
+  "ADHIKARI ROSHAN": ["投入","ソーター1","単数"],
+  "ADHIKARI SANGITA": ["投入","複数","単数"],
+  "KHATRI SABIN": ["投入","ソーター2"],
+  "DHUNGANA BHARAT": ["ソーター1","投入"],
+  "SHREESH SAGAR": ["投入"],
+  "GAUTAM MAHESWAR": ["投入","ソーター1","ソーター2"],
+  "RAI SURAJ": ["投入"],
+  "CHHETRI HARI BAHADUR": ["投入","ソーター2"],
+  "THAPA RUSMITA": ["複数"],
+  "CHAUDHARY SANKALPA": ["複数"],
+  "MAJHI SUNITA": ["複数"],
+  "OLI PABITRA": ["複数"],
+  "KHADKA ANITA": ["複数"],
+  "GHARTI MAGAR TILAK": ["ソーター1","複数"],
+  "THARU RENUKA DEVI": ["複数"],
+  "BUDHA PUSPA": ["複数"],
+  "PANERU SUNIRA": ["複数","単数"],
+  "THAGUNNA SAPANA": ["複数"],
+  "POUDEL ASHOK": ["複数","ソーター1"],
+  "POUDEL NABINA": ["複数"],
+  "BUDHA MAGAR AASHIKA": ["複数","単数"],
+  "RAKASKOTI PUSPA": ["複数"],
+  "K M OM SHANTA": ["複数"],
+  "MAHATARA KOPILA": ["複数","単数"],
+  "K C PAUDEL SONA": ["複数"],
+  "BARAL ADHIKARI NIRMALA": ["複数","単数"],
+  "POKHREL ASMITA": ["複数","ソーター1","単数"],
+  "KANDEL PARBATI": ["複数","単数"],
+  "B K SUSMITA": ["複数","単数"],
+  "BANSI SAPANA": ["ソーター1","複数"],
+  "KAMI TIKA KUMARI": ["単数","複数"],
+  "BHANDARI APSARA": ["単数","ソーター1"],
+  "BARME SUSMITA": ["単数"],
+  "SAUD LOKSARI": ["単数"],
+  "GHIMIRE SUSMITA": ["単数"],
+  "THAPA PAIJA CHANDA": ["単数"],
+  "BHANDARI SHIVA": ["単数"],
+  "RAWAT SHIBA": ["単数"],
+  "BASNET GYAN KUMARI": ["単数"],
+  "PUN NIRUTA": ["単数"],
+  "KHADKA KHEM KUMARI": ["単数"],
+  "GIRI MENUKA": ["単数"],
+  "CHAUDHARY DIPIKA": ["単数"],
+  "GOPALI PREJINA": ["単数"],
+  "KHATRI KIRAN": ["単数"],
+  "CHAUDHARY KRISTINA": ["単数"],
+  "KHATRI RANJITA": ["単数","複数"],
+  "PUN SAMJHANA": ["単数","複数"],
+  "SUBEDI SUSHMA": ["単数","複数"],
+  "SAPKOTA TULASI": ["単数"],
+  "TIMALSINA SAMIR": ["ソーター1","棚入れ","単数"],
+  "PASI ARJUN": ["単数","ソーター1"],
+  "SAPKOTA SANDESH": ["単数","ソーター1"],
+  "KUMAL SWASTIKA": ["単数","複数"],
+  "TAMANG MEENA": ["単数"],
+  "DULAL NITESH": ["ソーター1","単数"],
+  "POKHREL SHANTI": ["ソーター1"],
+  "PAUDEL KRISHNA PRASAD": ["ソーター1","ソーター2"],
+  "TIMALSINA HARI PRASAD": ["ソーター1","ソーター2","棚入れ"],
+  "CHHETRI BASANTA BAHADUR": ["ソーター1","ソーター2"],
+  "B K MANDIP": ["ソーター1"],
+  "B K PREM": ["ソーター1","ソーター2"],
+  "BHANDARI MILAN": ["ソーター1"],
+  "GAJUREL SUDARSAN": ["ソーター1","ソーター2"],
+  "GURUNG SUNIL": ["ソーター1","ソーター2"],
+  "THARU BIPAN": ["ソーター2","複数"],
+  "MIJAR SABIN": ["ソーター1","ソーター2"],
+  "POUDEL BINAYA": ["ソーター1","ソーター2","投入"],
+  "MOKTAN LAMA SUBARAJ": ["ソーター1","TC"],
+  "ROKA KAMAL": ["ソーター3","ソーター1","ソーター2"],
+  "KARKI ASHOK": ["ソーター1","ソーター2"],
+  "PAUDEL ASBIN": ["ソーター1","ソーター2","ソーター3"],
+  "BK BIMAL": ["ソーター2","ソーター3"],
+  "SUBEDI NIRAJ": ["ソーター2","ソーター3","投入"],
+  "DAHAL PARWAT KUMAR": ["ソーター1","ソーター2","ソーター3"],
+  "RAI SANJIB": ["ソーター2","投入"],
+  "MOKTAN KUNSANG": ["TC","ソーター1","ソーター3"],
+  "BOHARA JANAK": ["TC","ソーター1"],
+  "K C GOBINDA": ["TC","ソーター1","ソーター2"],
+  "REGMI GANESH": ["TC","ソーター1","ソーター2"],
+  "UPRETY UNNAT": ["TC","ソーター1"],
+  "JAYAPALA MUDIYANSELAGE": ["TC"],
+  "SEN SAMARTH": ["TC"],
+  "DHAKAL CHUDAMANI": ["TC"],
+  "SAFAL ARYAL": ["TC"],
+  "OLI PREM": ["TC"],
+  "BUDHA MAGAR ROHIT": ["TC","ソーター3"],
+  "CHAUDHARY NIRAJAN": ["TC"],
+  "CHHETRI SUJAN BAHADUR": ["ソーター1","ソーター2"],
+  "ROKA NIRIJMA": ["ソーター1","投入"],
+  "SUNUWAR JHARANA": ["ソーター1","ソーター2"],
+  "BHUSAL PRISEELA": ["ソーター1"],
+  "DULAL SURAB": ["ソーター1","ソーター2"],
+  "DHUNGANA SANDIP": ["ソーター1"],
+  "BOHARA BIRENDAR": ["ソーター1","ソーター2"],
+  "GURUNG SANJEET": ["ソーター1","ソーター2"],
+  "CHAUDHARY SAROJ": ["ソーター1","ソーター2"],
+  "SAUD BIRENDRA": ["ソーター1","ソーター2"],
+  "KHATRI BINOD": ["ソーター2","ソーター1"],
+  "KHADKA SAGAR": ["ソーター1","ソーター2","ソーター3"],
+  "WAGLE UPENDRA": ["ソーター2","ソーター3"],
+  "GHARTI CHHETRI NIRMAL": ["ソーター1","ソーター3"],
+  "KHANAL RAJU": ["ソーター1","ソーター2"],
+  "CHAUDHARY PRATIMA": ["ソーター1","ソーター2"],
+  "SINHALAGE SURANGA SAMPATH WIMALARATHNA": ["ソーター1","ソーター2"],
+  "TAMANG RES KUMAR": ["ソーター1","ソーター2"],
+  "SUBEDI SUMITRA": ["ソーター1","ソーター3"],
+  "KHATRI THAPA GANGA KUMARI": ["ソーター1","ソーター2","複数"],
+  "ADHIKARI TEJ PRASAD": ["ソーター1","ソーター2"],
+  "PANTA RUPAK": ["ソーター1","ソーター2"],
+  "SHARMA KANDEL PUSPA DEVI": ["ソーター1","ソーター2"],
+  "GURUNG AJAY": ["ソーター1","ソーター3"],
+  "GURUNG KUMAR": ["ソーター1","ソーター2","ソーター3"],
+  "GHIMIRE PRAKASH": ["ソーター1","ソーター2"],
+  "ACHARYA ASHIM": ["ソーター1","ソーター2"],
+  "CHHETRI JEEVAN": ["ソーター1","ソーター2"],
+  "SHAH DABAL BAHADUR": ["ソーター1"],
+  "GURUNG SRISTI": ["ソーター1","ソーター2"],
+  "PRABEEN NETHMAL": ["ソーター1"],
+  "RAI IMA": ["複数","投入","ソーター1"],
+  "ALE MAGAR SAMITA": ["複数"],
+  "SHAHI REKHA": ["複数"],
+  "SHRESTHA AMRITA": ["ソーター1"],
+  "SHRESTHA ALISHA": ["複数"],
+  "SHIVAKOTI SHAKUNTALA": ["ソーター1","ソーター2"],
+  "AACHARYA SHARMA KRITI": ["ソーター1"],
+  "SARTUNGE PRABINA": ["ソーター1"],
+  "RANABHAT SARITA": ["複数","投入"],
+  "ACHHAMI ISHWOR BAHADUR": ["ソーター1","投入"],
+  "REGMI GANGA": ["ソーター1","複数"],
+  "BHUBANESWORI SHAHI": ["複数"],
+  "SAMANT SACHIN SINGH": ["ソーター1","ソーター2"],
+  "DHAKAL ADHIKARI HIRA": ["ソーター1","複数"],
+  "SHRESTHA NABIN": ["ソーター1","ソーター2"],
+  "SHRESTHA SUJAN": ["ソーター1","ソーター3"],
+  "BHANDARI RUPA KUMARI": ["ソーター1","単数"],
+  "RIJAL MANOJ": ["ソーター1","ソーター2"],
+  "PANDEY DINESH": ["ソーター1","ソーター2"],
+  "B K SUNIL": ["ソーター1","ソーター2"],
+  "OLI GANESH KUMAR": ["ソーター1"],
+  "DANGAL SABINA": ["ソーター1","複数"],
+  "GAIRE BABURAM": ["ソーター1"],
+  "MAHAT BARSHA": ["ソーター1"],
+  "MAHAT ROSHAN": ["ソーター1","ソーター2"],
+  "GAUTAM JANAKI": ["複数","単数"],
+  "KHATRI ISHWORI": ["単数"],
+  "DARNAL TEK BAHADUR": ["ソーター1","ソーター3","投入"],
+  "SHAHI BHUBANESWORI": ["ソーター1","複数"],
+  "PANDEY SHIVA": ["ソーター1","ソーター2"],
+  "DULAL SAURAB": ["ソーター1","ソーター2"],
+  "THAPA TILAK BAHADUR": ["ソーター1","ソーター2"],
+  "THAPA KRISHNA BAHADUR": ["ソーター1","ソーター2","棚入れ","投入"],
+  "KHATRI DURGA BAHADUR": ["ソーター1","ソーター2"],
+  "PAIJA PRADIP": ["投入"],
+  "KISAN DIPAK BAHADUR": ["ソーター1"],
+  "KISAN ABISHEK": ["ソーター1"],
+  "KISAN GANESH": ["ソーター1"],
+  "BUDHATHOKI SANDESH": ["ソーター1"],
+  "SEDHAIN BISHAL": ["ソーター1"],
+  "TAMANG RANJANI": ["ソーター1","ソーター2","棚入れ"],
+  "DAMHAL GAUTAM SABINA": ["複数"],
+  "SHARMA G C LAXMI": ["ソーター1","単数","投入"],
+  "DHAMALA GAUTAM SABIN": ["複数"],
+  "CHAND RIMA": ["単数"],
+  "SHARMA RITIK": ["ソーター1","ソーター2","ソーター3"],
+  "THAPA ANIL KUMAR": ["ソーター2"],
+  "CHAUDHARY SAMJHANA": ["ソーター1"],
+  "SHRESTHA MAHENDRA": ["ソーター1","複数"],
+  "KUMAR ARJUN": ["ソーター3","ソーター2"],
+  "KUMAL ARJUN": ["ソーター3","ソーター2"],
+  "SUNAR SANDIP": ["ソーター1","ソーター2"],
+  "LAMA HEMANT": ["ソーター1","ソーター2"],
+  "LAMICHHANE AJAY": ["ソーター1","ソーター2"],
+  "KHATRI BIDUR BAHADUR": ["ソーター1","投入"],
+  "DARJEE AKASH": ["ソーター1"],
+  "RANBHAT SARITA": ["複数"],
+  "PRAVEEN NETHMAL": ["ソーター1"],
+  "KHANAL DURGA": ["ソーター2"],
+  "TAMANG RANJITA": ["単数","ソーター1","棚入れ"],
+  "SHAH THAKURI RACHANA": ["ソーター2"],
+  "SHARMA PAUDEL PRABESH": ["ソーター3"],
+  "SHARMA GAIRE UMA": ["複数","単数"],
+  "BHANDARI PRAKASH": ["ソーター1"],
+  "KARKI ABHISEK": ["ソーター1"],
+  "KARKI JAYANTI": ["ソーター1"],
+  "BUDATHOKI SANDESH": ["ソーター2"],
+  "RAJANI BLON TAMANG": ["ソーター1"],
+  "DAMICHHANE AJAY": ["ソーター2"],
+  "RAJANI TAMANG": ["投入","ソーター1","棚入れ"],
+  "MOHAN POUDEL": ["ソーター1"],
+  "CHANDA THAPA PAIJA": ["単数"],
+  "DUKAL NITESH": ["ソーター1"],
 };
-const CODES=['A','B','C'];
-function csvURL(gid){return`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;}
 
-/* ===== TRANSLATIONS ===== */
-const TX={
-  ja:{
-    title:'QCB6 乗車チェック',
-    sync:'📥 同期', syncing:'同期中...',
-    syncLabel:'Google Sheets から同期',
-    syncSub:'毎朝シフト入力後に同期してください',
-    lastSync:'最終同期: ',
-    rosterOk:'名登録済み · ',rosterBoarded:'名乗車済み',
-    rosterWarn:'本日のロスターが未設定です',
-    rosterWarnSub:'上の「同期」ボタンを押して読み込んでください。',
-    notices:'📢 お知らせ',noticePost:'+ 投稿',
-    noticeCancel:'キャンセル',noticeSend:'📢 全員に送信',
-    noticePH:'全員に知らせたいことを入力...',
-    noNotice:'お知らせはありません',
-    assigned:'名 割り当て済み',limit:'座席上限',
-    full:'満席',tapBoard:'タップして乗車',
-    reportBtn:'📋 出勤レポート',
-    boarded:'乗車済み',seatsLeft:'残席',todayReg:'本日登録',
-    busFull:'満席 — 乗車を停止してください！',
-    searchLabel:'名前を入力（どこからでも一致）',
-    searchPH:'例: SIN, THAPA, KU...',
-    statusBtn:'👥 状況',
-    waitingLabel:'乗車待ち',boardedLabel:'乗車済み',
-    typeSearch:'名前を入力して検索',
-    alreadyHere:'✅ 乗車済み',
-    alreadyElse:'⚠️ 別ステーションで乗車済み',
-    wrongStn:'⚠️ 別ステーション割り当て',
-    assignedTo:'に割り当て',override:'⚡ 例外として乗車許可',
-    noMatch:'に一致するスタッフが見つかりません',
-    tryOther:'別の文字を試してください',
-    results:'検索結果',noStaffSync:'スタッフが登録されていません。\nホームから同期してください。',
-    boardBtn:'✓ 乗車',busFullCant:'満席のため乗車不可',undo:'↩ 取り消し',
-    wrongBus:'⚠️ 誤乗車',noShow:'❌ 未乗車',
-    boardedAt:'で乗車',noStaffAssigned:'本日このステーションにスタッフが割り当てられていません。',
-    resetCI:'🔄 チェックインをリセット',
-    reportTitle:'📋 出勤レポート',
-    pushLabel:'Google Sheets に送信',pushSub:'Boarding Log・Exceptions・Summary タブに保存',
-    push:'📤 送信',pushing:'送信中...',
-    totalLabel:'本日の合計乗車人数',outOf:'名中',
-    wrongBusCount:'⚠️ 誤乗車',noShowCount:'❌ 未乗車',noAssigned:'本日割り当てなし',
-    adminTitle:'⚙️ 設定',seatTitle:'バスの座席上限',
-    seatSub:'各ステーションのバス座席数を設定してください',seats:'席',
-    staffTitle:'スタッフマスター',
-    staffTip:'💡 スタッフの追加はGoogle Sheetsの各タブで行い、「📥 同期」を押してください。',
-    staffSearch:'🔍 名前で検索...',noStaffYet:'スタッフが登録されていません。\nGoogle Sheetsに名前を入力して同期してください。',
-    editing:'編集中',save:'保存',cancel:'キャンセル',
-    realName:'本名',fbName:'Facebook名',noFB:'Facebook名なし',
-    confirmBoard:'名の乗車を確認',confirmBoardBtn:'✓ 乗車確定',selectHint:'名前をタップして選択',
-    connecting:'接続中...',connError:'接続できませんでした',retry:'再試行',
-    confirReset:'のチェックインをリセットしますか？',
-    confirmRemove:'このスタッフを削除しますか？',
-    confirmOverride:'例外として乗車を許可しますか？',
-    savedOk:'✅ 保存しました',
-    syncDone:'✅ 同期完了！',staffLoaded:'名を読み込みました',
-    syncFail:'❌ 同期失敗 — シートが公開されているか確認してください',
-    pushDone:'✅ Google Sheets に送信しました！',pushFail:'❌ 送信失敗: ',
-  },
-  en:{
-    title:'QCB6 Bus Check-in',
-    sync:'📥 Sync', syncing:'Syncing...',
-    syncLabel:'Sync from Google Sheets',
-    syncSub:'Sync every morning after entering the shift',
-    lastSync:'Last sync: ',
-    rosterOk:' assigned · ',rosterBoarded:' boarded',
-    rosterWarn:"Today's roster not set",
-    rosterWarnSub:'Press the Sync button above to load from Google Sheets.',
-    notices:'📢 Notices',noticePost:'+ Post',
-    noticeCancel:'Cancel',noticeSend:'📢 Send to Everyone',
-    noticePH:'Type a message for all leaders...',
-    noNotice:'No notices',
-    assigned:' assigned today',limit:'Seat limit',
-    full:'FULL',tapBoard:'tap to board',
-    reportBtn:'📋 Attendance Report',
-    boarded:'Boarded',seatsLeft:'Seats Left',todayReg:'Assigned',
-    busFull:'BUS FULL — Stop boarding!',
-    searchLabel:'Type name to search (matches anywhere in name)',
-    searchPH:'e.g. SIN, THAPA, KU...',
-    statusBtn:'👥 Status',
-    waitingLabel:'Waiting to Board',boardedLabel:'Boarded',
-    typeSearch:'Type a name to search',
-    alreadyHere:'✅ Already Boarded',
-    alreadyElse:'⚠️ Boarded at Different Station',
-    wrongStn:'⚠️ Wrong Station',
-    assignedTo:'Assigned to ',override:'⚡ Override — Allow Exception',
-    noMatch:'No staff found matching',
-    tryOther:'Try different letters',
-    results:'Results',noStaffSync:'No staff added.\nSync from home first.',
-    boardBtn:'✓ BOARD',busFullCant:'Bus full — cannot board',undo:'↩ Undo',
-    wrongBus:'⚠️ Wrong Bus',noShow:'❌ No Show',
-    boardedAt:' boarded at',noStaffAssigned:'No staff assigned to this station today.',
-    resetCI:'🔄 Reset Check-ins',
-    reportTitle:'📋 Attendance Report',
-    pushLabel:'Push to Google Sheets',pushSub:'Saves to Boarding Log, Exceptions & Summary tabs',
-    push:'📤 Push',pushing:'Pushing...',
-    totalLabel:'Total Boarded Today',outOf:'out of',
-    wrongBusCount:'⚠️ Wrong Bus',noShowCount:'❌ No Show',noAssigned:'No staff assigned today.',
-    adminTitle:'⚙️ Settings',seatTitle:'Bus Seat Limits',
-    seatSub:'Set the number of seats per bus per station',seats:'seats',
-    staffTitle:'Staff Master List',
-    staffTip:'💡 Add staff in Google Sheets tabs then tap 📥 Sync.',
-    staffSearch:'🔍 Search staff...',noStaffYet:'No staff yet.\nAdd names in Google Sheets and sync.',
-    editing:'Editing',save:'Save',cancel:'Cancel',
-    realName:'Real name',fbName:'Facebook name',noFB:'no facebook name',
-    confirmBoard:' people boarding',confirmBoardBtn:'✓ Confirm Boarding',selectHint:'Tap names to select',
-    connecting:'Connecting...',connError:'Could not connect',retry:'Retry',
-    confirReset:'Reset all check-ins for this station?',
-    confirmRemove:'Remove this staff member?',
-    confirmOverride:'Allow this person to board as an exception?',
-    savedOk:'✅ Saved',
-    syncDone:'✅ Synced! ',staffLoaded:' staff loaded',
-    syncFail:'❌ Sync failed — check sheet is set to public viewer',
-    pushDone:'✅ Report pushed to Google Sheets!',pushFail:'❌ Push failed: ',
+// ============ STATE ============
+let currentSite = localStorage.getItem("zozo_current_site") || "";
+let sites = [];
+let staffMap = [];
+let todayRoster = [], results = [], unmatched = [], extraReactors = [];
+let currentTab = "missing";
+let assignRoster = [], assignmentResult = [], aiOriginalSnapshot = [], editMode = false, movingPersonIdx = null;
+let skillEditTarget = null, skillEditDepts = [], skillEditPrimary = null, skillEditRatings = {};
+let skillOverrides = {};
+try { skillOverrides = JSON.parse(localStorage.getItem("zozo_skills_v1") || "{}"); } catch(e) {}
+
+// Aliases: maps reactor name → real staff name (or "__IGNORE__")
+// E.g. "ti ka" → "__IGNORE__" or "ram kumar" → "RAM BAHADUR KUMAR"
+let aliases = {};
+try { aliases = JSON.parse(localStorage.getItem("zozo_aliases_v1") || "{}"); } catch(e) {}
+function saveAliases() { localStorage.setItem("zozo_aliases_v1", JSON.stringify(aliases)); }
+
+// Locks: {NAME: {dept: "ソーター1"}} - always assign to this dept
+// Bans: {NAME: [dept1, dept2]} - never assign to these depts
+let locks = {};
+let bans = {};
+let fairnessHistory = {}; // {NAME: {dept: count}} - tracks recent hard-dept assignments
+try { locks = JSON.parse(localStorage.getItem("zozo_locks_v1") || "{}"); } catch(e) {}
+try { bans = JSON.parse(localStorage.getItem("zozo_bans_v1") || "{}"); } catch(e) {}
+try { fairnessHistory = JSON.parse(localStorage.getItem("zozo_fairness_v1") || "{}"); } catch(e) {}
+
+let lockType = "lock"; // current selection in locks modal
+
+function saveLocks() { localStorage.setItem("zozo_locks_v1", JSON.stringify(locks)); }
+function saveBans() { localStorage.setItem("zozo_bans_v1", JSON.stringify(bans)); }
+function saveFairness() { localStorage.setItem("zozo_fairness_v1", JSON.stringify(fairnessHistory)); }
+
+// ============ HELPERS ============
+function showToast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color || "#16a34a";
+  t.classList.add("show"); setTimeout(function() { t.classList.remove("show"); }, 2500);
+}
+function normalize(s) { return (s||"").toLowerCase().normalize("NFC").replace(/[\s\-_.,\/#!$%\^&\*;:{}=\[\]`~()'"]/g, ""); }
+function escapeHtml(s) { return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function isLeader(name) { const n = normalize(name); return LEADERS.some(function(l) { return normalize(l) === n; }); }
+function isSubLeader(name) { const n = normalize(name); return SUBLEADERS.some(function(l) { return normalize(l) === n; }); }
+
+// ============ SKILLS ============
+function getSkills(realName) {
+  const norm = (realName||"").toUpperCase().trim();
+  if (skillOverrides[norm]) {
+    const o = skillOverrides[norm];
+    return { depts: o.depts || [], primary: o.primary || null, notes: o.notes || "", ratings: o.ratings || {} };
   }
-};
-
-/* ===== STATE ===== */
-let S={
-  screen:'loading',as:'A',ht:'A',
-  boardSrch:'',sSrch:'',
-  editId:null,editRN:'',editFB:'',
-  syncing:false,pushing:false,
-  showNoticeInput:false,noticeText:'',
-  boardSelected:[],
-  toast:'',toastTimer:null,lastSync:'',
-  lang: localStorage.getItem('qcb6_lang')||'ja',
-  data:{stations:[],staff:[],roster:[],checkins:[],notices:[]}
-};
-
-function t(k){return TX[S.lang][k]||TX.ja[k]||k;}
-function toggleLang(){
-  S.lang=S.lang==='ja'?'en':'ja';
-  localStorage.setItem('qcb6_lang',S.lang);
-  render();
+  for (const key in SKILL_DATABASE) {
+    if (key.toUpperCase() === norm) return { depts: SKILL_DATABASE[key], primary: SKILL_DATABASE[key][0], notes: "", ratings: {} };
+  }
+  return { depts: [], primary: null, notes: "", ratings: {} };
+}
+function saveSkillsToStorage() { localStorage.setItem("zozo_skills_v1", JSON.stringify(skillOverrides)); }
+function renderSkillTags(realName) {
+  const s = getSkills(realName);
+  let html = "";
+  if (!s.depts || !s.depts.length) {
+    html = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills set</div>';
+  } else {
+    html = '<div style="margin-top:6px;">' + s.depts.map(function(d) {
+      const r = s.ratings && s.ratings[d] ? s.ratings[d] : 0;
+      const stars = r > 0 ? " " + "\u2605".repeat(r) : "";
+      return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + stars + '</span>';
+    }).join("") + '</div>';
+  }
+  if (s.notes) {
+    html += '<div style="margin-top:6px;padding:6px 10px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.4;"><strong>\u{1F4DD}</strong> ' + escapeHtml(s.notes) + '</div>';
+  }
+  return html;
 }
 
-function today(){return new Date().toISOString().slice(0,10);}
-function todayLbl(){
-  return S.lang==='ja'
-    ? new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'})
-    : new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function set(p){Object.assign(S,p);render();}
-function getStn(code){return S.data.stations.find(s=>s.code===code)||{code,name:STN[code]?.name||'Station '+code,seat_limit:59};}
-function getStaff(id){return S.data.staff.find(s=>s.id===id);}
-function getRosterStn(staffId){const r=S.data.roster.find(r=>r.staff_id===staffId);return r?r.station_code:null;}
-function getCI(staffId){return S.data.checkins.find(c=>c.staff_id===staffId);}
-function stnRoster(code){return S.data.roster.filter(r=>r.station_code===code).map(r=>r.staff_id);}
-function stnCI(code){return S.data.checkins.filter(c=>c.station_code===code).map(c=>c.staff_id);}
-
-function toast(msg,ms=3000){
-  if(S.toastTimer)clearTimeout(S.toastTimer);
-  S.toast=msg;S.toastTimer=setTimeout(()=>{S.toast='';render();},ms);render();
+function openSkillEditor(realName) {
+  skillEditTarget = realName;
+  const s = getSkills(realName);
+  skillEditDepts = (s.depts || []).slice();
+  skillEditPrimary = s.primary || null;
+  skillEditRatings = Object.assign({}, s.ratings || {});
+  document.getElementById("skillModalTitle").textContent = "\u{1F3AF} " + realName;
+  document.getElementById("skillNotes").value = s.notes || "";
+  renderSkillChips();
+  renderSkillRatings();
+  document.getElementById("skillModal").classList.add("show");
 }
 
-/* ===== DATA ===== */
-async function reloadCI(){const{data}=await sb.from('checkins').select('*').eq('shift_date',today());S.data.checkins=data||[];}
-async function reloadRoster(){const{data}=await sb.from('roster').select('*').eq('shift_date',today());S.data.roster=data||[];}
-async function reloadStaff(){const{data}=await sb.from('staff').select('*').order('real_name');S.data.staff=data||[];}
-async function reloadNotices(){const{data}=await sb.from('notices').select('*').order('created_at',{ascending:false}).limit(10);S.data.notices=data||[];}
-
-async function loadAll(){
-  S.screen='loading';render();
-  try{
-    const[st,sf,ro,ci,no]=await Promise.all([
-      sb.from('stations').select('*').order('code'),
-      sb.from('staff').select('*').order('real_name'),
-      sb.from('roster').select('*').eq('shift_date',today()),
-      sb.from('checkins').select('*').eq('shift_date',today()),
-      sb.from('notices').select('*').order('created_at',{ascending:false}).limit(10)
-    ]);
-    S.data.stations=st.data||[];S.data.staff=sf.data||[];
-    S.data.roster=ro.data||[];S.data.checkins=ci.data||[];S.data.notices=no.data||[];
-    S.screen='home';
-  }catch(e){S.screen='error';}
-  render();subscribe();
+function renderSkillRatings() {
+  const section = document.getElementById("skillRatingsSection");
+  const container = document.getElementById("skillRatingsContainer");
+  if (!skillEditDepts.length) {
+    section.style.display = "none";
+    return;
+  }
+  section.style.display = "block";
+  container.innerHTML = skillEditDepts.map(function(d) {
+    const rating = skillEditRatings[d] || 0;
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+      stars += '<span class="star ' + (i <= rating ? "on" : "") + '" onclick="setSkillRating(\'' + d.replace(/'/g, "\\'") + '\', ' + i + ')">&#9733;</span>';
+    }
+    return '<div class="star-row">' +
+      '<div class="dept-name">' + escapeHtml(d) + (d === skillEditPrimary ? ' &#11088;' : '') + '</div>' +
+      '<div class="stars">' + stars + '</div>' +
+    '</div>';
+  }).join("");
 }
 
-function subscribe(){
-  sb.channel('qcb6_live')
-    .on('postgres_changes',{event:'*',schema:'public',table:'checkins'},async()=>{await reloadCI();render();})
-    .on('postgres_changes',{event:'*',schema:'public',table:'roster'},async()=>{await reloadRoster();render();})
-    .on('postgres_changes',{event:'*',schema:'public',table:'staff'},async()=>{await reloadStaff();render();})
-    .on('postgres_changes',{event:'*',schema:'public',table:'notices'},async()=>{await reloadNotices();render();})
-    .subscribe();
+function setSkillRating(dept, rating) {
+  // Tap same star again to clear
+  if (skillEditRatings[dept] === rating) {
+    delete skillEditRatings[dept];
+  } else {
+    skillEditRatings[dept] = rating;
+  }
+  renderSkillRatings();
+}
+function openSkillEditorByIdx(idx) {
+  const staff = staffMap[idx];
+  if (!staff) { showToast("Staff not found", "#dc2626"); return; }
+  openSkillEditor(staff.real);
+}
+function closeSkillModal() {
+  document.getElementById("skillModal").classList.remove("show");
+  skillEditTarget = null;
+}
+function renderSkillChips() {
+  const c = document.getElementById("skillChipsContainer");
+  c.innerHTML = DEPARTMENTS.map(function(d) {
+    const isOn = skillEditDepts.indexOf(d) !== -1;
+    const isPri = d === skillEditPrimary;
+    return '<span class="skill-chip ' + (isPri ? "primary" : isOn ? "active" : "") + '" onclick="toggleSkill(\'' + d + '\')">' + (isPri ? "\u2B50 " : "") + d + '</span>';
+  }).join("");
+  document.getElementById("skillSummary").innerHTML = skillEditDepts.length
+    ? 'Skills: ' + skillEditDepts.length + (skillEditPrimary ? ' &middot; Primary: <strong>' + skillEditPrimary + '</strong>' : '')
+    : 'Tap a department to add skill';
+}
+function toggleSkill(d) {
+  if (skillEditDepts.indexOf(d) === -1) {
+    skillEditDepts.push(d);
+    if (!skillEditPrimary) skillEditPrimary = d;
+  } else if (d !== skillEditPrimary) {
+    skillEditPrimary = d;
+  } else {
+    skillEditDepts = skillEditDepts.filter(function(x) { return x !== d; });
+    delete skillEditRatings[d];
+    skillEditPrimary = skillEditDepts[0] || null;
+  }
+  renderSkillChips();
+  renderSkillRatings();
+}
+function saveSkillEdit() {
+  if (!skillEditTarget) return;
+  if (skillEditDepts.length && !skillEditPrimary) skillEditPrimary = skillEditDepts[0];
+  const notes = (document.getElementById("skillNotes").value || "").trim();
+  const norm = skillEditTarget.toUpperCase().trim();
+  // Clean up ratings - only keep depts that are still in the list
+  const cleanRatings = {};
+  for (const d in skillEditRatings) {
+    if (skillEditDepts.indexOf(d) !== -1) cleanRatings[d] = skillEditRatings[d];
+  }
+  if (skillEditDepts.length === 0 && !notes) {
+    delete skillOverrides[norm];
+    deleteSkillFromSheet(norm);
+  } else {
+    const data = { depts: skillEditDepts, primary: skillEditPrimary, notes: notes, ratings: cleanRatings };
+    skillOverrides[norm] = data;
+    pushSkillToSheet(norm, data);
+  }
+  saveSkillsToStorage();
+  closeSkillModal();
+  showToast("Saved & synced!");
+  renderManage();
 }
 
-/* ===== SYNC ===== */
-async function syncFromSheets(){
-  S.syncing=true;toast(t('syncing'),15000);render();
-  try{
-    const oldRIds=S.data.roster.map(r=>r.id);
-    if(oldRIds.length>0)await sb.from('roster').delete().in('id',oldRIds);
-    S.data.roster=[];let totalRoster=0;
-    for(const code of CODES){
-      const cfg=STN[code];
-      const res=await fetch(csvURL(cfg.gid));
-      const text=await res.text();
-      const parsed=Papa.parse(text.replace(/^\uFEFF/,''),{header:false,skipEmptyLines:true});
-      const names=parsed.data.map(row=>(row[0]||'').replace(/^"|"$/g,'').trim()).filter(n=>n&&n.length>1);
-      for(const name of names){
-        let member=S.data.staff.find(s=>s.real_name.toUpperCase()===name.toUpperCase());
-        if(!member){
-          const maxB=S.data.staff.reduce((m,s)=>Math.max(m,s.badge_number),0);
-          const{data,error}=await sb.from('staff').insert({badge_number:maxB+1,real_name:name,facebook_name:''}).select().single();
-          if(!error&&data){S.data.staff.push(data);member=data;}else continue;
-        }
-        const{data:rData}=await sb.from('roster').insert({shift_date:today(),staff_id:member.id,station_code:code}).select().single();
-        if(rData){S.data.roster.push(rData);totalRoster++;}
+// ============ SITES & STAFF ============
+async function loadSites() {
+  try {
+    const res = await fetch(API_URL + "?action=listSites");
+    sites = await res.json();
+    if (!sites.length) { showToast("No sites found!", "#dc2626"); return; }
+    if (!currentSite || !sites.find(function(s) { return s.name === currentSite; })) {
+      currentSite = sites[0].name;
+      localStorage.setItem("zozo_current_site", currentSite);
+    }
+    renderSiteSelector();
+    await loadStaff();
+  } catch(e) { showToast("Failed to load sites", "#dc2626"); }
+}
+function renderSiteSelector() {
+  document.getElementById("siteSelector").innerHTML = sites.map(function(s) {
+    return '<option value="' + escapeHtml(s.name) + '"' + (s.name === currentSite ? ' selected' : '') + '>' + escapeHtml(s.name) + ' (' + s.count + ')</option>';
+  }).join("");
+}
+async function onSiteChange() {
+  currentSite = document.getElementById("siteSelector").value;
+  localStorage.setItem("zozo_current_site", currentSite);
+  document.getElementById("results").style.display = "none";
+  todayRoster = []; results = [];
+  document.getElementById("rosterCount").textContent = "";
+  await loadStaff();
+  showToast("Switched to " + currentSite);
+}
+async function loadStaff() {
+  try {
+    const res = await fetch(API_URL + "?site=" + encodeURIComponent(currentSite));
+    staffMap = await res.json();
+    document.getElementById("siteCount").textContent = staffMap.length + " staff";
+    if (document.getElementById("page-manage").classList.contains("active")) renderManage();
+  } catch(e) { showToast("Failed to load staff", "#dc2626"); }
+}
+
+async function loadSkillsFromSheet() {
+  try {
+    const res = await fetch(API_URL + "?action=getSkills");
+    const sheetSkills = await res.json();
+    if (sheetSkills && typeof sheetSkills === "object" && !sheetSkills.error) {
+      // Merge with local: sheet wins (cloud is master)
+      const localOnly = {};
+      for (const k in skillOverrides) {
+        if (!sheetSkills[k]) localOnly[k] = skillOverrides[k];
+      }
+      skillOverrides = Object.assign({}, sheetSkills, localOnly);
+      saveSkillsToStorage();
+      // Push any local-only entries to sheet
+      for (const k in localOnly) {
+        pushSkillToSheet(k, localOnly[k]);
       }
     }
-    await reloadStaff();
-    S.lastSync=new Date().toLocaleTimeString();
-    toast(t('syncDone')+totalRoster+t('staffLoaded'),4000);
-  }catch(e){toast(t('syncFail')+': '+e.message,6000);}
-  S.syncing=false;render();
+  } catch(e) {
+    console.log("Skills sync failed, using local only", e);
+  }
 }
 
-/* ===== NOTICES ===== */
-async function refreshNotices(){
-  await reloadNotices();
-  render();
-  toast('🔄 Refreshed',1200);
-}
-
-async function postNotice(){
-  const msg=S.noticeText.trim();if(!msg)return;
-  const{data}=await sb.from('notices').insert({message:msg}).select().single();
-  if(data)S.data.notices.unshift(data);
-  S.noticeText='';S.showNoticeInput=false;render();
-}
-async function deleteNotice(id){
-  await sb.from('notices').delete().eq('id',id);
-  S.data.notices=S.data.notices.filter(n=>n.id!==id);render();
-}
-
-/* ===== PUSH ===== */
-async function pushToSheets(){
-  S.pushing=true;toast(t('pushing'),10000);render();
-  try{
-    const boardingLog=S.data.checkins.map(ci=>{
-      const m=getStaff(ci.staff_id),stn=getStn(ci.station_code);
-      return{realName:m?.real_name||'',facebook:m?.facebook_name||'',station:stn.name,time:new Date(ci.checked_in_at).toLocaleTimeString()};
+async function pushSkillToSheet(name, data) {
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        action: "saveSkill",
+        name: name,
+        depts: data.depts || [],
+        primary: data.primary || "",
+        notes: data.notes || ""
+      })
     });
-    const exceptions=[];
-    CODES.forEach(s=>{
-      const rIds=stnRoster(s),ciIds=stnCI(s);
-      rIds.filter(id=>!ciIds.includes(id)).forEach(id=>{
-        const m=getStaff(id),ci=getCI(id);
-        exceptions.push({realName:m?.real_name||'',facebook:m?.facebook_name||'',assigned:getStn(s).name,boardedAt:ci?getStn(ci.station_code).name:'',type:ci?'Wrong Station':'No Show'});
+  } catch(e) {}
+}
+
+async function deleteSkillFromSheet(name) {
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ action: "deleteSkill", name: name })
+    });
+  } catch(e) {}
+}
+
+async function syncCurrent() { showToast("Syncing..."); await loadSites(); await loadSkillsFromSheet(); showToast("Synced!"); renderManage(); }
+
+// ============ NAVIGATION ============
+function switchPage(page, el) {
+  const pages = document.querySelectorAll(".page");
+  for (let i=0; i<pages.length; i++) pages[i].classList.remove("active");
+  const tabs = document.querySelectorAll(".page-tab");
+  for (let i=0; i<tabs.length; i++) tabs[i].classList.remove("active");
+  document.getElementById("page-" + page).classList.add("active");
+  el.classList.add("active");
+  if (page === "manage") renderManage();
+  if (page === "rankings") { setupRankings(); renderRankings(); }
+  if (page === "settings") renderSettings();
+}
+
+// ============ REACTION CHECKER ============
+function tokenize(s) {
+  return (s || "").toLowerCase()
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(function(t){return t.length >= 2;});
+}
+
+function nameMatches(name, staff) {
+  // Use confidence score: require 80% of input tokens to match
+  // This prevents "BUDHA MAGAR AASHIKA" from wrongly matching "BUDHA MAGAR ROHIT" via shared surnames
+  return scoreNameMatch(name, staff) >= 0.8;
+}
+function findStaff(name) {
+  for (let i=0; i<staffMap.length; i++) {
+    if (nameMatches(name, staffMap[i])) return staffMap[i];
+  }
+  return null;
+}
+
+// Confidence-based matching: returns score 0..1
+// Smart rule: if BOTH sides have unmatched distinctive tokens (>=4 chars), it's likely a DIFFERENT person
+// (e.g. "BUDHA MAGAR AASHIKA" vs "BUDHA MAGAR ROHIT" - both have unmatched "AASHIKA"/"ROHIT")
+function scoreNameMatch(name, staff) {
+  const n = normalize(name); if (!n) return 0;
+  const fn = normalize(staff.fb), rn = normalize(staff.real);
+  if (fn === n || rn === n) return 1.0;
+  const inputTokens = tokenize(name).filter(function(t){return t.length >= 3;});
+  if (inputTokens.length === 0) return 0;
+  // Try matching against real name and fb separately, take best
+  const realTokens = tokenize(staff.real).filter(function(t){return t.length >= 3;});
+  const fbTokens = tokenize(staff.fb).filter(function(t){return t.length >= 3;});
+  return Math.max(
+    scoreAgainstTokens(inputTokens, realTokens),
+    scoreAgainstTokens(inputTokens, fbTokens)
+  );
+}
+
+function scoreAgainstTokens(inputTokens, staffTokens) {
+  if (!inputTokens.length || !staffTokens.length) return 0;
+  const inputMatched = [];
+  const staffMatched = [];
+  for (let i = 0; i < inputTokens.length; i++) inputMatched.push(false);
+  for (let j = 0; j < staffTokens.length; j++) staffMatched.push(false);
+  let matches = 0;
+  for (let i = 0; i < inputTokens.length; i++) {
+    const inTok = inputTokens[i];
+    for (let j = 0; j < staffTokens.length; j++) {
+      if (staffMatched[j]) continue;
+      const sTok = staffTokens[j];
+      if (inTok === sTok) {
+        matches += 1; inputMatched[i] = true; staffMatched[j] = true; break;
+      }
+      if (inTok.length >= 4 && sTok.length >= 4 && (inTok.indexOf(sTok) === 0 || sTok.indexOf(inTok) === 0)) {
+        matches += 0.85; inputMatched[i] = true; staffMatched[j] = true; break;
+      }
+    }
+  }
+  if (matches < 2) return 0; // need at least 2 token matches to avoid single-token false positives
+  // Conflict detection: count UNMATCHED distinctive tokens (length >= 4) on each side
+  let inputConflicts = 0, staffConflicts = 0;
+  for (let i = 0; i < inputTokens.length; i++) {
+    if (!inputMatched[i] && inputTokens[i].length >= 4) inputConflicts++;
+  }
+  for (let j = 0; j < staffTokens.length; j++) {
+    if (!staffMatched[j] && staffTokens[j].length >= 4) staffConflicts++;
+  }
+  // KEY RULE: if BOTH sides have unmatched distinctive tokens, this is likely a DIFFERENT person
+  // (e.g. BUDHA MAGAR AASHIKA vs BUDHA MAGAR ROHIT - "AASHIKA" and "ROHIT" both unmatched)
+  if (inputConflicts > 0 && staffConflicts > 0) {
+    return matches / (inputTokens.length + staffTokens.length); // low score, won't match
+  }
+  // One side is fully covered (or only missing short tokens) - good match
+  return Math.min(matches / Math.min(inputTokens.length, staffTokens.length), 0.95);
+}
+
+// Find best matches with confidence levels
+function findStaffWithConfidence(name) {
+  // 1. Check aliases first
+  const normInput = normalize(name);
+  if (aliases[normInput] !== undefined) {
+    if (aliases[normInput] === "__IGNORE__") return { aliased: true, ignore: true, original: name };
+    const aliasedReal = aliases[normInput];
+    for (let i = 0; i < staffMap.length; i++) {
+      if (normalize(staffMap[i].real) === normalize(aliasedReal)) {
+        return { aliased: true, staff: staffMap[i], original: name };
+      }
+    }
+  }
+  
+  // 2. Score all staff
+  const scored = [];
+  for (let i = 0; i < staffMap.length; i++) {
+    const score = scoreNameMatch(name, staffMap[i]);
+    if (score > 0) scored.push({ staff: staffMap[i], score: score });
+  }
+  scored.sort(function(a,b){return b.score - a.score;});
+  
+  if (scored.length === 0) return { unknown: true, original: name };
+  
+  const best = scored[0];
+  // High confidence: auto-match
+  if (best.score >= 0.85) {
+    return { confident: true, staff: best.staff, score: best.score, original: name };
+  }
+  // Medium confidence: ambiguous, ask user
+  if (best.score >= 0.35) {
+    return { ambiguous: true, candidates: scored.slice(0, 5), original: name };
+  }
+  return { unknown: true, original: name };
+}
+
+function loadRoster() {
+  const raw = document.getElementById("rosterInput").value;
+  if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  todayRoster = [];
+  const seen = {};
+  let unmatchedCount = 0;
+  lines.forEach(function(name) {
+    const k = name.toLowerCase().trim();
+    if (seen[k]) return;
+    seen[k] = true;
+    const found = findStaff(name);
+    if (found) todayRoster.push({fb: found.fb, real: found.real, input: name});
+    else { todayRoster.push({fb: name, real: "(not in database)", input: name}); unmatchedCount++; }
+  });
+  document.getElementById("rosterCount").textContent = todayRoster.length + "/" + lines.length + " loaded" + (unmatchedCount ? " (" + unmatchedCount + " unknown)" : "");
+  document.getElementById("results").style.display = "none";
+  document.getElementById("viewRosterBtn").style.display = todayRoster.length ? "inline-flex" : "none";
+  showToast(todayRoster.length + " loaded");
+}
+
+function viewLoadedRoster() {
+  if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  document.getElementById("rosterModal").classList.add("show");
+  document.getElementById("rosterModalSearch").value = "";
+  renderRosterModalList();
+}
+
+function closeRosterModal() {
+  document.getElementById("rosterModal").classList.remove("show");
+}
+
+function renderRosterModalList() {
+  const search = (document.getElementById("rosterModalSearch").value || "").toLowerCase();
+  const filtered = todayRoster.map(function(s, i){ return {fb: s.fb, real: s.real, input: s.input || s.fb, _idx: i}; })
+    .filter(function(s) {
+      if (!search) return true;
+      return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;
+    });
+  document.getElementById("rosterModalCount").textContent = "(" + todayRoster.length + ")";
+  const html = filtered.length ? filtered.map(function(s) {
+    const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    const isUnknown = s.real === "(not in database)";
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:' + (isUnknown ? "var(--red-light)" : "var(--bg)") + ';border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
+      '<div style="flex:1;min-width:0;font-size:12px;">' +
+        '<div style="font-weight:600;">' + escapeHtml(s.fb) + tag + '</div>' +
+        '<div style="color:var(--text3);">' + escapeHtml(s.real) + '</div>' +
+        (s.input && s.input !== s.fb ? '<div style="color:var(--text3);font-style:italic;font-size:10px;">typed: ' + escapeHtml(s.input) + '</div>' : '') +
+      '</div>' +
+      '<button class="btn-sm btn-red" onclick="removeFromRoster(' + s._idx + ')" title="Remove">&times;</button>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No matches</div>';
+  document.getElementById("rosterModalList").innerHTML = html;
+}
+
+function removeFromRoster(idx) {
+  const removed = todayRoster[idx];
+  todayRoster.splice(idx, 1);
+  document.getElementById("rosterCount").textContent = todayRoster.length + " loaded";
+  showToast("Removed " + (removed.real !== "(not in database)" ? removed.real : removed.fb), "#dc2626");
+  renderRosterModalList();
+  // If reactions already checked, hide stale results
+  if (document.getElementById("results").style.display !== "none") {
+    document.getElementById("results").style.display = "none";
+    showToast("Re-check reactions to update", "#d97706");
+  }
+}
+function clearRoster() {
+  document.getElementById("rosterInput").value = "";
+  document.getElementById("rosterCount").textContent = "";
+  document.getElementById("results").style.display = "none";
+  document.getElementById("viewRosterBtn").style.display = "none";
+  todayRoster = []; results = [];
+}
+function clearReactors() {
+  document.getElementById("reactorInput").value = "";
+  document.getElementById("reactorCount").textContent = "";
+  document.getElementById("results").style.display = "none";
+}
+function checkReactions() {
+  if (!todayRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  const raw = document.getElementById("reactorInput").value;
+  if (!raw.trim()) { showToast("Paste reactors!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  document.getElementById("reactorCount").textContent = lines.length + " detected";
+  unmatched = []; extraReactors = [];
+  results = todayRoster.map(function(s) { return {fb: s.fb, real: s.real, reacted: false}; });
+  
+  // First pass: collect confident matches, mark ambiguous ones for popup
+  const ambiguous = [];
+  const processedNames = {};
+  
+  lines.forEach(function(name) {
+    if (!normalize(name)) return;
+    const k = normalize(name);
+    if (processedNames[k]) return; // skip duplicates
+    processedNames[k] = true;
+    
+    const result = findStaffWithConfidence(name);
+    
+    if (result.ignore) return; // aliased to ignore
+    
+    if (result.aliased || result.confident) {
+      applyReactorMatch(result.staff, name);
+    } else if (result.ambiguous) {
+      ambiguous.push({ name: name, candidates: result.candidates });
+    } else {
+      unmatched.push(name);
+    }
+  });
+  
+  // If there are ambiguous matches, show popup
+  if (ambiguous.length > 0) {
+    showDisambiguateModal(ambiguous);
+  } else {
+    finalizeReactionResults();
+  }
+}
+
+function applyReactorMatch(dbMatch, originalName) {
+  let foundInRoster = false;
+  for (let i=0; i<results.length; i++) {
+    const r = results[i];
+    if (normalize(r.fb) === normalize(dbMatch.fb) || normalize(r.real) === normalize(dbMatch.real)) {
+      r.reacted = true; foundInRoster = true;
+    }
+  }
+  if (!foundInRoster) {
+    let exists = false;
+    for (let i=0; i<extraReactors.length; i++) {
+      if (normalize(extraReactors[i].fb) === normalize(dbMatch.fb)) { exists = true; break; }
+    }
+    if (!exists) extraReactors.push({fb: dbMatch.fb, real: dbMatch.real});
+  }
+}
+
+function finalizeReactionResults() {
+  const reactedNum = results.filter(function(s){return s.reacted;}).length;
+  document.getElementById("reactedCount").textContent = reactedNum;
+  document.getElementById("missingCount").textContent = results.length - reactedNum;
+  document.getElementById("shiftCount").textContent = results.length;
+  document.getElementById("extraCount").textContent = extraReactors.length;
+  document.getElementById("extraBadge").textContent = extraReactors.length ? "(" + extraReactors.length + ")" : "";
+  document.getElementById("results").style.display = "block";
+  currentTab = "missing";
+  const tabs = document.querySelectorAll(".f-tab");
+  for (let i=0; i<tabs.length; i++) {
+    if (i === 2) tabs[i].classList.add("active"); else tabs[i].classList.remove("active");
+  }
+  renderList();
+}
+
+// ============ DISAMBIGUATION MODAL ============
+let pendingAmbiguous = [];
+let userPicks = {}; // name -> choice ("real name" or "__IGNORE__")
+
+function showDisambiguateModal(ambiguous) {
+  pendingAmbiguous = ambiguous;
+  userPicks = {};
+  renderDisambiguateModal();
+  document.getElementById("disambiguateModal").classList.add("show");
+}
+
+function renderDisambiguateModal() {
+  const container = document.getElementById("disambiguateList");
+  let html = '<div style="margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6;">' +
+    '\u{1F4A1} ' + pendingAmbiguous.length + ' reactor name(s) need clarification. Pick the right person or mark as unknown. <strong>Your choices are saved</strong> so next time the same name comes up, it\'ll match automatically.' +
+  '</div>';
+  
+  pendingAmbiguous.forEach(function(item, idx) {
+    const reactorKey = "amb-" + idx;
+    html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">';
+    html += '<div style="font-weight:700;font-size:14px;margin-bottom:8px;">\u{1F914} <span style="color:var(--accent);">' + escapeHtml(item.name) + '</span></div>';
+    html += '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Did you mean...</div>';
+    
+    item.candidates.forEach(function(c, cidx) {
+      const confidencePct = Math.round(c.score * 100);
+      const cVal = c.staff.real.replace(/"/g, "&quot;");
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
+        '<input type="radio" name="' + reactorKey + '" value="' + cVal + '" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:13px;font-weight:600;">' + escapeHtml(c.staff.real) + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);">FB: ' + escapeHtml(c.staff.fb) + '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;font-weight:700;color:' + (confidencePct >= 70 ? "var(--green)" : confidencePct >= 50 ? "var(--orange)" : "var(--red)") + ';">' + confidencePct + '%</div>' +
+      '</label>';
+    });
+    
+    // None of these option
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;cursor:pointer;">' +
+      '<input type="radio" name="' + reactorKey + '" value="__IGNORE__" onchange="pickDisambiguate(\'' + reactorKey + '\', this.value, ' + idx + ')" />' +
+      '<div style="flex:1;font-size:13px;color:var(--text2);">\u274C None of these (not a staff member)</div>' +
+    '</label>';
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function pickDisambiguate(reactorKey, choice, idx) {
+  const item = pendingAmbiguous[idx];
+  userPicks[item.name] = choice;
+}
+
+function applyDisambiguation() {
+  // Process each ambiguous match based on user pick
+  pendingAmbiguous.forEach(function(item) {
+    const pick = userPicks[item.name];
+    const normInput = normalize(item.name);
+    if (!pick) {
+      // No selection made → treat as unknown
+      unmatched.push(item.name);
+      return;
+    }
+    if (pick === "__IGNORE__") {
+      aliases[normInput] = "__IGNORE__";
+      return;
+    }
+    // Save alias and apply match
+    aliases[normInput] = pick;
+    for (let i = 0; i < staffMap.length; i++) {
+      if (normalize(staffMap[i].real) === normalize(pick)) {
+        applyReactorMatch(staffMap[i], item.name);
+        break;
+      }
+    }
+  });
+  saveAliases();
+  document.getElementById("disambiguateModal").classList.remove("show");
+  pendingAmbiguous = [];
+  userPicks = {};
+  finalizeReactionResults();
+  showToast("Saved aliases. Next time these auto-match!");
+}
+
+function skipDisambiguation() {
+  // Treat all unchosen as unknown
+  pendingAmbiguous.forEach(function(item) {
+    if (!userPicks[item.name]) unmatched.push(item.name);
+  });
+  // Apply any that were chosen
+  pendingAmbiguous.forEach(function(item) {
+    const pick = userPicks[item.name];
+    const normInput = normalize(item.name);
+    if (pick && pick !== "__IGNORE__") {
+      aliases[normInput] = pick;
+      for (let i = 0; i < staffMap.length; i++) {
+        if (normalize(staffMap[i].real) === normalize(pick)) {
+          applyReactorMatch(staffMap[i], item.name);
+          break;
+        }
+      }
+    } else if (pick === "__IGNORE__") {
+      aliases[normInput] = "__IGNORE__";
+    }
+  });
+  saveAliases();
+  document.getElementById("disambiguateModal").classList.remove("show");
+  pendingAmbiguous = [];
+  userPicks = {};
+  finalizeReactionResults();
+}
+function setTab(tab, el) {
+  currentTab = tab;
+  const tabs = document.querySelectorAll(".f-tab");
+  for (let i=0; i<tabs.length; i++) tabs[i].classList.remove("active");
+  el.classList.add("active");
+  renderList();
+}
+function renderList() {
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  let list = [], isExtra = false;
+  if (currentTab === "extra") { list = extraReactors.slice(); isExtra = true; }
+  else if (currentTab === "reacted") list = results.filter(function(s){return s.reacted;});
+  else if (currentTab === "missing") list = results.filter(function(s){return !s.reacted;});
+  else list = results.slice();
+  if (search) list = list.filter(function(s){return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;});
+  document.getElementById("staffList").innerHTML = list.length ? list.map(function(s) {
+    if (isExtra) {
+      return '<div class="staff-row extra"><div><div class="staff-name">' + escapeHtml(s.fb) + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div><div class="badge badge-extra">Extra</div></div>';
+    }
+    const leaderTag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    return '<div class="staff-row ' + (s.reacted ? "reacted" : "missing") + '"><div><div class="staff-name">' + escapeHtml(s.fb) + leaderTag + '</div><div class="staff-real">' + escapeHtml(s.real) + '</div></div><div class="badge ' + (s.reacted ? "badge-yes" : "badge-no") + '">' + (s.reacted ? "Reacted" : "Missing") + '</div></div>';
+  }).join("") : '<div class="empty">No results</div>';
+  document.getElementById("unmatchedBox").innerHTML = unmatched.length ?
+    '<div class="unmatched"><strong>' + unmatched.length + ' unknown:</strong>' +
+    unmatched.map(function(n){return '<span class="tag">' + escapeHtml(n) + '</span>';}).join(" ") + '</div>' : "";
+}
+
+// ============ MANAGE STAFF ============
+function renderManage() {
+  const search = (document.getElementById("manageSearch").value || "").toLowerCase();
+  let list = staffMap.map(function(s, i) { return {fb: s.fb, real: s.real, _idx: i}; });
+  if (search) list = list.filter(function(s){return s.fb.toLowerCase().indexOf(search) !== -1 || s.real.toLowerCase().indexOf(search) !== -1;});
+  document.getElementById("manageList").innerHTML = list.length ? list.map(function(s) {
+    const idx = s._idx;
+    const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
+    return '<div class="manage-row" id="mrow-' + idx + '">' +
+      '<div class="manage-names" id="mn-' + idx + '">' +
+        '<div class="staff-name">' + escapeHtml(s.fb) + tag + '</div>' +
+        '<div class="staff-real">' + escapeHtml(s.real) + '</div>' +
+        renderSkillTags(s.real) +
+      '</div>' +
+      '<div class="edit-area" id="me-' + idx + '">' +
+        '<input type="text" id="ef-' + idx + '" value="' + escapeHtml(s.fb) + '" placeholder="Facebook"/>' +
+        '<input type="text" id="er-' + idx + '" value="' + escapeHtml(s.real) + '" placeholder="Real"/>' +
+      '</div>' +
+      '<div class="row-btns" id="mb-' + idx + '">' +
+        '<button class="btn-sm btn-gray" onclick="openSkillEditorByIdx(' + idx + ')" title="Edit skills">\u{1F3AF}</button>' +
+        '<button class="btn-sm btn-gray" onclick="startEdit(' + idx + ')" title="Edit name">\u270F\uFE0F</button>' +
+        '<button class="btn-sm btn-red" onclick="removeStaff(' + idx + ')" title="Delete">\u{1F5D1}</button>' +
+      '</div>' +
+      '<div class="row-btns-edit" id="mbe-' + idx + '">' +
+        '<button class="btn-sm btn-green" onclick="saveEdit(' + idx + ')">\u2705</button>' +
+        '<button class="btn-sm btn-gray" onclick="cancelEdit(' + idx + ')">\u2715</button>' +
+      '</div></div>';
+  }).join("") : '<div class="empty">No staff. Add some!</div>';
+}
+async function addStaff() {
+  const fb = document.getElementById("newFb").value.trim();
+  const real = document.getElementById("newReal").value.trim();
+  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
+  staffMap.push({fb: fb, real: real});
+  document.getElementById("siteCount").textContent = staffMap.length + " staff";
+  document.getElementById("newFb").value = ""; document.getElementById("newReal").value = "";
+  showToast(fb + " added!"); renderManage();
+  try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"add", site:currentSite, fb:fb, real:real})}); } catch(e) {}
+}
+function removeStaff(idx) {
+  const staff = staffMap[idx];
+  document.getElementById("confirmTitle").textContent = "Remove";
+  document.getElementById("confirmMsg").textContent = "Remove '" + staff.fb + "'?";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = async function() {
+    staffMap.splice(idx, 1);
+    document.getElementById("siteCount").textContent = staffMap.length + " staff";
+    closeConfirm();
+    showToast(staff.fb + " removed", "#dc2626");
+    renderManage();
+    try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"delete", site:currentSite, fb:staff.fb, real:staff.real})}); } catch(e) {}
+  };
+}
+function closeConfirm() {
+  document.getElementById("confirmModal").classList.remove("show");
+}
+function startEdit(idx) {
+  document.getElementById("mn-"+idx).style.display = "none";
+  document.getElementById("me-"+idx).style.display = "flex";
+  document.getElementById("mb-"+idx).style.display = "none";
+  document.getElementById("mbe-"+idx).style.display = "flex";
+}
+function cancelEdit(idx) {
+  document.getElementById("mn-"+idx).style.display = "block";
+  document.getElementById("me-"+idx).style.display = "none";
+  document.getElementById("mb-"+idx).style.display = "flex";
+  document.getElementById("mbe-"+idx).style.display = "none";
+}
+async function saveEdit(idx) {
+  const fb = document.getElementById("ef-"+idx).value.trim();
+  const real = document.getElementById("er-"+idx).value.trim();
+  if (!fb || !real) { showToast("Both required!", "#dc2626"); return; }
+  const oldFb = staffMap[idx].fb, oldReal = staffMap[idx].real;
+  staffMap[idx] = {fb: fb, real: real};
+  showToast("Updated!"); renderManage();
+  try { await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"update", site:currentSite, oldFb:oldFb, oldReal:oldReal, newFb:fb, newReal:real})}); } catch(e) {}
+}
+
+// ============ SITES MODAL ============
+function openSitesModal() { renderSitesList(); document.getElementById("sitesModal").classList.add("show"); }
+function closeSitesModal() { document.getElementById("sitesModal").classList.remove("show"); }
+function renderSitesList() {
+  document.getElementById("sitesList").innerHTML = sites.map(function(s) {
+    const nameEsc = s.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    return '<div class="site-list-item ' + (s.name === currentSite ? "active" : "") + '">' +
+    '<div style="flex:1;"><div class="site-name-text">' + escapeHtml(s.name) + '</div><div class="site-count">' + s.count + ' staff</div></div>' +
+    (sites.length > 1 ? '<button class="btn-sm btn-red" onclick="removeSite(\'' + nameEsc + '\')">\u{1F5D1}</button>' : "") +
+    '</div>';
+  }).join("");
+}
+async function addSite() {
+  const name = document.getElementById("newSiteName").value.trim();
+  if (!name) { showToast("Enter name!", "#dc2626"); return; }
+  showToast("Creating...");
+  try {
+    await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"addSite", siteName:name})});
+    setTimeout(async function() {
+      await loadSites();
+      currentSite = name;
+      localStorage.setItem("zozo_current_site", currentSite);
+      renderSiteSelector(); await loadStaff(); renderSitesList();
+      document.getElementById("newSiteName").value = "";
+      showToast("Site created!");
+    }, 1500);
+  } catch(e) { showToast("Failed!", "#dc2626"); }
+}
+function removeSite(name) {
+  document.getElementById("confirmTitle").textContent = "Remove Site";
+  document.getElementById("confirmMsg").textContent = "Remove '" + name + "' and ALL staff?";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = async function() {
+    closeConfirm(); showToast("Removing...");
+    try {
+      await fetch(API_URL, {method:"POST", mode:"no-cors", body: JSON.stringify({action:"deleteSite", siteName:name})});
+      setTimeout(async function() { await loadSites(); renderSitesList(); showToast("Removed", "#dc2626"); }, 1500);
+    } catch(e) { showToast("Failed!", "#dc2626"); }
+  };
+}
+
+// ============ SMART ASSIGNMENT ============
+function findSkillsFor(name) {
+  const n = normalize(name);
+  const norm = (name||"").toUpperCase().trim();
+  if (skillOverrides[norm]) return {name: name, depts: skillOverrides[norm].depts, primary: skillOverrides[norm].primary};
+  for (const key in skillOverrides) {
+    if (normalize(key) === n) return {name: key, depts: skillOverrides[key].depts, primary: skillOverrides[key].primary};
+  }
+  for (const dbName in SKILL_DATABASE) {
+    if (normalize(dbName) === n) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
+  }
+  for (const dbName in SKILL_DATABASE) {
+    const dn = normalize(dbName);
+    if (dn.indexOf(n) !== -1 || n.indexOf(dn) !== -1) {
+      if (Math.abs(dn.length - n.length) < 5) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
+    }
+  }
+  return null;
+}
+function loadAssignRoster() {
+  const raw = document.getElementById("assignRoster").value;
+  if (!raw.trim()) { showToast("Paste roster!", "#dc2626"); return; }
+  const lines = raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(Boolean);
+  assignRoster = [];
+  const seen = {};
+  let unknown = 0;
+  lines.forEach(function(name) {
+    const k = name.toLowerCase().trim();
+    if (seen[k]) return;
+    seen[k] = true;
+    const skill = findSkillsFor(name);
+    const ratings = skill ? (skillOverrides[(skill.name||"").toUpperCase().trim()] || {}).ratings || {} : {};
+    assignRoster.push({
+      input: name,
+      name: skill ? skill.name : name,
+      depts: skill ? skill.depts : [],
+      primary: skill ? skill.primary : null,
+      ratings: ratings,
+      assigned: null,
+      leaderRole: null,
+      forced: false
+    });
+    if (!skill) unknown++;
+  });
+  document.getElementById("assignRosterCount").textContent = assignRoster.length + " loaded" + (unknown ? " (" + unknown + " unknown)" : "");
+  showToast(assignRoster.length + " loaded");
+  buildDeptNeedsGrid();
+}
+function buildDeptNeedsGrid() {
+  const grid = document.getElementById("deptNeedsGrid");
+  grid.innerHTML = DEPARTMENTS.map(function(d) {
+    const count = assignRoster.filter(function(s){return s.depts.indexOf(d) !== -1;}).length;
+    return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">' +
+      '<div style="font-size:11px;font-weight:600;margin-bottom:4px;">' + d + '</div>' +
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;" id="avail-' + d + '">' + count + ' avail</div>' +
+      '<input type="number" id="need-' + d + '" min="0" value="0" style="text-align:center;font-weight:700;font-size:14px;" oninput="updateTotal()" />' +
+      '</div>';
+  }).join("");
+  updateTotal();
+}
+function updateTotal() {
+  let total = 0;
+  const shortages = [];
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    const need = parseInt(el ? el.value : 0) || 0;
+    total += need;
+    const avail = assignRoster.filter(function(s){return s.depts.indexOf(d) !== -1;}).length;
+    const availEl = document.getElementById("avail-" + d);
+    if (availEl) {
+      if (need > avail && need > 0) {
+        availEl.style.color = "#dc2626";
+        availEl.style.fontWeight = "700";
+        availEl.textContent = "\u26A0 " + avail + " avail";
+        shortages.push({ dept: d, need: need, avail: avail });
+      } else {
+        availEl.style.color = "var(--text2)";
+        availEl.style.fontWeight = "500";
+        availEl.textContent = avail + " avail";
+      }
+    }
+  });
+  const el = document.getElementById("assignTotalNeeded");
+  if (el) el.textContent = "Need: " + total + " / Have: " + assignRoster.length;
+
+  // Show shortage alerts
+  const alertsEl = document.getElementById("shortageAlerts");
+  if (shortages.length && total > 0) {
+    let html = '<div style="padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#991b1b;font-size:12px;line-height:1.6;">';
+    html += '<div style="font-weight:700;margin-bottom:6px;">\u26A0 Staffing shortages detected:</div>';
+    shortages.forEach(function(s) {
+      const shortBy = s.need - s.avail;
+      html += '<div>\u2022 <strong>' + s.dept + '</strong>: need ' + s.need + ', only ' + s.avail + ' available (short by ' + shortBy + ')</div>';
+    });
+    // Suggest who could fill in
+    const suggestions = findShortageHelpers(shortages);
+    if (suggestions.length) {
+      html += '<div style="margin-top:8px;font-size:11px;font-weight:600;">\u{1F4A1} Could help with secondary skills:</div>';
+      suggestions.slice(0, 5).forEach(function(sug) {
+        html += '<div style="font-size:11px;margin-top:2px;">\u2022 ' + escapeHtml(sug.name) + ' (' + sug.depts.join(", ") + ')</div>';
       });
-    });
-    const summary={
-      aB:stnCI('A').length,aA:stnRoster('A').length,bB:stnCI('B').length,bA:stnRoster('B').length,
-      cB:stnCI('C').length,cA:stnRoster('C').length,total:S.data.checkins.length,
-      wrong:exceptions.filter(e=>e.type==='Wrong Station').length,noShow:exceptions.filter(e=>e.type==='No Show').length
-    };
-    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'push_report',date:today(),boardingLog,exceptions,summary})});
-    toast(t('pushDone'),4000);
-  }catch(e){toast(t('pushFail')+e.message,5000);}
-  S.pushing=false;render();
-}
-
-/* ===== ACTIONS ===== */
-async function doCheckIn(stnCode,staffId){
-  const ex=S.data.checkins.find(c=>c.staff_id===staffId);
-  if(ex){await sb.from('checkins').delete().eq('id',ex.id);S.data.checkins=S.data.checkins.filter(c=>c.id!==ex.id);}
-  else{const{data}=await sb.from('checkins').insert({shift_date:today(),staff_id:staffId,station_code:stnCode}).select().single();if(data)S.data.checkins.push(data);}
-  S.boardSrch='';render();
-}
-async function overrideCheckIn(stnCode,staffId){
-  const m=getStaff(staffId);
-  if(!confirm(t('confirmOverride')+(m?' ('+m.real_name+')':'')))return;
-  await doCheckIn(stnCode,staffId);
-}
-async function clearStationColors(){
-  if(!confirm('Clear yesterday\'s colors from Google Sheets station tabs?'))return;
-  toast('🎨 Clearing colors...',8000);
-  try{
-    await fetch(SCRIPT_URL+'?action=clear_colors',{mode:'no-cors'});
-    toast('✅ Colors cleared! Sheet is ready for today.',4000);
-  }catch(e){toast('❌ Failed: '+e.message,4000);}
-}
-
-async function resetAllCI(){
-  if(!confirm('Reset ALL check-ins for today? This cannot be undone.'))return;
-  const ids=S.data.checkins.map(c=>c.id);
-  if(ids.length>0)await sb.from('checkins').delete().in('id',ids);
-  S.data.checkins=[];
-  toast('✅ All check-ins reset',2000);
-  render();
-}
-
-async function resetAllRoster(){
-  if(!confirm('Clear today\'s roster? You will need to sync again.'))return;
-  const ids=S.data.roster.map(r=>r.id);
-  if(ids.length>0)await sb.from('roster').delete().in('id',ids);
-  S.data.roster=[];
-  toast('✅ Roster cleared',2000);
-  render();
-}
-
-async function resetCI(stnCode){
-  const stn=getStn(stnCode);
-  if(!confirm(stn.name+' '+t('confirReset')))return;
-  const ids=S.data.checkins.filter(c=>c.station_code===stnCode).map(c=>c.id);
-  if(ids.length>0)await sb.from('checkins').delete().in('id',ids);
-  S.data.checkins=S.data.checkins.filter(c=>c.station_code!==stnCode);render();
-}
-async function updateStn(code){
-  const l=document.getElementById('sl'+code);if(!l)return;
-  const limit=parseInt(l.value)||20,name=STN[code].name;
-  await sb.from('stations').update({name,seat_limit:limit}).eq('code',code);
-  const idx=S.data.stations.findIndex(s=>s.code===code);
-  if(idx>=0)S.data.stations[idx]={...S.data.stations[idx],name,seat_limit:limit};
-  toast(t('savedOk'),1500);render();
-}
-async function saveEdit(){
-  const rn=S.editRN.trim(),fb=S.editFB.trim();if(!rn)return;
-  await sb.from('staff').update({real_name:rn,facebook_name:fb}).eq('id',S.editId);
-  const idx=S.data.staff.findIndex(s=>s.id===S.editId);
-  if(idx>=0)S.data.staff[idx]={...S.data.staff[idx],real_name:rn,facebook_name:fb};
-  S.editId=null;render();
-}
-async function removeStaff(id){
-  if(!confirm(t('confirmRemove')))return;
-  await sb.from('staff').delete().eq('id',id);
-  S.data.staff=S.data.staff.filter(s=>s.id!==id);
-  S.data.roster=S.data.roster.filter(r=>r.staff_id!==id);
-  S.data.checkins=S.data.checkins.filter(c=>c.staff_id!==id);render();
-}
-function exportCSV(){
-  let rows=['Real Name,Facebook Name,Assigned Station,Boarded,Boarded At,Time'];
-  S.data.staff.forEach(m=>{
-    const a=getRosterStn(m.id),ci=getCI(m.id);
-    rows.push([m.real_name,m.facebook_name||'',a?getStn(a).name:'',ci?'YES':'NO',ci?getStn(ci.station_code).name:'',ci?new Date(ci.checked_in_at).toLocaleTimeString():''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
-  });
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
-  a.download='QCB6_'+today()+'.csv';a.click();
-}
-
-/* ===== LANG TOGGLE BUTTON ===== */
-function langBtn(){
-  return`<button onclick="toggleLang()" style="background:none;border:1.5px solid #ddd;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#555;display:flex;align-items:center;gap:4px">
-    ${S.lang==='ja'?'🇬🇧 EN':'🇯🇵 JP'}
-  </button>`;
-}
-
-/* ===== HOME ===== */
-function scrHome(){
-  const rSet=S.data.roster.length>0,tot=S.data.checkins.length;
-  let h=`<div style="padding:1.25rem 1.25rem 0.5rem">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <h1 style="font-size:19px;font-weight:700;color:#1a1a1a;flex:1">🚌 ${t('title')}</h1>
-      ${langBtn()}
-      <button onclick="set({screen:'admin',sSrch:''})" style="background:none;border:1px solid #ddd;border-radius:8px;padding:7px 10px;font-size:13px;color:#666">⚙️</button>
-    </div>
-    <p style="font-size:12px;color:#aaa;margin-bottom:12px">${todayLbl()}</p>
-
-    <div style="background:#f7f7f5;border:1px solid #e0e0dc;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600;color:#1a1a1a">${t('syncLabel')}</div>
-        <div style="font-size:11px;color:#aaa;margin-top:1px">${S.lastSync?t('lastSync')+S.lastSync:t('syncSub')}</div>
-      </div>
-      <button onclick="syncFromSheets()" style="padding:8px 14px;border-radius:8px;border:none;background:${S.syncing?'#aaa':'#1a1a1a'};color:white;font-size:13px;font-weight:700;white-space:nowrap" ${S.syncing?'disabled':''}>
-        ${S.syncing?t('syncing'):t('sync')}
-      </button>
-    </div>`;
-
-  if(!rSet){
-    h+=`<div style="background:#FFF8E6;border:2px solid #F5A623;border-radius:12px;padding:1rem;margin-bottom:10px">
-      <div style="font-size:14px;font-weight:700;color:#A0650A;margin-bottom:4px">⚠️ ${t('rosterWarn')}</div>
-      <div style="font-size:13px;color:#C17D20">${t('rosterWarnSub')}</div>
-    </div>`;
-  }else{
-    h+=`<div style="background:#EAF3DE;border:1px solid #639922;border-radius:10px;padding:9px 12px;margin-bottom:10px">
-      <div style="font-size:13px;color:#3B6D11;font-weight:600">✅ ${S.data.roster.length}${t('rosterOk')}${tot}${t('rosterBoarded')}</div>
-    </div>`;
-  }
-
-  // Notices
-  h+=`<div style="margin-bottom:12px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <div style="font-size:12px;font-weight:700;color:#555">${t('notices')}</div>
-      <div style="display:flex;gap:6px">
-        <button onclick="refreshNotices()" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:12px;color:#555" title="Refresh">🔄</button>
-        <button onclick="set({showNoticeInput:!S.showNoticeInput,noticeText:''})" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;font-size:12px;color:#555">
-          ${S.showNoticeInput?t('noticeCancel'):t('noticePost')}
-        </button>
-      </div>
-    </div>`;
-  if(S.showNoticeInput){
-    h+=`<div style="background:#fffdf0;border:1.5px solid #F5A623;border-radius:10px;padding:10px;margin-bottom:8px">
-      <textarea id="ntxt" placeholder="${t('noticePH')}" oninput="S.noticeText=this.value" rows="2"
-        style="resize:none;border:1px solid #e0d8b0;border-radius:7px;padding:8px 10px;font-size:14px;margin-bottom:8px;background:#fff"
-      >${esc(S.noticeText)}</textarea>
-      <button onclick="postNotice()" style="width:100%;padding:10px;border-radius:8px;border:none;background:#F5A623;color:white;font-size:14px;font-weight:700">${t('noticeSend')}</button>
-    </div>`;
-  }
-  if(S.data.notices.length===0){
-    h+=`<div style="background:#f9f9f7;border:1px solid #e8e8e4;border-radius:8px;padding:10px 12px;font-size:13px;color:#bbb;text-align:center">${t('noNotice')}</div>`;
-  }else{
-    S.data.notices.forEach(n=>{
-      const time=new Date(n.created_at);
-      const tStr=S.lang==='ja'?time.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):time.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-      h+=`<div style="background:#fffdf0;border:1px solid #F5C842;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:8px">
-        <div style="flex:1">
-          <div style="font-size:14px;color:#1a1a1a;font-weight:500;line-height:1.4">${esc(n.message)}</div>
-          <div style="font-size:11px;color:#aaa;margin-top:3px">${tStr}</div>
-        </div>
-        <button onclick="deleteNotice(${n.id})" style="background:none;border:none;font-size:16px;color:#ddd;padding:0;flex-shrink:0">🗑</button>
-      </div>`;
-    });
-  }
-  h+=`</div>`;
-
-  // Station cards
-  CODES.forEach(code=>{
-    const cfg=STN[code],stn=getStn(code);
-    const cnt=stnCI(code).length,asgn=stnRoster(code).length,lim=stn.seat_limit;
-    const full=cnt>=lim,pct=asgn>0?Math.min(100,Math.round(cnt/asgn*100)):0;
-    h+=`<button onclick="set({screen:'board',as:'${code}',boardSrch:''})"
-      style="width:100%;background:${cfg.bg};border:2px solid ${cfg.bd};border-radius:14px;padding:1rem 1.1rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;text-align:left">
-      <div style="flex:1">
-        <div style="font-size:16px;font-weight:700;color:${cfg.dk};margin-bottom:2px">${cfg.emoji} ${esc(cfg.name)}</div>
-        <div style="font-size:12px;color:${cfg.tx}">${asgn}${t('assigned')} · ${t('limit')} ${lim}</div>
-        <div style="height:5px;width:130px;background:rgba(0,0,0,0.1);border-radius:3px;margin-top:8px">
-          <div style="height:5px;border-radius:3px;width:${pct}%;background:${full?'#E24B4A':cfg.bd}"></div>
-        </div>
-      </div>
-      <div style="text-align:right;margin-left:12px">
-        <div style="font-size:28px;font-weight:800;color:${full?'#A32D2D':cfg.dk};line-height:1">${cnt}/${asgn}</div>
-        <div style="font-size:11px;color:${full?'#A32D2D':cfg.tx};margin-top:2px">${full?t('full'):t('tapBoard')}</div>
-      </div>
-    </button>`;
-  });
-
-  h+=`<button onclick="set({screen:'report'})" style="width:100%;margin-top:4px;padding:11px;border-radius:9px;border:1px solid #ddd;background:#f7f7f5;font-size:13px;color:#555;margin-bottom:2rem">${t('reportBtn')}</button></div>`;
-  return h;
-}
-
-/* ===== BOARDING ===== */
-function scrBoard(){
-  const code=S.as,cfg=STN[code],stn=getStn(code);
-  const ciIds=stnCI(code),cnt=ciIds.length,rem=stn.seat_limit-cnt,full=rem<=0;
-  const rIds=stnRoster(code),srch=(S.boardSrch||'').trim().toLowerCase();
-  const rosterStaff=S.data.staff.filter(m=>rIds.includes(m.id));
-  // Smart search: 1-2 chars = match word start only | 3+ chars = match anywhere
-  const filtered=srch?rosterStaff.filter(m=>{
-    const name=m.real_name.toLowerCase();
-    if(srch.length<=2){
-      // Match only if any WORD in the name starts with the search
-      return name.split(' ').some(word=>word.startsWith(srch));
-    }else{
-      // 3+ chars: match anywhere in the full name
-      return name.includes(srch);
     }
-  }):[];
-
-  let h=`<div>
-    <div style="background:${cfg.bd};padding:1rem 1.1rem 0.9rem">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <button class="bk" onclick="S.boardSelected=[];set({screen:'home',boardSrch:''})" style="color:white">←</button>
-        <span style="font-size:17px;font-weight:700;color:white;flex:1">${cfg.emoji} ${esc(cfg.name)}</span>
-        <button onclick="set({screen:'history',ht:'${code}'})" style="background:rgba(255,255,255,.2);border:none;border-radius:7px;padding:6px 10px;color:white;font-size:12px;font-weight:600">${t('statusBtn')}</button>
-      </div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:8px 11px">
-          <div style="font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.5px;font-weight:700">${t('boarded').toUpperCase()}</div>
-          <div style="font-size:28px;font-weight:800;color:white;line-height:1.1">${cnt}</div>
-        </div>
-        <div style="flex:1;background:${full?'#FCEBEB':'rgba(255,255,255,.18)'};border-radius:10px;padding:8px 11px">
-          <div style="font-size:9px;color:${full?'#A32D2D':'rgba(255,255,255,.7)'};letter-spacing:.5px;font-weight:700">${t('seatsLeft').toUpperCase()}</div>
-          <div style="font-size:28px;font-weight:800;color:${full?'#A32D2D':'white'};line-height:1.1">${rem}</div>
-        </div>
-        <div style="flex:1;background:rgba(255,255,255,.18);border-radius:10px;padding:8px 11px">
-          <div style="font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.5px;font-weight:700">${t('todayReg').toUpperCase()}</div>
-          <div style="font-size:28px;font-weight:800;color:white;line-height:1.1">${rIds.length}</div>
-        </div>
-      </div>
-      ${full?`<div style="margin-top:9px;background:#FCEBEB;border-radius:8px;padding:9px;text-align:center;font-size:14px;color:#A32D2D;font-weight:800">⚠️ ${t('busFull')}</div>`:''}
-    </div>
-
-    <div style="padding:12px 1rem 6px">
-      <div style="font-size:11px;color:#aaa;font-weight:700;letter-spacing:.5px;margin-bottom:6px">${t('searchLabel')}</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="bsrch" placeholder="${t('searchPH')}" value="${esc(S.boardSrch)}"
-          oninput="updateBoardSrch(this.value,'${code}')"
-          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-          style="flex:1;font-size:18px;font-weight:600;padding:12px 14px;border-radius:10px;border:2px solid ${cfg.bd};text-transform:uppercase" autofocus />
-        ${S.boardSrch?`<button onclick="set({boardSrch:''})" style="padding:11px 14px;border-radius:10px;border:1px solid #ddd;background:#f5f5f0;font-size:16px;color:#888">✕</button>`:''}
-      </div>
-    </div>
-
-    <div style="padding:4px 1rem 8px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch">`;
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l=>{
-    const has=rosterStaff.some(m=>m.real_name.toUpperCase().startsWith(l));
-    const active=S.boardSrch.toUpperCase()===l;
-    h+=`<button onclick="set({boardSrch:'${l}'})" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid ${has?cfg.bd:'#e8e8e8'};background:${active?cfg.bd:(has?cfg.bg:'#f7f7f5')};color:${active?'white':(has?cfg.dk:'#ccc')};font-size:12px;font-weight:700;margin-right:3px">${l}</button>`;
-  });
-  h+=`</div><div id="boardResults" style="padding:0 1rem;overflow-y:auto;max-height:calc(100vh - 360px)">${buildBoardResults(code)}`;
-
-  h+=`</div>
-    <!-- Confirm bar -->
-    <div id="confirmBar" style="display:${S.boardSelected.length>0?'block':'none'};position:sticky;bottom:0;padding:12px 1rem 1.5rem;background:white;border-top:1px solid #e8e8e4;box-shadow:0 -4px 12px rgba(0,0,0,.08)">
-      <button onclick="confirmBoarding('${code}')"
-        style="width:100%;padding:16px;border-radius:12px;border:none;background:#1a1a1a;color:white;font-size:17px;font-weight:800">
-        ✓ ${S.boardSelected.length} ${t('confirmBoardBtn')}
-      </button>
-    </div>
-  </div>`;
-  return h;
+    html += '</div>';
+    alertsEl.innerHTML = html;
+    alertsEl.style.display = "block";
+  } else {
+    alertsEl.style.display = "none";
+  }
 }
-
-/* ===== HISTORY ===== */
-function scrHistory(){
-  const code=S.ht,cfg=STN[code],stn=getStn(code);
-  const rIds=stnRoster(code),ciIds=stnCI(code);
-  const boarded=rIds.filter(id=>ciIds.includes(id));
-  const missed=rIds.filter(id=>!ciIds.includes(id));
-  const wrongPpl=missed.filter(id=>getCI(id)!==undefined);
-  const noShow=missed.filter(id=>getCI(id)===undefined);
-
-  const card=(id,type)=>{
-    const m=getStaff(id),ci=getCI(id);if(!m)return'';
-    if(type==='wrong'&&ci){
-      const wCfg=STN[ci.station_code]||STN.A;
-      return`<div style="padding:10px 0;border-bottom:1px solid rgba(245,166,35,.25)">
-        <div style="font-size:15px;font-weight:600;color:#1a1a1a">${esc(m.real_name)}</div>
-        ${m.facebook_name?`<div style="font-size:12px;color:#A0650A">fb: ${esc(m.facebook_name)}</div>`:''}
-        <div style="font-size:12px;color:#A0650A;margin-top:2px">→ ${wCfg.emoji} ${esc(wCfg.name)}</div>
-      </div>`;
+function findShortageHelpers(shortages) {
+  const shortDepts = shortages.map(function(s){return s.dept;});
+  const helpers = [];
+  assignRoster.forEach(function(p) {
+    if (!p.depts.length) return;
+    // Find someone who CAN do a shortage dept but it's NOT their primary
+    const canHelp = p.depts.filter(function(d){return shortDepts.indexOf(d) !== -1;});
+    if (canHelp.length && (!p.primary || shortDepts.indexOf(p.primary) === -1)) {
+      helpers.push({name: p.name, depts: canHelp});
     }
-    return`<div style="padding:10px 0;border-bottom:1px solid #f0f0ec${type==='noshow'?';opacity:.65':''}">
-      <div style="font-size:15px;font-weight:500;color:${type==='noshow'?'#888':'#1a1a1a'}">${esc(m.real_name)}</div>
-      ${m.facebook_name?`<div style="font-size:12px;color:${type==='noshow'?'#bbb':'#aaa'}">fb: ${esc(m.facebook_name)}</div>`:''}
-    </div>`;
+  });
+  return helpers;
+}
+function clearAssignNeeds() {
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    if (el) el.value = 0;
+  });
+  document.getElementById("assignResults").style.display = "none";
+  updateTotal();
+}
+function runAssignment() {
+  if (!assignRoster.length) { showToast("Load roster first!", "#dc2626"); return; }
+  const needs = {};
+  let totalNeeded = 0;
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    needs[d] = parseInt(el ? el.value : 0) || 0;
+    totalNeeded += needs[d];
+  });
+  if (totalNeeded === 0) { showToast("Set needs!", "#dc2626"); return; }
+
+  // Load rules
+  const rules = {
+    requireLeader: document.getElementById("ruleRequireLeader") ? document.getElementById("ruleRequireLeader").checked : true,
+    requireSubLeader: document.getElementById("ruleRequireSubLeader") ? document.getElementById("ruleRequireSubLeader").checked : true,
+    primaryFirst: document.getElementById("rulePrimaryFirst") ? document.getElementById("rulePrimaryFirst").checked : true,
+    noForce: document.getElementById("ruleNoForce") ? document.getElementById("ruleNoForce").checked : false,
+    fairness: document.getElementById("ruleFairness") ? document.getElementById("ruleFairness").checked : false
   };
 
-  let h=`<div>
-    <div style="background:${cfg.bg};padding:1rem 1.1rem 0.875rem;border-bottom:1px solid ${cfg.bd}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <button class="bk" onclick="set({screen:'board',as:'${code}',boardSrch:''})" style="color:${cfg.tx}">←</button>
-        <span style="font-size:17px;font-weight:700;color:${cfg.dk};flex:1">${cfg.emoji} ${esc(cfg.name)}</span>
-      </div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1;background:${cfg.bg};border:1px solid ${cfg.bd};border-radius:8px;padding:8px;text-align:center">
-          <div style="font-size:9px;color:${cfg.tx};font-weight:700">✅ ${t('boarded').toUpperCase()}</div>
-          <div style="font-size:22px;font-weight:800;color:${cfg.dk}">${boarded.length}</div>
-        </div>
-        <div style="flex:1;background:#FFF8E6;border:1px solid #F5A623;border-radius:8px;padding:8px;text-align:center">
-          <div style="font-size:9px;color:#A0650A;font-weight:700">${t('wrongBus').toUpperCase()}</div>
-          <div style="font-size:22px;font-weight:800;color:#A0650A">${wrongPpl.length}</div>
-        </div>
-        <div style="flex:1;background:#f5f5f0;border:1px solid #ddd;border-radius:8px;padding:8px;text-align:center">
-          <div style="font-size:9px;color:#888;font-weight:700">${t('noShow').toUpperCase()}</div>
-          <div style="font-size:22px;font-weight:800;color:#888">${noShow.length}</div>
-        </div>
-      </div>
-    </div>
-    <div style="padding:1rem">`;
+  assignmentResult = assignRoster.map(function(s) {
+    return {
+      input: s.input, name: s.name, depts: s.depts.slice(), primary: s.primary,
+      assigned: null, leaderRole: null, forced: false, lockedFlag: false
+    };
+  });
+  const remaining = {};
+  for (const d in needs) remaining[d] = needs[d];
+  const sorterLines = ["\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3"];
 
-  if(boarded.length>0){h+=`<div style="font-size:10px;color:#3B6D11;letter-spacing:.5px;font-weight:700;margin-bottom:6px">✅ ${t('boardedLabel')} (${boarded.length})</div>`;boarded.forEach(id=>{h+=card(id,'boarded');});}
-  if(wrongPpl.length>0){h+=`<div style="font-size:10px;color:#A0650A;letter-spacing:.5px;font-weight:700;margin:14px 0 4px">${t('wrongStn')} (${wrongPpl.length})</div><div style="background:#FFF8E6;border:1px solid #F5A623;border-radius:10px;padding:0 10px;margin-bottom:4px">`;wrongPpl.forEach(id=>{h+=card(id,'wrong');});h+=`</div>`;}
-  if(noShow.length>0){h+=`<div style="font-size:10px;color:#888;letter-spacing:.5px;font-weight:700;margin:14px 0 4px">${t('noShow')} (${noShow.length})</div><div style="background:#f5f5f0;border:1px solid #e0e0dc;border-radius:10px;padding:0 10px;margin-bottom:4px">`;noShow.forEach(id=>{h+=card(id,'noshow');});h+=`</div>`;}
-  if(rIds.length===0)h+=`<p style="color:#ccc;font-size:13px;text-align:center;padding:2rem">${t('noStaffAssigned')}</p>`;
-
-  h+=`</div><div style="padding:0 1rem 2.5rem"><button onclick="resetCI('${code}')" style="width:100%;padding:11px;border-radius:9px;border:1px solid #ddd;background:#f7f7f5;font-size:13px;color:#888">${t('resetCI')}</button></div></div>`;
-  return h;
-}
-
-/* ===== REPORT ===== */
-function scrReport(){
-  let tB=0,tS=0,tW=0,tN=0;
-  let h=`<div>
-    <div style="padding:1rem 1.1rem 0.875rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e8e8e4">
-      <button class="bk" onclick="set({screen:'home'})">←</button>
-      <div style="flex:1"><div style="font-size:17px;font-weight:700;color:#1a1a1a">${t('reportTitle')}</div><div style="font-size:11px;color:#aaa">${todayLbl()}</div></div>
-      <button onclick="exportCSV()" style="background:#555;border:none;border-radius:8px;padding:8px 10px;color:white;font-size:12px;font-weight:700">⬇️ CSV</button>
-    </div>
-    <div style="padding:10px 1rem;background:#f7f7f5;border-bottom:1px solid #e8e8e4;display:flex;align-items:center;gap:10px">
-      <div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1a1a1a">${t('pushLabel')}</div><div style="font-size:11px;color:#aaa">${t('pushSub')}</div></div>
-      <button onclick="pushToSheets()" style="padding:8px 14px;border-radius:8px;border:none;background:${S.pushing?'#aaa':'#217346'};color:white;font-size:13px;font-weight:700;white-space:nowrap" ${S.pushing?'disabled':''}>${S.pushing?t('pushing'):t('push')}</button>
-    </div>`;
-
-  CODES.forEach(code=>{
-    const cfg=STN[code],stn=getStn(code);
-    const rIds=stnRoster(code),ciIds=stnCI(code);
-    const boarded=rIds.filter(id=>ciIds.includes(id));
-    const missed=rIds.filter(id=>!ciIds.includes(id));
-    const wrongSt=missed.filter(id=>getCI(id)!==undefined);
-    const noShow=missed.filter(id=>getCI(id)===undefined);
-    tB+=boarded.length;tS+=rIds.length;tW+=wrongSt.length;tN+=noShow.length;
-
-    h+=`<div style="padding:1rem;border-bottom:1px solid #f0f0ec">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:15px;font-weight:700;color:${cfg.dk}">${cfg.emoji} ${esc(cfg.name)}</span>
-        <span style="font-size:15px;font-weight:700;color:${cfg.dk}">${boarded.length}/${rIds.length}</span>
-      </div>`;
-    if(boarded.length>0){
-      h+=`<div style="font-size:10px;color:#3B6D11;font-weight:700;margin-bottom:6px">✅ ${t('boardedLabel')} (${boarded.length})</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">`;
-      boarded.forEach(id=>{const m=getStaff(id);if(m)h+=`<span style="background:${cfg.bg};border:1px solid ${cfg.bd};padding:5px 10px;border-radius:20px;font-size:12px;color:${cfg.dk};font-weight:600">${esc(m.real_name)}</span>`;});
-      h+=`</div>`;
+  // STEP 0: Apply LOCKS first (highest priority)
+  assignmentResult.forEach(function(person) {
+    const lockedDept = getLockedDept(person.name);
+    if (lockedDept && remaining[lockedDept] > 0) {
+      person.assigned = lockedDept;
+      person.lockedFlag = true;
+      remaining[lockedDept]--;
     }
-    if(wrongSt.length>0){
-      h+=`<div style="font-size:10px;color:#A0650A;font-weight:700;margin-bottom:6px">${t('wrongBus')} (${wrongSt.length})</div>`;
-      wrongSt.forEach(id=>{const m=getStaff(id),ci=getCI(id);if(!m||!ci)return;const wCfg=STN[ci.station_code]||STN.A;h+=`<div style="background:#FFF8E6;border:1px solid #F5A623;border-radius:8px;padding:7px 10px;margin-bottom:5px;font-size:13px"><b>${esc(m.real_name)}</b>${m.facebook_name?` · fb: ${esc(m.facebook_name)}`:''} → ${wCfg.emoji} ${esc(wCfg.name)}</div>`;});
-    }
-    if(noShow.length>0){
-      h+=`<div style="font-size:10px;color:#888;font-weight:700;margin-bottom:6px">${t('noShow')} (${noShow.length})</div><div style="display:flex;flex-wrap:wrap;gap:5px">`;
-      noShow.forEach(id=>{const m=getStaff(id);if(m)h+=`<span style="background:#f5f5f0;border:1px solid #e0e0dc;padding:5px 10px;border-radius:20px;font-size:12px;color:#888">${esc(m.real_name)}</span>`;});
-      h+=`</div>`;
-    }
-    if(rIds.length===0)h+=`<p style="color:#ccc;font-size:13px">${t('noAssigned')}</p>`;
-    h+=`</div>`;
   });
 
-  h+=`<div style="padding:1rem 1rem 3rem">
-    <div style="background:#f7f7f5;border-radius:12px;padding:1.25rem;text-align:center;margin-bottom:10px">
-      <div style="font-size:11px;color:#aaa;font-weight:700;letter-spacing:.5px">${t('totalLabel').toUpperCase()}</div>
-      <div style="font-size:52px;font-weight:800;color:#1a1a1a;line-height:1.1">${tB}</div>
-      <div style="font-size:13px;color:#aaa">${t('outOf')} ${tS}</div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <div style="flex:1;background:#FFF8E6;border:1px solid #F5A623;border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:10px;color:#A0650A;font-weight:700">${t('wrongBusCount')}</div>
-        <div style="font-size:24px;font-weight:800;color:#A0650A">${tW}</div>
-      </div>
-      <div style="flex:1;background:#f5f5f0;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:10px;color:#888;font-weight:700">${t('noShowCount')}</div>
-        <div style="font-size:24px;font-weight:800;color:#888">${tN}</div>
-      </div>
-    </div>
-  </div></div>`;
-  return h;
-}
+  // STEP 1: Main leaders to sorter lines (if rule enabled)
+  if (rules.requireLeader) {
+    const availableLeaders = assignmentResult.filter(function(p){return isLeader(p.name);});
+    sorterLines.forEach(function(line) {
+      if (remaining[line] <= 0) return;
+      let leader = availableLeaders.find(function(p){return !p.assigned && !isBanned(p.name, line) && p.depts.indexOf(line) !== -1;});
+      if (!leader) leader = availableLeaders.find(function(p){return !p.assigned && !isBanned(p.name, line);});
+      if (leader) { leader.assigned = line; leader.leaderRole = "\u7BA1\u7406"; remaining[line]--; }
+    });
+  }
 
-/* ===== ADMIN ===== */
-function scrAdmin(){
-  const srch=S.sSrch.toLowerCase();
-  const filtered=S.data.staff.filter(m=>m.real_name.toLowerCase().includes(srch)||(m.facebook_name||'').toLowerCase().includes(srch));
-  let h=`<div>
-    <div style="padding:1rem 1.1rem 0.875rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e8e8e4">
-      <button class="bk" onclick="set({screen:'home'})">←</button>
-      <span style="font-size:18px;font-weight:700;color:#1a1a1a;flex:1">${t('adminTitle')}</span>
-      ${langBtn()}
-    </div>
-    <!-- Reset section -->
-    <div style="padding:1rem;border-bottom:1px solid #f0f0ec;background:#fafafa">
-      <div style="font-size:11px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:8px">RESET / リセット</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="resetAllCI()" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid #E24B4A;background:#FDECEA;color:#A32D2D;font-size:13px;font-weight:700">
-          🗑 Reset All Check-ins<br><span style="font-size:11px;font-weight:400">全乗車記録をリセット</span>
-        </button>
-        <button onclick="resetAllRoster()" style="flex:1;padding:10px;border-radius:9px;border:1.5px solid #F5A623;background:#FFF8E6;color:#A0650A;font-size:13px;font-weight:700">
-          🔄 Clear Roster<br><span style="font-size:11px;font-weight:400">ロスターをクリア</span>
-        </button>
-      </div>
-      <button onclick="clearStationColors()" style="width:100%;margin-top:8px;padding:10px;border-radius:9px;border:1.5px solid #378ADD;background:#E6F1FB;color:#185FA5;font-size:13px;font-weight:700">
-        🎨 Clear Yesterday's Colors from Google Sheets<br><span style="font-size:11px;font-weight:400">前日の色をシートから削除する</span>
-      </button>
-      <div style="font-size:11px;color:#aaa;margin-top:8px;text-align:center">Tomorrow's data resets automatically · 翌日は自動リセット</div>
-    </div>
+  // STEP 2: Sub-leaders to sorter lines (if rule enabled)
+  if (rules.requireSubLeader) {
+    sorterLines.forEach(function(line) {
+      if (remaining[line] <= 0) return;
+      const sub = assignmentResult.find(function(p){return !p.assigned && isSubLeader(p.name) && !isBanned(p.name, line) && p.depts.indexOf(line) !== -1;});
+      if (sub) { sub.assigned = line; sub.leaderRole = "sub"; remaining[line]--; }
+    });
+  }
 
-    <div style="padding:1rem;border-bottom:1px solid #f0f0ec">
-      <div style="font-size:11px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:4px">${t('seatTitle').toUpperCase()}</div>
-      <div style="font-size:12px;color:#aaa;margin-bottom:10px">${t('seatSub')}</div>`;
-  CODES.forEach(code=>{
-    const cfg=STN[code],stn=getStn(code);
-    h+=`<div style="background:${cfg.bg};border:1px solid ${cfg.bd};border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
-      <div style="flex:1">
-        <div style="font-size:15px;font-weight:700;color:${cfg.dk}">${cfg.emoji} ${esc(cfg.name)}</div>
-        <div style="font-size:12px;color:${cfg.tx};margin-top:2px">${stnRoster(code).length} ${t('assigned')}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <input type="number" id="sl${code}" value="${stn.seat_limit}" onblur="updateStn('${code}')"
-          style="width:70px;background:white;border-color:${cfg.bd};text-align:center;font-size:18px;font-weight:700;padding:8px" />
-        <span style="font-size:13px;color:${cfg.tx};font-weight:600">${t('seats')}</span>
-      </div>
-    </div>`;
-  });
-
-  h+=`</div>
-    <div style="padding:1rem">
-      <div style="font-size:11px;color:#888;font-weight:700;letter-spacing:.5px;margin-bottom:8px">${t('staffTitle').toUpperCase()} (${S.data.staff.length})</div>
-      <div style="background:#EAF3DE;border:1px solid #639922;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#3B6D11">${t('staffTip')}</div>
-      <input type="text" placeholder="${t('staffSearch')}" value="${esc(S.sSrch)}" oninput="set({sSrch:this.value})" style="margin-bottom:10px;background:#f7f7f5;border:1px solid #e0e0dc" />`;
-
-  if(S.data.staff.length===0){
-    h+=`<div style="border:1.5px dashed #ddd;border-radius:10px;padding:2rem;text-align:center;color:#bbb;font-size:13px">${t('noStaffYet')}</div>`;
-  }else if(filtered.length===0){
-    h+=`<div style="text-align:center;color:#bbb;font-size:13px;padding:1rem">—</div>`;
-  }else{
-    h+=`<div style="border:1px solid #e8e8e4;border-radius:10px;overflow:hidden">`;
-    filtered.forEach((m,i)=>{
-      const asgn=getRosterStn(m.id),cfg=asgn?STN[asgn]:null;
-      const isEdit=S.editId===m.id;
-      if(isEdit){
-        h+=`<div style="padding:12px;background:#f7f7f5;${i<filtered.length-1?'border-bottom:1px solid #e0e0dc':''}">
-          <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:6px">${t('editing')}</div>
-          <input type="text" value="${esc(S.editRN)}" oninput="S.editRN=this.value" placeholder="${t('realName')}" style="margin-bottom:6px" />
-          <input type="text" value="${esc(S.editFB)}" oninput="S.editFB=this.value" placeholder="${t('fbName')}" style="margin-bottom:8px" />
-          <div style="display:flex;gap:6px">
-            <button onclick="saveEdit()" style="flex:2;padding:9px;border-radius:7px;border:none;background:#1a1a1a;color:white;font-size:14px;font-weight:700">${t('save')}</button>
-            <button onclick="set({editId:null})" style="flex:1;padding:9px;border-radius:7px;border:1px solid #ddd;background:#f5f5f0;color:#666;font-size:13px">${t('cancel')}</button>
-          </div>
-        </div>`;
-      }else{
-        h+=`<div style="display:flex;align-items:center;padding:10px 12px;${i<filtered.length-1?'border-bottom:1px solid #f0f0ec':''}">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;color:#1a1a1a;font-weight:500">${esc(m.real_name)}</div>
-            <div style="font-size:12px;color:#aaa">${m.facebook_name?'fb: '+esc(m.facebook_name):`<span style="color:#ddd">${t('noFB')}</span>`}</div>
-          </div>
-          ${cfg?`<span style="font-size:14px;margin-right:6px">${cfg.emoji}</span>`:''}
-          <button onclick="set({editId:${m.id},editRN:'${m.real_name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',editFB:'${(m.facebook_name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}'})" style="background:none;border:none;font-size:17px;padding:3px 4px;color:#aaa">✏️</button>
-          <button onclick="removeStaff(${m.id})" style="background:none;border:none;font-size:17px;padding:3px 4px;color:#E24B4A">🗑</button>
-        </div>`;
+  // STEP 3: Primary skill matches (if rule enabled)
+  if (rules.primaryFirst) {
+    // If fairness, sort by who has been picked LEAST for their primary dept
+    let candidates = assignmentResult.filter(function(p){return !p.assigned && p.primary && !isBanned(p.name, p.primary);});
+    if (rules.fairness) {
+      candidates.sort(function(a,b) {
+        return getFairnessScore(a.name, a.primary) - getFairnessScore(b.name, b.primary);
+      });
+    }
+    candidates.forEach(function(person) {
+      if (person.assigned) return;
+      if (remaining[person.primary] > 0) {
+        person.assigned = person.primary;
+        remaining[person.primary]--;
       }
     });
-    h+=`</div>`;
   }
-  h+=`</div><div style="height:2rem"></div></div>`;
-  return h;
-}
 
-/* ===== CONFIRM BOARDING ===== */
-async function confirmBoarding(code){
-  const ids=[...S.boardSelected];
-  if(ids.length===0)return;
-  for(const id of ids){
-    const ex=S.data.checkins.find(c=>c.staff_id===id);
-    if(!ex){
-      const{data}=await sb.from('checkins').insert({shift_date:today(),staff_id:id,station_code:code}).select().single();
-      if(data)S.data.checkins.push(data);
+  // STEP 4: Single-skill specialists (respect bans)
+  assignmentResult.forEach(function(person) {
+    if (person.assigned) return;
+    if (person.depts.length === 1 && remaining[person.depts[0]] > 0 && !isBanned(person.name, person.depts[0])) {
+      person.assigned = person.depts[0];
+      remaining[person.depts[0]]--;
     }
-  }
-  S.boardSelected=[];
-  S.boardSrch='';
-  render();
-}
+  });
 
-function toggleSelect(id){
-  const idx=S.boardSelected.indexOf(id);
-  if(idx>=0)S.boardSelected.splice(idx,1);
-  else S.boardSelected.push(id);
-  const el=document.getElementById('boardResults');
-  if(el)el.innerHTML=buildBoardResults(S.as);
-  updateConfirmBar();
-}
-
-function updateConfirmBar(){
-  const bar=document.getElementById('confirmBar');
-  if(!bar)return;
-  const n=S.boardSelected.length;
-  if(n>0){
-    bar.style.display='block';
-    bar.innerHTML=`<button onclick="confirmBoarding('${S.as}')"
-      style="width:100%;padding:16px;border-radius:12px;border:none;background:#1a1a1a;color:white;font-size:17px;font-weight:800;letter-spacing:.2px">
-      ✓ ${n} ${t('confirmBoard')}
-    </button>`;
-  }else{
-    bar.style.display='none';
-  }
-}
-
-/* ===== BOARD LIVE SEARCH (no full re-render) ===== */
-function updateBoardSrch(val,code){
-  S.boardSrch=val;
-  const el=document.getElementById('boardResults');
-  if(el)el.innerHTML=buildBoardResults(code);
-}
-
-function buildBoardResults(code){
-  const cfg=STN[code];
-  const ciIds=stnCI(code);
-  const rIds=stnRoster(code);
-  const srch=(S.boardSrch||'').trim().toLowerCase();
-  const rosterStaff=S.data.staff.filter(m=>rIds.includes(m.id));
-  const full=ciIds.length>=getStn(code).seat_limit;
-
-  const filtered=srch?rosterStaff.filter(m=>{
-    const name=m.real_name.toLowerCase();
-    return srch.length<=2
-      ? name.split(' ').some(w=>w.startsWith(srch))
-      : name.includes(srch);
-  }):[];
-
-  let h='';
-
-  if(!srch){
-    const waiting=rosterStaff.filter(m=>!ciIds.includes(m.id));
-    const done=rosterStaff.filter(m=>ciIds.includes(m.id));
-    if(rosterStaff.length===0){
-      h+=`<div style="text-align:center;padding:3rem 1rem;color:#bbb;font-size:14px">${t('noStaffSync')}</div>`;
-    }else{
-      if(waiting.length>0){
-        h+=`<div style="font-size:10px;color:#888;letter-spacing:.5px;font-weight:700;padding:8px 0 4px">${t('waitingLabel')} (${waiting.length}) — ${t('typeSearch')}</div>`;
-        waiting.forEach(m=>{
-          const sel=S.boardSelected.includes(m.id);
-          h+=`<button onclick="toggleSelect(${m.id})" style="width:100%;padding:12px 8px;border:none;border-bottom:1px solid #f0f0ec;background:${sel?cfg.bg:'transparent'};display:flex;align-items:center;gap:12px;text-align:left">
-            <div style="width:30px;height:30px;border-radius:8px;flex-shrink:0;border:2px solid ${sel?cfg.bd:'#ccc'};background:${sel?cfg.bd:'white'};display:flex;align-items:center;justify-content:center">
-              ${sel?`<span style="color:white;font-size:16px;font-weight:800">✓</span>`:''}
-            </div>
-            <div style="font-size:17px;font-weight:${sel?700:500};color:${sel?cfg.dk:'#333'}">${esc(m.real_name)}</div>
-          </button>`;
-        });
-      }
-      if(done.length>0){
-        h+=`<div style="font-size:10px;color:#3B6D11;letter-spacing:.5px;font-weight:700;padding:12px 0 4px">✅ ${t('boardedLabel')} (${done.length})</div>`;
-        done.forEach(m=>{
-          h+=`<div style="padding:9px 0;border-bottom:1px solid #f0f0ec;display:flex;align-items:center;gap:10px;opacity:.5">
-            <div style="flex:1"><div style="font-size:15px;color:#888;text-decoration:line-through">${esc(m.real_name)}</div></div>
-            <div style="width:28px;height:28px;border-radius:6px;background:${cfg.bd};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="color:white;font-size:15px">✓</span></div>
-          </div>`;
-        });
-      }
+  // STEP 5: Fill by department priority (with ratings + fairness)
+  const fillOrder = ["\u7BA1\u7406", "\u68DA\u5165\u308C", "\u5358\u642C", "\u51FA\u5EAB\u642C\u9001", "TC", "\u6295\u5165", "\u30BD\u30FC\u30BF\u30FC1", "\u30BD\u30FC\u30BF\u30FC2", "\u30BD\u30FC\u30BF\u30FC3", "\u8907\u6570", "\u5358\u6570"];
+  fillOrder.forEach(function(dept) {
+    while (remaining[dept] > 0) {
+      let candidates = assignmentResult.filter(function(p){return !p.assigned && p.depts.indexOf(dept) !== -1 && !isBanned(p.name, dept);});
+      if (candidates.length === 0) break;
+      // Sort: ratings (higher first), then fairness (lower first if enabled)
+      candidates.sort(function(a, b) {
+        const ra = (a.ratings && a.ratings[dept]) || 0;
+        const rb = (b.ratings && b.ratings[dept]) || 0;
+        if (rb !== ra) return rb - ra; // higher rating wins
+        if (rules.fairness) {
+          return getFairnessScore(a.name, dept) - getFairnessScore(b.name, dept);
+        }
+        return 0;
+      });
+      candidates[0].assigned = dept;
+      remaining[dept]--;
     }
-  } else if(filtered.length===0){
-    h+=`<div style="text-align:center;padding:2rem 1rem;color:#bbb;font-size:14px">${t('noMatch')} "<b>${esc(S.boardSrch)}</b>"<br><span style="font-size:12px">${t('tryOther')}</span></div>`;
+  });
+
+  // STEP 6: Force-fill remaining (only if rule allows, respect bans always)
+  if (!rules.noForce) {
+    DEPARTMENTS.forEach(function(dept) {
+      while (remaining[dept] > 0) {
+        const candidate = assignmentResult.find(function(p){return !p.assigned && !isBanned(p.name, dept);});
+        if (!candidate) break;
+        candidate.assigned = dept;
+        candidate.forced = true;
+        remaining[dept]--;
+      }
+    });
+  }
+
+  // Record fairness history
+  if (rules.fairness) recordFairnessForToday();
+
+  // Save snapshot of AI's original assignment for "Reset to AI" feature
+  aiOriginalSnapshot = JSON.parse(JSON.stringify(assignmentResult));
+  editMode = false;
+
+  renderAssignmentResults(needs);
+}
+
+function toggleRules() {
+  const panel = document.getElementById("rulesPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+function saveRulesToStorage() {
+  const rules = {
+    requireLeader: document.getElementById("ruleRequireLeader").checked,
+    requireSubLeader: document.getElementById("ruleRequireSubLeader").checked,
+    primaryFirst: document.getElementById("rulePrimaryFirst").checked,
+    noForce: document.getElementById("ruleNoForce").checked,
+    fairness: document.getElementById("ruleFairness") ? document.getElementById("ruleFairness").checked : false
+  };
+  localStorage.setItem("zozo_rules_v1", JSON.stringify(rules));
+}
+
+function loadRulesFromStorage() {
+  try {
+    const r = JSON.parse(localStorage.getItem("zozo_rules_v1") || "null");
+    if (!r) return;
+    if (document.getElementById("ruleRequireLeader")) document.getElementById("ruleRequireLeader").checked = !!r.requireLeader;
+    if (document.getElementById("ruleRequireSubLeader")) document.getElementById("ruleRequireSubLeader").checked = !!r.requireSubLeader;
+    if (document.getElementById("rulePrimaryFirst")) document.getElementById("rulePrimaryFirst").checked = !!r.primaryFirst;
+    if (document.getElementById("ruleNoForce")) document.getElementById("ruleNoForce").checked = !!r.noForce;
+    if (document.getElementById("ruleFairness")) document.getElementById("ruleFairness").checked = !!r.fairness;
+  } catch(e) {}
+}
+// ============ MANUAL EDIT MODE ============
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn = document.getElementById("editModeBtn");
+  const resetBtn = document.getElementById("resetEditBtn");
+  const hint = document.getElementById("editModeHint");
+  if (editMode) {
+    btn.innerHTML = "&#9989; Done";
+    btn.style.background = "var(--green)";
+    resetBtn.style.display = "inline-block";
+    hint.style.display = "block";
   } else {
-    h+=`<div style="font-size:10px;color:#888;letter-spacing:.5px;font-weight:700;padding:8px 0 6px">${t('results')} (${filtered.length})</div>`;
-    filtered.forEach(m=>{
-      const exCI=getCI(m.id);
-      const alreadyHere=exCI&&exCI.station_code===code;
-      const boardedElse=exCI&&exCI.station_code!==code;
-      const assignedTo=getRosterStn(m.id);
-      const wrongStn=!rIds.includes(m.id)&&assignedTo&&assignedTo!==code;
+    btn.innerHTML = "&#9999;&#65039; Edit";
+    btn.style.background = "var(--accent)";
+    resetBtn.style.display = "none";
+    hint.style.display = "none";
+  }
+  renderAssignmentResults(getCurrentNeeds());
+}
 
-      if(alreadyHere){
-        h+=`<div style="background:#EAF3DE;border:1.5px solid #639922;border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:11px;color:#3B6D11;font-weight:700;margin-bottom:3px">${t('alreadyHere')}</div>
-          <div style="font-size:20px;font-weight:700;color:#1a1a1a">${esc(m.real_name)}</div>
-          <button onclick="doCheckIn('${code}',${m.id})" style="margin-top:8px;width:100%;padding:9px;border-radius:8px;border:1.5px solid #639922;background:#f5f5f0;font-size:13px;color:#3B6D11;font-weight:600">${t('undo')}</button>
-        </div>`;
-      } else if(boardedElse){
-        const wCfg=STN[exCI.station_code]||STN.A;
-        h+=`<div style="background:#FFF8E6;border:1.5px solid #F5A623;border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:11px;color:#A0650A;font-weight:700;margin-bottom:3px">${t('alreadyElse')}</div>
-          <div style="font-size:20px;font-weight:700;color:#1a1a1a">${esc(m.real_name)}</div>
-          <div style="font-size:12px;color:#A0650A;margin-top:3px">→ ${wCfg.emoji} ${esc(wCfg.name)}</div>
-        </div>`;
-      } else if(wrongStn){
-        const oCfg=STN[assignedTo]||STN.A;
-        h+=`<div style="background:#FFF8E6;border:1.5px solid #F5A623;border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:11px;color:#A0650A;font-weight:700;margin-bottom:3px">${t('wrongStn')}</div>
-          <div style="font-size:20px;font-weight:700;color:#1a1a1a">${esc(m.real_name)}</div>
-          <div style="font-size:12px;color:#A0650A;margin-top:3px">${t('assignedTo')} ${oCfg.emoji} ${esc(oCfg.name)}</div>
-          <button onclick="overrideCheckIn('${code}',${m.id})" style="margin-top:8px;width:100%;padding:9px;border-radius:8px;border:1.5px solid #F5A623;background:#FFF8E6;font-size:13px;color:#A0650A;font-weight:600">${t('override')}</button>
-        </div>`;
-      } else if(!full){
-        const sel=S.boardSelected.includes(m.id);
-        h+=`<button onclick="toggleSelect(${m.id})" style="width:100%;background:${sel?cfg.bg:'white'};border:2px solid ${sel?cfg.bd:'#e0e0dc'};border-radius:10px;padding:14px;margin-bottom:8px;text-align:left;display:flex;align-items:center;gap:12px">
-          <div style="flex:1"><div style="font-size:20px;font-weight:700;color:${sel?cfg.dk:'#333'}">${esc(m.real_name)}</div></div>
-          <div style="width:46px;height:46px;border-radius:10px;background:${sel?cfg.bd:'#f0f0ec'};border:2px solid ${sel?cfg.bd:'#e0e0dc'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${sel?`<span style="color:white;font-size:22px;font-weight:800">✓</span>`:`<span style="color:#ccc;font-size:22px">○</span>`}
-          </div>
-        </button>`;
-      } else {
-        h+=`<div style="background:${cfg.bg};border:1.5px solid ${cfg.bd};border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:20px;font-weight:700;color:${cfg.dk}">${esc(m.real_name)}</div>
-          <div style="font-size:12px;color:#A32D2D;margin-top:4px;font-weight:700">${t('busFullCant')}</div>
-        </div>`;
-      }
+function getCurrentNeeds() {
+  const needs = {};
+  DEPARTMENTS.forEach(function(d) {
+    const el = document.getElementById("need-" + d);
+    needs[d] = parseInt(el ? el.value : 0) || 0;
+  });
+  return needs;
+}
+
+function resetToAI() {
+  if (!aiOriginalSnapshot.length) return;
+  document.getElementById("confirmTitle").textContent = "Reset to AI";
+  document.getElementById("confirmMsg").textContent = "Undo all manual changes and restore the original AI assignment?";
+  document.getElementById("confirmOk").textContent = "Reset";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = function() {
+    assignmentResult = JSON.parse(JSON.stringify(aiOriginalSnapshot));
+    closeConfirm();
+    showToast("Restored AI assignment");
+    renderAssignmentResults(getCurrentNeeds());
+  };
+}
+
+function openMovePerson(idx) {
+  if (!editMode) return;
+  movingPersonIdx = idx;
+  const p = assignmentResult[idx];
+  document.getElementById("movePersonTitle").textContent = "\u{1F504} Move " + p.name;
+  const currentDept = p.assigned ? "Currently in <strong>" + p.assigned + "</strong>" : "Currently <strong>unassigned</strong>";
+  document.getElementById("movePersonMsg").innerHTML = currentDept + ". Tap a department to move:";
+  
+  // Show all departments as buttons, highlighting their skills
+  const grid = document.getElementById("moveDeptGrid");
+  grid.innerHTML = DEPARTMENTS.map(function(d) {
+    const hasSkill = p.depts.indexOf(d) !== -1;
+    const isPrimary = p.primary === d;
+    const isCurrent = p.assigned === d;
+    const isBanned_ = isBanned(p.name, d);
+    const rating = (p.ratings && p.ratings[d]) || 0;
+    let bg = "var(--bg)", border = "var(--border)", color = "var(--text)";
+    if (isCurrent) { bg = "var(--green-light)"; border = "var(--green-border)"; color = "var(--green)"; }
+    else if (isPrimary) { bg = "var(--yellow-bg)"; border = "var(--yellow-border)"; color = "var(--yellow-text)"; }
+    else if (hasSkill) { bg = "var(--accent-light)"; border = "var(--accent)"; color = "var(--accent)"; }
+    else if (isBanned_) { bg = "var(--red-light)"; border = "var(--red-border)"; color = "var(--red)"; }
+    const icon = isCurrent ? "&#10003; " : (isPrimary ? "&#11088; " : (hasSkill ? "&#128279; " : (isBanned_ ? "&#128683; " : "&#10067; ")));
+    const stars = rating > 0 ? '<span style="color:#fbbf24;font-size:10px;">' + "\u2605".repeat(rating) + '</span>' : '';
+    return '<button class="btn-sm" onclick="confirmMovePerson(\'' + d.replace(/'/g, "\\'") + '\')" style="background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';padding:10px 8px;text-align:left;font-size:12px;">' +
+      '<div style="font-weight:700;">' + icon + escapeHtml(d) + '</div>' +
+      (stars ? '<div>' + stars + '</div>' : '') +
+    '</button>';
+  }).join("");
+  
+  // Show/hide unassign button based on current state
+  document.getElementById("moveUnassignBtn").style.display = p.assigned ? "inline-block" : "none";
+  document.getElementById("movePersonModal").classList.add("show");
+}
+
+function confirmMovePerson(newDept) {
+  if (movingPersonIdx === null) return;
+  const p = assignmentResult[movingPersonIdx];
+  const oldDept = p.assigned;
+  if (oldDept === newDept) { closeMovePerson(); return; }
+  p.assigned = newDept;
+  // Clear forced/locked flags - this is manual
+  p.forced = false;
+  // Keep lockedFlag/leaderRole as they indicate WHY they were assigned originally
+  // But if leader role doesn't match new sorter line, clear it
+  if (p.leaderRole && newDept.indexOf("\u30BD\u30FC\u30BF\u30FC") === -1) {
+    p.leaderRole = null;
+  }
+  closeMovePerson();
+  showToast("Moved " + p.name + " \u2192 " + newDept);
+  renderAssignmentResults(getCurrentNeeds());
+}
+
+function unassignPerson() {
+  if (movingPersonIdx === null) return;
+  const p = assignmentResult[movingPersonIdx];
+  p.assigned = null;
+  p.forced = false;
+  p.lockedFlag = false;
+  p.leaderRole = null;
+  closeMovePerson();
+  showToast(p.name + " unassigned");
+  renderAssignmentResults(getCurrentNeeds());
+}
+
+function closeMovePerson() {
+  movingPersonIdx = null;
+  document.getElementById("movePersonModal").classList.remove("show");
+}
+
+function assignUnassigned(idx) {
+  // Same as openMovePerson but for unassigned people
+  openMovePerson(idx);
+}
+
+function renderAssignmentResults(needs) {
+  let summary = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;">';
+  DEPARTMENTS.forEach(function(d) {
+    if (needs[d] === 0) return;
+    const assigned = assignmentResult.filter(function(p){return p.assigned === d;}).length;
+    const ok = assigned >= needs[d];
+    summary += '<div style="background:' + (ok ? "var(--green-light)" : "var(--red-light)") + ';border:1px solid ' + (ok ? "var(--green-border)" : "var(--red-border)") + ';border-radius:8px;padding:8px;text-align:center;">' +
+      '<div style="font-size:11px;font-weight:600;">' + d + '</div>' +
+      '<div style="font-size:14px;font-weight:700;color:' + (ok ? "var(--green)" : "var(--red)") + ';">' + assigned + '/' + needs[d] + '</div></div>';
+  });
+  summary += '</div>';
+  document.getElementById("assignmentSummary").innerHTML = summary;
+
+  let html = "";
+  DEPARTMENTS.forEach(function(d) {
+    const peopleWithIdx = [];
+    assignmentResult.forEach(function(p, idx) {
+      if (p.assigned === d) peopleWithIdx.push({p: p, idx: idx});
+    });
+    if (peopleWithIdx.length === 0) return;
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;padding:6px 10px;background:var(--accent-light);border-radius:6px;color:var(--accent);">' + d + ' (' + peopleWithIdx.length + ')</div>';
+    html += peopleWithIdx.map(function(item) {
+      const p = item.p;
+      let rowClass = "staff-row";
+      let badge = "";
+      if (p.lockedFlag) {
+        badge = '<div class="badge" style="background:#7c3aed;color:white;">\u{1F512} LOCKED</div>';
+      } else if (p.leaderRole === "\u7BA1\u7406") {
+        rowClass += " leader-row";
+        badge = '<div class="badge" style="background:var(--leader-border);color:white;">\u{1F451} \u7BA1\u7406</div>';
+      } else if (p.leaderRole === "sub") {
+        rowClass += " subleader-row";
+        badge = '<div class="badge" style="background:var(--subleader-border);color:white;">\u2B50 SUB</div>';
+      } else if (isLeader(p.name)) badge = '<span class="leader-tag">LEADER</span>';
+      else if (isSubLeader(p.name)) badge = '<span class="subleader-tag">SUB</span>';
+      if (p.forced) badge = '<div class="badge badge-extra">Forced</div>';
+      // Show rating for the assigned dept
+      const rating = (p.ratings && p.ratings[p.assigned]) || 0;
+      const ratingStars = rating > 0 ? '<span style="color:#fbbf24;margin-left:6px;font-size:13px;">' + "\u2605".repeat(rating) + '</span>' : '';
+      const editAttr = editMode ? ' onclick="openMovePerson(' + item.idx + ')" style="cursor:pointer;outline:2px dashed var(--accent);outline-offset:-4px;"' : '';
+      const moveIcon = editMode ? '<span style="margin-right:6px;color:var(--accent);font-size:14px;">&#10021;</span>' : '';
+      return '<div class="' + rowClass + '"' + editAttr + '><div>' + moveIcon + '<div class="staff-name" style="display:inline-block;">' + escapeHtml(p.name) + ratingStars + '</div>' +
+        (p.depts.length ? '<div class="staff-real">Skills: ' + escapeHtml(p.depts.join(", ")) + '</div>' : '<div class="staff-real" style="color:#dc2626;">No skill data</div>') +
+        '</div>' + badge + '</div>';
+    }).join("");
+    html += '</div>';
+  });
+  const unassignedWithIdx = [];
+  assignmentResult.forEach(function(p, idx) {
+    if (!p.assigned) unassignedWithIdx.push({p: p, idx: idx});
+  });
+  if (unassignedWithIdx.length) {
+    html += '<div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">';
+    html += '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">&#10067; Unassigned (' + unassignedWithIdx.length + ')</div>';
+    html += unassignedWithIdx.map(function(item) {
+      const p = item.p;
+      const editAttr = editMode ? ' onclick="assignUnassigned(' + item.idx + ')" style="cursor:pointer;outline:2px dashed var(--accent);outline-offset:-2px;border-radius:6px;padding:4px 8px;background:var(--accent-light);"' : ' style="padding:4px 0;"';
+      const moveIcon = editMode ? '<span style="color:var(--accent);margin-right:6px;">+</span>' : '';
+      return '<div' + editAttr + ' class="staff-name" >' + moveIcon + escapeHtml(p.name) + '</div>';
+    }).join("");
+    html += '</div>';
+  }
+  document.getElementById("assignmentList").innerHTML = html;
+  document.getElementById("assignResults").style.display = "block";
+  if (!editMode) setTimeout(function(){document.getElementById("assignResults").scrollIntoView({behavior:"smooth"});}, 100);
+}
+function copyAssignment() {
+  let text = "Today's Assignment\n\n";
+  DEPARTMENTS.forEach(function(d) {
+    const people = assignmentResult.filter(function(p){return p.assigned === d;});
+    if (people.length === 0) return;
+    text += "[" + d + "] (" + people.length + ")\n";
+    people.forEach(function(p) {
+      let prefix = "  - ";
+      if (p.leaderRole === "\u7BA1\u7406") prefix = "  [LEADER] ";
+      else if (p.leaderRole === "sub") prefix = "  [SUB] ";
+      text += prefix + p.name + (p.forced ? " (forced)" : "") + "\n";
+    });
+    text += "\n";
+  });
+  navigator.clipboard.writeText(text).then(function(){showToast("Copied!");}).catch(function(){showToast("Copy failed", "#dc2626");});
+}
+
+// ============ DARK MODE ============
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("zozo_dark", isDark ? "1" : "0");
+  document.getElementById("darkBtn").textContent = isDark ? "\u2600\uFE0F" : "\u{1F319}";
+}
+if (localStorage.getItem("zozo_dark") === "1") {
+  document.body.classList.add("dark");
+  setTimeout(function() {
+    const btn = document.getElementById("darkBtn");
+    if (btn) btn.textContent = "\u2600\uFE0F";
+  }, 50);
+}
+
+// ============ LOCKS, BANS & FAIRNESS ============
+function openLocksModal() {
+  document.getElementById("locksModal").classList.add("show");
+  // Populate dept dropdown
+  document.getElementById("lockDeptSelect").innerHTML = DEPARTMENTS.map(function(d) {
+    return '<option value="' + d + '">' + d + '</option>';
+  }).join("");
+  setLockType("lock");
+  renderLocksList();
+}
+
+function closeLocksModal() {
+  document.getElementById("locksModal").classList.remove("show");
+  document.getElementById("lockPersonInput").value = "";
+  document.getElementById("lockPersonSuggestions").innerHTML = "";
+  updateLocksSummary();
+}
+
+function setLockType(type) {
+  lockType = type;
+  const lockBtn = document.getElementById("lockTypeBtn");
+  const banBtn = document.getElementById("banTypeBtn");
+  if (type === "lock") {
+    lockBtn.style.background = "var(--accent)";
+    lockBtn.style.color = "white";
+    lockBtn.className = "btn-sm";
+    banBtn.style.background = "";
+    banBtn.style.color = "";
+    banBtn.className = "btn-sm btn-gray";
+  } else {
+    banBtn.style.background = "var(--red)";
+    banBtn.style.color = "white";
+    banBtn.className = "btn-sm";
+    lockBtn.style.background = "";
+    lockBtn.style.color = "";
+    lockBtn.className = "btn-sm btn-gray";
+  }
+}
+
+function onLockPersonInput() {
+  const q = document.getElementById("lockPersonInput").value.trim().toLowerCase();
+  const sug = document.getElementById("lockPersonSuggestions");
+  if (q.length < 2) { sug.innerHTML = ""; return; }
+  // Get all known names
+  const names = new Set();
+  staffMap.forEach(function(s){names.add(s.real);});
+  for (const k in SKILL_DATABASE) names.add(k);
+  const matches = Array.from(names).filter(function(n){return n.toLowerCase().indexOf(q) !== -1;}).slice(0, 6);
+  sug.innerHTML = matches.map(function(n) {
+    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickLockPerson(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
+  }).join("");
+}
+
+function pickLockPerson(name) {
+  document.getElementById("lockPersonInput").value = name;
+  document.getElementById("lockPersonSuggestions").innerHTML = "";
+}
+
+function addLock() {
+  const name = document.getElementById("lockPersonInput").value.trim().toUpperCase();
+  const dept = document.getElementById("lockDeptSelect").value;
+  if (!name) { showToast("Enter person name!", "#dc2626"); return; }
+  if (lockType === "lock") {
+    locks[name] = { dept: dept };
+    saveLocks();
+    showToast("🔒 " + name + " locked to " + dept);
+  } else {
+    if (!bans[name]) bans[name] = [];
+    if (bans[name].indexOf(dept) === -1) bans[name].push(dept);
+    saveBans();
+    showToast("🚫 " + name + " banned from " + dept);
+  }
+  document.getElementById("lockPersonInput").value = "";
+  renderLocksList();
+  updateLocksSummary();
+}
+
+function removeLock(name) {
+  delete locks[name];
+  saveLocks();
+  renderLocksList();
+  updateLocksSummary();
+}
+
+function removeBan(name, dept) {
+  if (!bans[name]) return;
+  bans[name] = bans[name].filter(function(d){return d !== dept;});
+  if (bans[name].length === 0) delete bans[name];
+  saveBans();
+  renderLocksList();
+  updateLocksSummary();
+}
+
+function renderLocksList() {
+  let html = "";
+  const lockNames = Object.keys(locks);
+  const banNames = Object.keys(bans);
+  
+  if (lockNames.length === 0 && banNames.length === 0) {
+    html = '<div class="empty" style="padding:20px;">No locks or bans yet</div>';
+  } else {
+    lockNames.forEach(function(name) {
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--accent-light);border-radius:6px;margin-bottom:4px;">' +
+        '<div style="font-size:12px;">&#128274; <strong>' + escapeHtml(name) + '</strong> &rarr; ' + escapeHtml(locks[name].dept) + '</div>' +
+        '<button class="btn-sm btn-red" onclick="removeLock(\'' + name.replace(/'/g, "\\'") + '\')" style="padding:4px 8px;min-width:30px;min-height:30px;">&times;</button>' +
+        '</div>';
+    });
+    banNames.forEach(function(name) {
+      bans[name].forEach(function(dept) {
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--red-light);border-radius:6px;margin-bottom:4px;">' +
+          '<div style="font-size:12px;">&#128683; <strong>' + escapeHtml(name) + '</strong> never ' + escapeHtml(dept) + '</div>' +
+          '<button class="btn-sm btn-red" onclick="removeBan(\'' + name.replace(/'/g, "\\'") + '\', \'' + dept + '\')" style="padding:4px 8px;min-width:30px;min-height:30px;">&times;</button>' +
+          '</div>';
+      });
     });
   }
-  return h;
+  document.getElementById("locksList").innerHTML = html;
 }
 
-/* ===== RENDER ===== */
-function render(){
-  const app=document.getElementById('app');
-  switch(S.screen){
-    case 'loading': app.innerHTML=`<div style="padding:4rem;text-align:center;color:#aaa"><div style="font-size:40px;margin-bottom:1rem">🚌</div><div>${t('connecting')}</div></div>`; break;
-    case 'error':   app.innerHTML=`<div style="padding:3rem;text-align:center"><div style="font-size:36px;margin-bottom:1rem">⚠️</div><div style="font-size:16px;color:#A32D2D;margin-bottom:1rem">${t('connError')}</div><button onclick="loadAll()" style="padding:10px 20px;border-radius:8px;border:none;background:#1a1a1a;color:white;font-size:14px">${t('retry')}</button></div>`; break;
-    case 'home':    app.innerHTML=scrHome();    break;
-    case 'board':   app.innerHTML=scrBoard();   break;
-    case 'history': app.innerHTML=scrHistory(); break;
-    case 'report':  app.innerHTML=scrReport();  break;
-    case 'admin':   app.innerHTML=scrAdmin();   break;
-    default:        app.innerHTML=scrHome();
+function updateLocksSummary() {
+  const lockCount = Object.keys(locks).length;
+  let banCount = 0;
+  for (const k in bans) banCount += bans[k].length;
+  const el = document.getElementById("locksSummary");
+  if (el) {
+    if (lockCount + banCount === 0) {
+      el.textContent = "No locks or bans set";
+    } else {
+      el.innerHTML = "&#128274; " + lockCount + " locks &middot; &#128683; " + banCount + " bans";
+    }
   }
-  if(S.toast){const t=document.createElement('div');t.className='toast';t.textContent=S.toast;document.body.appendChild(t);}
-  else{document.querySelectorAll('.toast').forEach(t=>t.remove());}
-  if(S.screen==='board'){const el=document.getElementById('bsrch');if(el)setTimeout(()=>el.focus(),80);}
 }
 
-loadAll();
+function isLocked(name, dept) {
+  const norm = (name||"").toUpperCase().trim();
+  return locks[norm] && locks[norm].dept === dept;
+}
+
+function getLockedDept(name) {
+  const norm = (name||"").toUpperCase().trim();
+  return locks[norm] ? locks[norm].dept : null;
+}
+
+function isBanned(name, dept) {
+  const norm = (name||"").toUpperCase().trim();
+  return bans[norm] && bans[norm].indexOf(dept) !== -1;
+}
+
+function recordFairnessForToday() {
+  // Track who was assigned to "hard" departments today
+  const hardDepts = ["\u68DA\u5165\u308C", "\u51FA\u5EAB\u642C\u9001", "\u5358\u642C", "\u6295\u5165"];
+  assignmentResult.forEach(function(p) {
+    if (!p.assigned || hardDepts.indexOf(p.assigned) === -1) return;
+    const norm = (p.name||"").toUpperCase().trim();
+    if (!fairnessHistory[norm]) fairnessHistory[norm] = {};
+    fairnessHistory[norm][p.assigned] = (fairnessHistory[norm][p.assigned] || 0) + 1;
+  });
+  saveFairness();
+}
+
+function getFairnessScore(name, dept) {
+  // Lower score = picked less recently = should be picked
+  const norm = (name||"").toUpperCase().trim();
+  if (!fairnessHistory[norm]) return 0;
+  return fairnessHistory[norm][dept] || 0;
+}
+
+function resetFairnessHistory() {
+  fairnessHistory = {};
+  saveFairness();
+  showToast("Fairness history reset");
+}
+
+// ============ SETTINGS PAGE ============
+function renderSettings() {
+  renderLeadersList();
+  renderSubLeadersList();
+  renderDepartmentsList();
+  renderAliasesList();
+}
+
+function renderAliasesList() {
+  const keys = Object.keys(aliases);
+  document.getElementById("aliasesCount").textContent = "(" + keys.length + ")";
+  if (!keys.length) {
+    document.getElementById("aliasesList").innerHTML = '<div class="empty" style="padding:14px;font-size:12px;">No aliases yet. They\'ll appear as you confirm ambiguous matches.</div>';
+    return;
+  }
+  const html = keys.sort().map(function(k) {
+    const target = aliases[k];
+    const isIgnore = target === "__IGNORE__";
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:' + (isIgnore ? "var(--red-light)" : "var(--accent-light)") + ';border-radius:6px;margin-bottom:4px;">' +
+      '<div style="font-size:12px;flex:1;min-width:0;">' +
+        '<div style="font-weight:600;">' + escapeHtml(k) + '</div>' +
+        '<div style="color:var(--text2);">&rarr; ' + (isIgnore ? '\u274C Ignore' : escapeHtml(target)) + '</div>' +
+      '</div>' +
+      '<button class="btn-sm btn-red" onclick="removeAlias(\'' + k.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+    '</div>';
+  }).join("");
+  document.getElementById("aliasesList").innerHTML = html;
+}
+
+function removeAlias(key) {
+  delete aliases[key];
+  saveAliases();
+  renderAliasesList();
+  showToast("Alias removed");
+}
+
+function getAllKnownNames() {
+  const names = new Set();
+  staffMap.forEach(function(s){names.add(s.real.toUpperCase().trim());});
+  for (const k in SKILL_DATABASE) names.add(k.toUpperCase().trim());
+  for (const k in skillOverrides) names.add(k.toUpperCase().trim());
+  return Array.from(names).sort();
+}
+
+function onLeaderInput() {
+  const q = document.getElementById("newLeaderInput").value.trim().toLowerCase();
+  const sug = document.getElementById("leaderSuggestions");
+  if (q.length < 2) { sug.innerHTML = ""; return; }
+  const names = getAllKnownNames().filter(function(n) {
+    return n.toLowerCase().indexOf(q) !== -1 && LEADERS.indexOf(n) === -1;
+  }).slice(0, 5);
+  sug.innerHTML = names.map(function(n) {
+    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
+  }).join("");
+}
+
+function pickLeaderName(name) {
+  document.getElementById("newLeaderInput").value = name;
+  document.getElementById("leaderSuggestions").innerHTML = "";
+}
+
+function promoteToLeader() {
+  const name = document.getElementById("newLeaderInput").value.trim().toUpperCase();
+  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
+  if (LEADERS.indexOf(name) !== -1) { showToast("Already a leader", "#dc2626"); return; }
+  // Remove from sub-leaders if present
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  LEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  document.getElementById("newLeaderInput").value = "";
+  document.getElementById("leaderSuggestions").innerHTML = "";
+  showToast("\u{1F451} " + name + " promoted to LEADER");
+  renderSettings();
+}
+
+function demoteLeader(name) {
+  LEADERS = LEADERS.filter(function(n){return n !== name;});
+  saveLeaders();
+  showToast(name + " demoted");
+  renderSettings();
+}
+
+function renderLeadersList() {
+  document.getElementById("leadersCount").textContent = "(" + LEADERS.length + ")";
+  const html = LEADERS.length ? LEADERS.map(function(n) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--leader-bg);border:1px solid var(--leader-border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">&#128081; ' + escapeHtml(n) + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveLeaderToSub(\'' + n.replace(/'/g, "\\'") + '\')" title="Demote to Sub-leader">&darr; SUB</button>' +
+        '<button class="btn-sm btn-red" onclick="demoteLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No leaders</div>';
+  document.getElementById("leadersList").innerHTML = html;
+}
+
+function moveLeaderToSub(name) {
+  LEADERS = LEADERS.filter(function(n){return n !== name;});
+  if (SUBLEADERS.indexOf(name) === -1) SUBLEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  showToast(name + " moved to Sub-leader");
+  renderSettings();
+}
+
+function onSubLeaderInput() {
+  const q = document.getElementById("newSubLeaderInput").value.trim().toLowerCase();
+  const sug = document.getElementById("subleaderSuggestions");
+  if (q.length < 2) { sug.innerHTML = ""; return; }
+  const names = getAllKnownNames().filter(function(n) {
+    return n.toLowerCase().indexOf(q) !== -1 && SUBLEADERS.indexOf(n) === -1 && LEADERS.indexOf(n) === -1;
+  }).slice(0, 5);
+  sug.innerHTML = names.map(function(n) {
+    return '<div style="padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px;" onclick="pickSubLeaderName(\'' + n.replace(/'/g, "\\'") + '\')">' + escapeHtml(n) + '</div>';
+  }).join("");
+}
+
+function pickSubLeaderName(name) {
+  document.getElementById("newSubLeaderInput").value = name;
+  document.getElementById("subleaderSuggestions").innerHTML = "";
+}
+
+function promoteToSubLeader() {
+  const name = document.getElementById("newSubLeaderInput").value.trim().toUpperCase();
+  if (!name) { showToast("Enter a name!", "#dc2626"); return; }
+  if (SUBLEADERS.indexOf(name) !== -1) { showToast("Already a sub-leader", "#dc2626"); return; }
+  if (LEADERS.indexOf(name) !== -1) { showToast("Already a main leader", "#dc2626"); return; }
+  SUBLEADERS.push(name);
+  saveSubLeaders();
+  document.getElementById("newSubLeaderInput").value = "";
+  document.getElementById("subleaderSuggestions").innerHTML = "";
+  showToast("\u2B50 " + name + " promoted to SUB-LEADER");
+  renderSettings();
+}
+
+function demoteSubLeader(name) {
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  saveSubLeaders();
+  showToast(name + " demoted");
+  renderSettings();
+}
+
+function moveSubToLeader(name) {
+  SUBLEADERS = SUBLEADERS.filter(function(n){return n !== name;});
+  if (LEADERS.indexOf(name) === -1) LEADERS.push(name);
+  saveLeaders();
+  saveSubLeaders();
+  showToast("\u{1F451} " + name + " promoted to LEADER");
+  renderSettings();
+}
+
+function renderSubLeadersList() {
+  document.getElementById("subleadersCount").textContent = "(" + SUBLEADERS.length + ")";
+  const html = SUBLEADERS.length ? SUBLEADERS.map(function(n) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--subleader-bg);border:1px solid var(--subleader-border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">&#11088; ' + escapeHtml(n) + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveSubToLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Promote to Leader">&uarr; LEADER</button>' +
+        '<button class="btn-sm btn-red" onclick="demoteSubLeader(\'' + n.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No sub-leaders</div>';
+  document.getElementById("subleadersList").innerHTML = html;
+}
+
+function addDepartment() {
+  const name = document.getElementById("newDeptInput").value.trim();
+  if (!name) { showToast("Enter dept name!", "#dc2626"); return; }
+  if (DEPARTMENTS.indexOf(name) !== -1) { showToast("Already exists", "#dc2626"); return; }
+  DEPARTMENTS.push(name);
+  saveDepartments();
+  document.getElementById("newDeptInput").value = "";
+  showToast("\u2795 " + name + " added");
+  renderSettings();
+}
+
+function removeDepartment(name) {
+  // Confirm because this affects assignments
+  document.getElementById("confirmTitle").textContent = "Remove Department";
+  document.getElementById("confirmMsg").textContent = "Remove '" + name + "'? This will not affect existing skills, but the department won't appear in future assignments.";
+  document.getElementById("confirmOk").textContent = "Remove";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = function() {
+    DEPARTMENTS = DEPARTMENTS.filter(function(d){return d !== name;});
+    saveDepartments();
+    closeConfirm();
+    showToast(name + " removed", "#dc2626");
+    renderSettings();
+  };
+}
+
+function moveDept(name, direction) {
+  const idx = DEPARTMENTS.indexOf(name);
+  if (idx === -1) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= DEPARTMENTS.length) return;
+  DEPARTMENTS.splice(idx, 1);
+  DEPARTMENTS.splice(newIdx, 0, name);
+  saveDepartments();
+  renderSettings();
+}
+
+function renderDepartmentsList() {
+  document.getElementById("deptsCount").textContent = "(" + DEPARTMENTS.length + ")";
+  const html = DEPARTMENTS.length ? DEPARTMENTS.map(function(d, i) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">' +
+      '<div style="font-weight:600;font-size:13px;">' + escapeHtml(d) + '</div>' +
+      '<div style="display:flex;gap:4px;">' +
+        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', -1)" title="Up" ' + (i === 0 ? 'disabled style="opacity:0.4;"' : '') + '>&uarr;</button>' +
+        '<button class="btn-sm btn-gray" onclick="moveDept(\'' + d.replace(/'/g, "\\'") + '\', 1)" title="Down" ' + (i === DEPARTMENTS.length - 1 ? 'disabled style="opacity:0.4;"' : '') + '>&darr;</button>' +
+        '<button class="btn-sm btn-red" onclick="removeDepartment(\'' + d.replace(/'/g, "\\'") + '\')" title="Remove">&times;</button>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="padding:20px;">No departments</div>';
+  document.getElementById("deptsList").innerHTML = html;
+}
+
+// ============ BACKUP / IMPORT ============
+function exportSettings() {
+  const data = {
+    leaders: LEADERS,
+    subleaders: SUBLEADERS,
+    departments: DEPARTMENTS,
+    skillOverrides: skillOverrides,
+    locks: locks,
+    bans: bans,
+    fairnessHistory: fairnessHistory,
+    aliases: aliases,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "zozo-settings-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("\u{1F4E5} Exported!");
+}
+
+function importSettings() {
+  document.getElementById("importFile").click();
+}
+
+function handleImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.leaders) { LEADERS = data.leaders; saveLeaders(); }
+      if (data.subleaders) { SUBLEADERS = data.subleaders; saveSubLeaders(); }
+      if (data.departments) { DEPARTMENTS = data.departments; saveDepartments(); }
+      if (data.skillOverrides) { skillOverrides = data.skillOverrides; saveSkillsToStorage(); }
+      if (data.locks) { locks = data.locks; saveLocks(); }
+      if (data.bans) { bans = data.bans; saveBans(); }
+      if (data.fairnessHistory) { fairnessHistory = data.fairnessHistory; saveFairness(); }
+      if (data.aliases) { aliases = data.aliases; saveAliases(); }
+      showToast("\u{1F4E4} Imported!");
+      renderSettings();
+    } catch(err) {
+      showToast("Invalid file", "#dc2626");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetFairnessHistoryConfirm() {
+  document.getElementById("confirmTitle").textContent = "Reset Fairness";
+  document.getElementById("confirmMsg").textContent = "Clear all fairness tracking history? AI will no longer remember who got hard departments recently.";
+  document.getElementById("confirmOk").textContent = "Reset";
+  document.getElementById("confirmModal").classList.add("show");
+  document.getElementById("confirmOk").onclick = function() {
+    fairnessHistory = {};
+    saveFairness();
+    closeConfirm();
+    showToast("Fairness history cleared");
+  };
+}
+
+// ============ RANKINGS ============
+function setupRankings() {
+  const deptSelect = document.getElementById("rankingDept");
+  deptSelect.innerHTML = DEPARTMENTS.map(function(d) {
+    return '<option value="' + d + '">' + d + '</option>';
+  }).join("");
+  // Show/hide dept selector based on type
+  document.getElementById("rankingType").onchange = function() {
+    document.getElementById("rankingDept").style.display = this.value === "dept" ? "block" : "none";
+    renderRankings();
+  };
+}
+
+function getAllStaffWithSkills() {
+  // Combine staffMap with skill data
+  const result = [];
+  const seen = {};
+  // First add staffMap people
+  staffMap.forEach(function(s) {
+    const skills = getSkills(s.real);
+    const key = s.real.toUpperCase().trim();
+    seen[key] = true;
+    result.push({
+      name: s.real,
+      fb: s.fb,
+      depts: skills.depts || [],
+      primary: skills.primary,
+      notes: skills.notes || "",
+      isLeader: isLeader(s.real),
+      isSubLeader: isSubLeader(s.real),
+      inStaffMap: true
+    });
+  });
+  // Then add SKILL_DATABASE people not yet seen
+  for (const dbName in SKILL_DATABASE) {
+    const key = dbName.toUpperCase().trim();
+    if (seen[key]) continue;
+    const skills = getSkills(dbName);
+    result.push({
+      name: dbName,
+      fb: "",
+      depts: skills.depts || [],
+      primary: skills.primary,
+      notes: skills.notes || "",
+      isLeader: isLeader(dbName),
+      isSubLeader: isSubLeader(dbName),
+      inStaffMap: false
+    });
+  }
+  return result;
+}
+
+function renderRankings() {
+  const type = document.getElementById("rankingType").value;
+  const all = getAllStaffWithSkills();
+  let list = [];
+  let title = "";
+  
+  if (type === "flexible") {
+    list = all.filter(function(s){return s.depts.length >= 2;})
+      .sort(function(a,b){return b.depts.length - a.depts.length;})
+      .slice(0, 50);
+    title = "\u{1F3C6} Most Flexible (works in 2+ departments)";
+  } else if (type === "leaders") {
+    const leaders = all.filter(function(s){return s.isLeader;});
+    const subs = all.filter(function(s){return s.isSubLeader;});
+    list = leaders.concat(subs);
+    title = "\u{1F451} Leaders (" + leaders.length + ") + Sub-leaders (" + subs.length + ")";
+  } else if (type === "specialists") {
+    list = all.filter(function(s){return s.depts.length === 1;});
+    title = "\u2B50 Specialists (single department)";
+  } else if (type === "dept") {
+    const d = document.getElementById("rankingDept").value;
+    list = all.filter(function(s){return s.depts.indexOf(d) !== -1;})
+      .sort(function(a,b){
+        if (a.primary === d && b.primary !== d) return -1;
+        if (a.primary !== d && b.primary === d) return 1;
+        return 0;
+      });
+    title = "\u{1F4D8} Can work " + d + " (" + list.length + " people)";
+  } else if (type === "missing") {
+    list = all.filter(function(s){return s.depts.length === 0;});
+    title = "\u26A0\uFE0F Missing Skill Data (" + list.length + " people)";
+  } else if (type === "notes") {
+    list = all.filter(function(s){return s.notes && s.notes.length > 0;});
+    title = "\u{1F4DD} Staff with Notes (" + list.length + ")";
+  }
+  
+  let html = '<div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--accent);">' + title + '</div>';
+  
+  if (!list.length) {
+    html += '<div class="empty">No staff found</div>';
+  } else {
+    html += list.map(function(s, idx) {
+      let rowStyle = "";
+      let tag = "";
+      if (s.isLeader) { rowStyle = "background:var(--leader-bg);border:1px solid var(--leader-border);"; tag = '<span class="leader-tag">LEADER</span>'; }
+      else if (s.isSubLeader) { rowStyle = "background:var(--subleader-bg);border:1px solid var(--subleader-border);"; tag = '<span class="subleader-tag">SUB</span>'; }
+      
+      let skillsHtml = "";
+      if (s.depts.length) {
+        skillsHtml = '<div style="margin-top:4px;">' + s.depts.map(function(d) {
+          return '<span class="skill-tag' + (d === s.primary ? ' primary' : '') + '">' + d + '</span>';
+        }).join("") + '</div>';
+      } else {
+        skillsHtml = '<div class="hint" style="color:#dc2626;margin-top:4px;">No skills</div>';
+      }
+      
+      let notesHtml = "";
+      if (s.notes) {
+        notesHtml = '<div style="margin-top:6px;padding:6px 10px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.4;"><strong>\u{1F4DD}</strong> ' + escapeHtml(s.notes) + '</div>';
+      }
+      
+      return '<div class="staff-row" style="' + rowStyle + 'flex-direction:column;align-items:stretch;gap:0;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="staff-name">' + (idx+1) + '. ' + escapeHtml(s.name) + tag + '</div>' +
+            (s.fb ? '<div class="staff-real">FB: ' + escapeHtml(s.fb) + '</div>' : '') +
+          '</div>' +
+          '<div style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:4px 8px;border-radius:6px;white-space:nowrap;">' + s.depts.length + ' skills</div>' +
+        '</div>' +
+        skillsHtml +
+        notesHtml +
+      '</div>';
+    }).join("");
+  }
+  
+  document.getElementById("rankingsList").innerHTML = html;
+}
+
+// ============ INIT ============
+// Auto-save rules when changed + load saved rules
+setTimeout(function() {
+  ["ruleRequireLeader", "ruleRequireSubLeader", "rulePrimaryFirst", "ruleNoForce", "ruleFairness"].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", saveRulesToStorage);
+  });
+  loadRulesFromStorage();
+  updateLocksSummary();
+}, 100);
+
+// Initial load: sites first, then skills from sheet
+(async function() {
+  await loadSites();
+  await loadSkillsFromSheet();
+})();
+
 </script>
 </body>
 </html>
