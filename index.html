@@ -144,7 +144,7 @@
 <div class="header">
   <div class="logo">ZZ</div>
   <div>
-    <div class="header-title">Reaction Checker</div>
+    <div class="header-title">Reaction Checker <span style="font-size:10px;background:#10b981;color:white;padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;">v1.3 FIXED</span></div>
     <div class="header-sub" id="siteCount">Loading...</div>
   </div>
   <div class="site-selector">
@@ -1063,9 +1063,19 @@ function nameMatches(name, staff) {
   return scoreNameMatch(name, staff) >= 0.8;
 }
 function findStaff(name) {
+  // BUG FIX: Scan ALL staff and return the BEST match (highest score),
+  // not just the first one above threshold. This prevents "SHRESTHA NABIN KUMAR"
+  // from accidentally matching "SHRESTHA NABIN" when both are in the DB.
+  let bestStaff = null;
+  let bestScore = 0;
   for (let i=0; i<staffMap.length; i++) {
-    if (nameMatches(name, staffMap[i])) return staffMap[i];
+    const score = scoreNameMatch(name, staffMap[i]);
+    if (score > bestScore) {
+      bestScore = score;
+      bestStaff = staffMap[i];
+    }
   }
+  if (bestScore >= 0.8) return bestStaff;
   return null;
 }
 
@@ -1116,12 +1126,19 @@ function scoreAgainstTokens(inputTokens, staffTokens) {
   for (let j = 0; j < staffTokens.length; j++) {
     if (!staffMatched[j] && staffTokens[j].length >= 4) staffConflicts++;
   }
-  // KEY RULE: if BOTH sides have unmatched distinctive tokens, this is likely a DIFFERENT person
+  // RULE 1: if BOTH sides have unmatched distinctive tokens, this is likely a DIFFERENT person
   // (e.g. BUDHA MAGAR AASHIKA vs BUDHA MAGAR ROHIT - "AASHIKA" and "ROHIT" both unmatched)
   if (inputConflicts > 0 && staffConflicts > 0) {
     return matches / (inputTokens.length + staffTokens.length); // low score, won't match
   }
-  // One side is fully covered (or only missing short tokens) - good match
+  // RULE 2 (NEW): if INPUT has unmatched distinctive tokens but STAFF is fully covered,
+  // the user typed EXTRA distinctive info that staff doesn't have - likely meant a different person.
+  // (e.g. SHRESTHA NABIN KUMAR vs SHRESTHA NABIN - "KUMAR" is extra → user meant a different Nabin)
+  // Penalize the score so a more specific match (if exists) wins, OR trigger disambiguation popup.
+  if (inputConflicts > 0 && staffConflicts === 0) {
+    return Math.min(matches / inputTokens.length, 0.75); // capped below auto-match threshold
+  }
+  // RULE 3: Only staff has unmatched distinctive (or neither does) - user abbreviated, good match
   return Math.min(matches / Math.min(inputTokens.length, staffTokens.length), 0.95);
 }
 
@@ -1204,11 +1221,23 @@ function renderRosterModalList() {
   const html = filtered.length ? filtered.map(function(s) {
     const tag = isLeader(s.real) ? '<span class="leader-tag">LEADER</span>' : isSubLeader(s.real) ? '<span class="subleader-tag">SUB</span>' : '';
     const isUnknown = s.real === "(not in database)";
+    // DEBUG: compute the match score to show why it picked this staff
+    let debugScore = "";
+    if (!isUnknown && typeof scoreNameMatch === 'function') {
+      for (let i = 0; i < staffMap.length; i++) {
+        if (staffMap[i].real === s.real && staffMap[i].fb === s.fb) {
+          const sc = scoreNameMatch(s.input, staffMap[i]);
+          debugScore = '<div style="color:#7c3aed;font-size:10px;">score: ' + sc.toFixed(2) + '</div>';
+          break;
+        }
+      }
+    }
     return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:' + (isUnknown ? "var(--red-light)" : "var(--bg)") + ';border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">' +
       '<div style="flex:1;min-width:0;font-size:12px;">' +
         '<div style="font-weight:600;">' + escapeHtml(s.fb) + tag + '</div>' +
         '<div style="color:var(--text3);">' + escapeHtml(s.real) + '</div>' +
         (s.input && s.input !== s.fb ? '<div style="color:var(--text3);font-style:italic;font-size:10px;">typed: ' + escapeHtml(s.input) + '</div>' : '') +
+        debugScore +
       '</div>' +
       '<button class="btn-sm btn-red" onclick="removeFromRoster(' + s._idx + ')" title="Remove">&times;</button>' +
     '</div>';
@@ -1575,19 +1604,31 @@ function removeSite(name) {
 function findSkillsFor(name) {
   const n = normalize(name);
   const norm = (name||"").toUpperCase().trim();
-  if (skillOverrides[norm]) return {name: name, depts: skillOverrides[norm].depts, primary: skillOverrides[norm].primary};
+  // 1. Exact key in overrides
+  if (skillOverrides[norm]) return {name: norm, depts: skillOverrides[norm].depts, primary: skillOverrides[norm].primary};
+  // 2. Exact normalized match in overrides
   for (const key in skillOverrides) {
     if (normalize(key) === n) return {name: key, depts: skillOverrides[key].depts, primary: skillOverrides[key].primary};
   }
+  // 3. Exact normalized match in SKILL_DATABASE
   for (const dbName in SKILL_DATABASE) {
     if (normalize(dbName) === n) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
   }
+  // 4. FUZZY: Find BEST substring match (not first!)
+  // This prevents "SHRESTHA NABIN KUMAR" from accidentally matching "SHRESTHA NABIN".
+  // Prefer the candidate with smallest length difference (closest match wins).
+  let bestName = null, bestDiff = Infinity;
   for (const dbName in SKILL_DATABASE) {
     const dn = normalize(dbName);
     if (dn.indexOf(n) !== -1 || n.indexOf(dn) !== -1) {
-      if (Math.abs(dn.length - n.length) < 5) return {name: dbName, depts: SKILL_DATABASE[dbName], primary: SKILL_DATABASE[dbName][0]};
+      const diff = Math.abs(dn.length - n.length);
+      if (diff < 5 && diff < bestDiff) {
+        bestDiff = diff;
+        bestName = dbName;
+      }
     }
   }
+  if (bestName) return {name: bestName, depts: SKILL_DATABASE[bestName], primary: SKILL_DATABASE[bestName][0]};
   return null;
 }
 function loadAssignRoster() {
