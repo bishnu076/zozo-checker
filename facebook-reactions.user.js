@@ -1,17 +1,176 @@
 // ==UserScript==
 // @name         Facebook Reaction Extractor
 // @namespace    bishnu076
-// @version      2.0
+// @version      3.0
 // @description  Extract reactor names from Facebook posts
 // @match        https://www.facebook.com/*
 // @match        https://m.facebook.com/*
-// @grant        none
+// @grant        GM_setClipboard
 // ==/UserScript==
 
 (function() {
   'use strict';
 
   const BLOCKED = ['click','view','profile','follow','add friend','message','more','like','comment','share','reply','see','all','reactions','people','this','you'];
+
+  function copyText(text) {
+    // Method 1 - GM_setClipboard (most reliable in userscripts)
+    if (typeof GM_setClipboard !== 'undefined') {
+      GM_setClipboard(text);
+      return true;
+    }
+    // Method 2 - execCommand fallback
+    let ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    let ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function showBox(names, copied) {
+    let existing = document.getElementById('fb-reaction-box');
+    if (existing) existing.remove();
+
+    let nameList = [...names].join('\n');
+
+    let box = document.createElement('div');
+    box.id = 'fb-reaction-box';
+    box.style.cssText = `
+      position:fixed;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,0.6);
+      z-index:999999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family:-apple-system,sans-serif;
+    `;
+
+    let card = document.createElement('div');
+    card.style.cssText = `
+      background:#fff;
+      border-radius:16px;
+      padding:20px;
+      margin:16px;
+      width:100%;
+      max-width:420px;
+      max-height:85vh;
+      overflow-y:auto;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    `;
+
+    // Header
+    let header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
+    header.innerHTML = `
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#1877f2;">👥 Reaction Extractor</div>
+        <div style="font-size:13px;color:#666;margin-top:2px;">${names.size} names found</div>
+      </div>
+      <div style="background:${copied ? '#e8f5e9' : '#fff3e0'};color:${copied ? '#2e7d32' : '#e65100'};padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+        ${copied ? '✅ Copied!' : '⚠️ Copy failed'}
+      </div>
+    `;
+    card.appendChild(header);
+
+    // Textarea
+    let ta = document.createElement('textarea');
+    ta.id = 'fb-name-list';
+    ta.value = nameList;
+    ta.readOnly = true;
+    ta.style.cssText = `
+      width:100%;
+      height:180px;
+      font-size:13px;
+      border:1.5px solid #e0e0e0;
+      border-radius:10px;
+      padding:10px;
+      box-sizing:border-box;
+      resize:none;
+      background:#f8f9fa;
+      color:#222;
+      line-height:1.6;
+    `;
+    card.appendChild(ta);
+
+    // Buttons row
+    let btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:10px;margin-top:12px;';
+
+    // Copy button
+    let copyBtn = document.createElement('button');
+    copyBtn.id = 'fb-copy-btn';
+    copyBtn.innerText = '📋 Copy';
+    copyBtn.style.cssText = `
+      flex:1;
+      padding:12px;
+      background:#1877f2;
+      color:white;
+      border:none;
+      border-radius:10px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+    `;
+    copyBtn.addEventListener('click', function() {
+      ta.removeAttribute('readonly');
+      ta.select();
+      let ok = copyText(nameList);
+      ta.setAttribute('readonly', true);
+      copyBtn.innerText = ok ? '✅ Copied!' : '❌ Failed';
+      copyBtn.style.background = ok ? '#2e7d32' : '#c62828';
+      setTimeout(() => {
+        copyBtn.innerText = '📋 Copy';
+        copyBtn.style.background = '#1877f2';
+      }, 2000);
+    });
+    btnRow.appendChild(copyBtn);
+
+    // Close button
+    let closeBtn = document.createElement('button');
+    closeBtn.innerText = '✕ Close';
+    closeBtn.style.cssText = `
+      padding:12px 18px;
+      background:#f0f0f0;
+      color:#333;
+      border:none;
+      border-radius:10px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+    `;
+    closeBtn.addEventListener('click', () => box.remove());
+    btnRow.appendChild(closeBtn);
+
+    card.appendChild(btnRow);
+
+    // Tip
+    let tip = document.createElement('div');
+    tip.style.cssText = 'margin-top:10px;font-size:11px;color:#999;text-align:center;';
+    tip.innerText = 'Tap Copy → paste into ZOZO Checker';
+    card.appendChild(tip);
+
+    box.appendChild(card);
+
+    // Close on background tap
+    box.addEventListener('click', function(e) {
+      if (e.target === box) box.remove();
+    });
+
+    document.body.appendChild(box);
+
+    // Try auto-select textarea
+    setTimeout(() => {
+      ta.removeAttribute('readonly');
+      ta.focus();
+      ta.select();
+      ta.setAttribute('readonly', true);
+    }, 100);
+  }
 
   function extractNames() {
     let names = new Set();
@@ -39,33 +198,10 @@
 
     if (names.size === 0) return;
 
+    // Try auto copy
     let nameList = [...names].join('\n');
-
-    // Auto copy to clipboard
-    navigator.clipboard.writeText(nameList).catch(() => {
-      let ta = document.createElement('textarea');
-      ta.value = nameList;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    });
-
-    // Show confirmation box
-    let existing = document.getElementById('fb-reaction-box');
-    if (existing) existing.remove();
-
-    let box = document.createElement('div');
-    box.id = 'fb-reaction-box';
-    box.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:#fff;border:3px solid #1877f2;border-radius:12px;padding:15px;z-index:999999;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-    box.innerHTML = `
-      <div style="font-weight:bold;color:#1877f2;font-size:16px;margin-bottom:6px;">✅ ${names.size} names copied!</div>
-      <div style="color:#333;font-size:13px;margin-bottom:10px;">Ready to paste into ZOZO Checker</div>
-      <textarea style="width:100%;height:150px;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:8px;box-sizing:border-box;">${nameList}</textarea>
-      <button style="margin-top:8px;padding:10px;background:#1877f2;color:white;border:none;border-radius:6px;font-size:14px;width:48%;margin-right:2%;" onclick="navigator.clipboard.writeText(document.querySelector('#fb-reaction-box textarea').value)">📋 Copy </button>
-      <button style="margin-top:8px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:6px;font-size:14px;width:48%;" onclick="document.getElementById('fb-reaction-box').remove()">❌ Close</button>
-    `;
-    document.body.appendChild(box);
+    let copied = copyText(nameList);
+    showBox(names, copied);
   }
 
   let observer = new MutationObserver(function() {
