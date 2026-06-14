@@ -23,7 +23,16 @@
       let spans = a.querySelectorAll('span');
       spans.forEach(s => {
         let t = s.innerText.trim();
-        if (t.length > 1 && t.length < 50 && !t.includes('\n') && !t.match(/^\d+$/))
+        if (t.length > 1 && t.length < 50 && 
+    !t.includes('\n') && 
+    !t.match(/^\d+$/) &&
+    !t.toLowerCase().includes('click') &&
+    !t.toLowerCase().includes('view') &&
+    !t.toLowerCase().includes('profile') &&
+    !t.toLowerCase().includes('follow') &&
+    !t.toLowerCase().includes('add friend') &&
+    !t.toLowerCase().includes('message') &&
+    !t.toLowerCase().includes('more'))
           names.add(t);
       });
     });
