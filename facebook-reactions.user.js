@@ -62,7 +62,7 @@
       <div style="font-weight:bold;color:#1877f2;font-size:16px;margin-bottom:6px;">✅ ${names.size} names copied!</div>
       <div style="color:#333;font-size:13px;margin-bottom:10px;">Ready to paste into ZOZO Checker</div>
       <textarea style="width:100%;height:150px;font-size:12px;border:1px solid #ccc;border-radius:6px;padding:8px;box-sizing:border-box;">${nameList}</textarea>
-      <button style="margin-top:8px;padding:10px;background:#1877f2;color:white;border:none;border-radius:6px;font-size:14px;width:48%;margin-right:2%;" onclick="navigator.clipboard.writeText(document.querySelector('#fb-reaction-box textarea').value)">📋 Copy Again</button>
+      <button style="margin-top:8px;padding:10px;background:#1877f2;color:white;border:none;border-radius:6px;font-size:14px;width:48%;margin-right:2%;" onclick="navigator.clipboard.writeText(document.querySelector('#fb-reaction-box textarea').value)">📋 Copy </button>
       <button style="margin-top:8px;padding:10px;background:#e74c3c;color:white;border:none;border-radius:6px;font-size:14px;width:48%;" onclick="document.getElementById('fb-reaction-box').remove()">❌ Close</button>
     `;
     document.body.appendChild(box);
